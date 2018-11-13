@@ -1,4 +1,5 @@
-sphinx
+IPython
 nbsphinx
+sphinx
 sphinx_autodoc_typehints
 sphinx_bootstrap_theme
