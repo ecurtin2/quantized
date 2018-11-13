@@ -9,7 +9,7 @@ import click
 def main(args=None):
     """Console script for transit_chem."""
     click.echo("Replace this message by putting your code into "
-               "transit_chem.cli.main")
+               "transit-chem.cli.main")
     click.echo("See click documentation at http://click.pocoo.org/")
     return 0
 
