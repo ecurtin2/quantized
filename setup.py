@@ -49,6 +49,6 @@ setup(
     tests_require=test_requirements,
     extras_require={'dev': dev_requirements},
     url='https://github.com/ecurtin2/transit_chem',
-    version='0.1.0',
+    version='0.2.0',
     zip_safe=False,
 )
