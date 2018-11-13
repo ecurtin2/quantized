@@ -1,0 +1,15 @@
+pytest
+pytest-cov
+black
+isort
+flake8
+tox
+sphinx
+nbsphinx
+sphinx_autodoc_typehints
+pip
+bumpversion
+wheel
+watchdog
+coverage
+twine
