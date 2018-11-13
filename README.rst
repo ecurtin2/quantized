@@ -6,8 +6,8 @@ transit-chem
 .. image:: https://img.shields.io/pypi/v/transit_chem.svg
         :target: https://pypi.python.org/pypi/transit_chem
 
-.. image:: https://img.shields.io/travis/ecurtin2/transit_chem.svg
-        :target: https://travis-ci.org/ecurtin2/transit_chem
+.. image:: https://img.shields.io/travis/ecurtin2/transit-chem.svg
+        :target: https://travis-ci.org/ecurtin2/transit-chem
 
 .. image:: https://readthedocs.org/projects/transit-chem/badge/?version=latest
         :target: https://transit-chem.readthedocs.io/en/latest/?badge=latest
