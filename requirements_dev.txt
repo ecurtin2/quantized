@@ -6,7 +6,6 @@ flake8
 tox
 sphinx
 nbsphinx
-sphinx_autodoc_typehints
 pip
 bumpversion
 wheel
