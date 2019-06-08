@@ -1,0 +1,17 @@
+version: '3.4'
+
+
+services:
+  test:
+    build: .
+    working_dir: /code/tests
+    command: ["pytest", "."]
+    volumes:
+      - .:/code/
+
+  docs:
+    build: .
+    working_dir: /code/docs
+    command: ["make", "clean", "html"]
+    volumes:
+      - .:/code/

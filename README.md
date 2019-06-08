@@ -1,4 +1,3 @@
-============
 transit-chem
 ============
 
@@ -12,8 +11,6 @@ transit-chem
 .. image:: https://readthedocs.org/projects/transit-chem/badge/?version=latest
         :target: https://transit-chem.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-
-
 
 
 Quantifying electron transit in donor-bridge-acceptor systems using probabilistic confidence.
@@ -31,7 +28,6 @@ Features
 Credits
 -------
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+Cookiecutter: https://github.com/audreyr/cookiecutter
+audreyr/cookiecutter-pypackage: https://github.com/audreyr/cookiecutter-pypackage
+Setup.py: https://github.com/kennethreitz/setup.py/blob/master/setup.py

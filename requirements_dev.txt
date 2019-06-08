@@ -2,6 +2,7 @@ pytest
 pytest-cov
 black
 isort
+hypothesis
 flake8
 tox
 sphinx

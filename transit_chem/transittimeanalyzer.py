@@ -6,7 +6,6 @@ import logging
 import numpy as np
 from scipy import linalg
 
-from transittime import h5pytools
 from transittime import utils
 from transittime.log_helper import log_block, TimeLevel
 
@@ -279,10 +278,3 @@ class TransitTime(metaclass=ABCMeta):
         else:
             with open(dir+fname, 'w') as f:
                 f.write(s)
-
-    @log_block('Save attributes to hdf5', mod_log, level=logging.CRITICAL)
-    def to_hdf5(self, fname):
-        #  Nonetype values cause an error in the HDF5 dumping. \
-        #  Just exclude them.
-        dump = {k: v for k, v in self.non_method_attrs.items() if v is not None}
-        h5pytools.quick_dump(fname, dump)

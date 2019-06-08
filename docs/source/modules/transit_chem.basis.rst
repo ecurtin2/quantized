@@ -1,4 +1,7 @@
-.. automodule:: transit_chem.some_module
+basis
+=======
+
+.. automodule:: transit_chem.basis
     :members:
     :undoc-members:
     :show-inheritance:
