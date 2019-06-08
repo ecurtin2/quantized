@@ -19,7 +19,7 @@ URL = 'https://github.com/ecurtin2/transit-chem'
 EMAIL = 'evanmcurtin@gmail.com'
 AUTHOR = 'Evan Curtin'
 REQUIRES_PYTHON = '>=3.4.0'
-VERSION = '0.2.0'
+VERSION = 'version='0.3.0''
 
 # What packages are required for this module to be executed?
 this_dir = Path(__file__).parent
