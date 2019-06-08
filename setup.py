@@ -6,6 +6,7 @@
 
 import io
 import os
+from pathlib import Path
 import sys
 from shutil import rmtree
 
@@ -21,15 +22,12 @@ REQUIRES_PYTHON = '>=3.4.0'
 VERSION = '0.2.0'
 
 # What packages are required for this module to be executed?
-with open("requirements.txt") as f:
-    REQUIRED = f.read().split()
+this_dir = Path(__file__).parent
+REQUIRED = (this_dir / "requirements.txt").read_text().split()
 
 # What packages are optional?
-with open("docs/requirements_doc.txt") as f:
-    EXTRAS_DOC = f.read().split()
-
-with open("requirements_dev.txt") as f:
-    EXTRAS_DEV = f.read().split()
+EXTRAS_DOC = (this_dir / "docs/requirements_doc.txt").read_text().split()
+EXTRAS_DEV = (this_dir / "requirements_dev.txt").read_text().split()
 
 EXTRAS = {
     'dev': EXTRAS_DEV, 'doc': EXTRAS_DOC, 'all': EXTRAS_DEV + EXTRAS_DOC
