@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from typing import Tuple
 
 import numba
@@ -253,7 +255,8 @@ def make_potential_integral(potential: callable):
     return potential_integral
 
 
-class HarmonicOscillatorWaveFunction:
+@dataclass
+class HarmonicOscillator:
     """A 1D quantum harmonic oscillator wave function.
 
     Parameters
@@ -270,9 +273,9 @@ class HarmonicOscillatorWaveFunction:
     Examples
     ---------
 
-    >>> ho = HarmonicOscillatorWaveFunction(n=2, center=0.5)
+    >>> ho = HarmonicOscillator(n=2, center=0.5)
     >>> ho
-    HarmonicOscillatorWaveFunction(n=2, center=0.5, omega=1, mass=1.0)
+    HarmonicOscillator(n=2, center=0.5, omega=1, mass=1.0)
     >>> ho(0.5)
     -0.5311259660135984
     >>> ho(1000)
@@ -282,6 +285,10 @@ class HarmonicOscillatorWaveFunction:
 
     """
 
+    n: int
+    mass: int = 1
+    center: float
+    omega: float = 1.0
 
     @staticmethod
     def from_potential_points(
@@ -312,21 +319,21 @@ class HarmonicOscillatorWaveFunction:
 
         Returns
         --------
-        HarmonicOscillatorWaveFunction
+        HarmonicOscillator
             The harmonic oscillator wave function resulting from the potential at the 3
             points.
 
         Examples
         ---------
 
-        >>> ho = HarmonicOscillatorWaveFunction.from_potential_points(
+        >>> ho = HarmonicOscillator.from_potential_points(
         ...     point1=(0.5, 1),
         ...     point2=(2.0, 0.5),
         ...     point3=(3.0, 1.5),
         ...     n=0
         ... )
         >>> ho
-        HarmonicOscillatorWaveFunction(n=0, center=1.5624999999999998, omega=1.0327955589886444, mass=1.0)
+        HarmonicOscillator(n=0, center=1.5624999999999998, omega=1.0327955589886444, mass=1.0)
 
 
         """
@@ -337,19 +344,19 @@ class HarmonicOscillatorWaveFunction:
         # 2a / m = w**2
         # sqrt(2a/m) = w
         w = np.sqrt(2*a / mass)
-        return HarmonicOscillatorWaveFunction(n=n, center=center, omega=w, mass=mass)
+        return HarmonicOscillator(n=n, center=center, omega=w, mass=mass)
 
-    def __init__(self, n: int, center: float, omega: float=1, mass: float=1.0):
-        self.mass = mass
-        self.center = center
-        self.omega = omega
-        self.n = n
-        self.normalization = 1.0 / math.sqrt(2 ** n * math.factorial(n)) * ((mass * omega) / math.pi) ** 0.25
-        self._hermite = special.hermite(self.n)
+
+
+    @property
+    def N(self):
+        return 1.0 / math.sqrt(2 ** n * math.factorial(n)) 
+        * ((mass * omega) / math.pi) ** 0.25
+
+    @property
+    def _hermite(self):
+        return special.hermite(self.n)
 
     def __call__(self, x):
         y = (np.sqrt(self.mass * self.omega)) * (x - self.center)
-        return self.normalization * np.exp(-y**2 / 2.0) * self._hermite(y)
-
-    def __repr__(self):
-        return f'{type(self).__name__}(n={self.n}, center={self.center}, omega={self.omega}, mass={self.mass})'
+        return self.N * np.exp(-y**2 / 2.0) * self._hermite(y)

@@ -248,33 +248,3 @@ class TransitTime(metaclass=ABCMeta):
         a_prod = np.asarray(list(itertools.accumulate(A_tilde, lambda a, b: b @ a)))
         #  Broadcasting rules means that each 2x2 submatrix of a_prod matrix multiplies P_o_tilde
         self.P_not = np.sum(a_prod @ P_o_tilde, axis=1)
-
-    @property
-    def non_method_attrs(self):
-        temp = {key: val for key, val in self.__dict__.items()
-                if not utils.is_function_or_list_of_function(val)}
-        attrs = {key: val for key, val in temp.items()
-                 if not utils.is_instance_userdefined_and_newclass(val)}
-        return attrs
-
-    @log_block('Save attributes to json', mod_log, level=logging.CRITICAL)
-    def to_json(self, fname=None, dir="./"):
-        """Write attributes to .json format, prints to file if given, else returns as string."""
-        attrs = self.non_method_attrs
-
-        #  Convert numpy array and list of numpy arrays to lists.
-        for key, val in attrs.items():
-            try:
-                attrs[key] = val.tolist()
-            except:
-                try:
-                    val = [i.tolist() for i in val]
-                    attrs[key] = val
-                except:
-                    pass
-        s = json.dumps(attrs, indent=2, separators=(',', ': '))
-        if fname is None:
-            return s
-        else:
-            with open(dir+fname, 'w') as f:
-                f.write(s)
