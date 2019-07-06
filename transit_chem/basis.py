@@ -286,8 +286,8 @@ class HarmonicOscillator:
     """
 
     n: int
-    mass: int = 1
     center: float
+    mass: int = 1
     omega: float = 1.0
 
     @staticmethod
@@ -350,8 +350,7 @@ class HarmonicOscillator:
 
     @property
     def N(self):
-        return 1.0 / math.sqrt(2 ** n * math.factorial(n)) 
-        * ((mass * omega) / math.pi) ** 0.25
+        return (1.0 / math.sqrt(2 ** n * math.factorial(n)) * ((mass * omega) / math.pi) ** 0.25)
 
     @property
     def _hermite(self):

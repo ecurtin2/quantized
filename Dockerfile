@@ -4,4 +4,4 @@ RUN apt-get update -y \
 
 COPY . /code
 WORKDIR /code
-RUN pip install .[all]
+RUN pip install -e .[all]
