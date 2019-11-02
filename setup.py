@@ -17,10 +17,15 @@ URL = "https://github.com/ecurtin2/transit-chem"
 EMAIL = "evanmcurtin@gmail.com"
 AUTHOR = "Evan Curtin"
 REQUIRES_PYTHON = ">=3.4.0"
-VERSION = "0.5.0"
+
 
 # What packages are required for this module to be executed?
 this_dir = Path(__file__).parent
+init = (this_dir / "transit_chem/__init__.py").read_text()
+for line in init.splitlines():
+    if "__version__" in line:
+        VERSION = line.split("=")[1]
+
 REQUIRED = (this_dir / "requirements.txt").read_text().split()
 
 # What packages are optional?

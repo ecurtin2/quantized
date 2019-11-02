@@ -20,7 +20,7 @@
 #
 
 import sphinx_bootstrap_theme
-from transit_chem import version # noqa 401
+from transit_chem import __version__ as version  # noqa 401
 
 
 # -- General configuration ---------------------------------------------
