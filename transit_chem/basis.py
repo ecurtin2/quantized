@@ -5,7 +5,6 @@ import attr
 import numba
 import numpy as np
 from scipy import integrate, special
-from scipy.misc import derivative
 
 from transit_chem import config
 from transit_chem.validation import Range
@@ -204,43 +203,6 @@ def overlap1d(
     return integrate.quad(integrand, a=lower_limit, b=upper_limit, args=args)[0]
 
 
-def kinetic_integral(
-    first: Callable,
-    second: Callable,
-    *args,
-    lower_limit: float = -np.inf,
-    upper_limit: float = np.inf,
-) -> float:
-    """Return kinetic energy integral of two functions
-
-    Parameters
-    -----------
-    first
-        The first function
-    second
-        The second function
-    *args
-        Extra args to pass to **both** first and second function
-    lower_limit
-        The lower limit of integration
-    upper_limit
-        The upper limit of integration
-
-    Returns
-    --------
-    float
-        The value of the kinetic energy integral.
-
-    """
-
-    def kinetic_func(x, *args_):
-        return -0.5 * derivative(second, x, dx=config.SMALL_NUMBER, n=2, args=args_)
-
-    return overlap1d(
-        first, kinetic_func, *args, lower_limit=lower_limit, upper_limit=upper_limit
-    )
-
-
 def make_potential_integral(potential: Callable):
     """
 
@@ -408,6 +370,55 @@ class HarmonicOscillator:
         # sqrt(2a/m) = w
         w = np.sqrt(2 * a / mass)
         return HarmonicOscillator(n=n, center=center, omega=w, mass=mass)
+
+    def __kinetic__(self):
+        """Return kinetic energy operator applied on this.
+
+        K = p^2 / 2m
+        p = i * sqrt(m w hbar/2)(a+ - a)
+
+        k = -1/2 * (m w hbar / 2)[(a+ - a)^2]
+        [] = (a+^2 + a+a + aa+  - a^2)
+
+        [] = sqrt(n+1)sqrt(n+2)| n + 2 >  always
+                sqrt(n+1)sqrt(n+1)| n >      always
+                sqrt(n)  sqrt(n)  | n >      if n == 0  0
+                sqrt(n)  sqrt(n-1)| n - 2 >  if n <= 1  0
+
+        k = - (m w hbar) / 4 * []
+        """
+
+        def raised_2(x):
+            return (
+                np.sqrt(self.n + 1)
+                * np.sqrt(self.n + 2)
+                * HarmonicOscillator(
+                    n=self.n + 2, center=self.center, mass=self.mass, omega=self.omega
+                )(x)
+            )
+
+        def inner(x):
+            if self.n == 0:
+                return (self.n + 1) * self(x)  # second term is zero
+            return (2 * self.n + 1) * self(x)
+
+        def lowered_2(x):
+            if self.n <= 1:
+                return 0.0 * x
+            return (
+                np.sqrt(self.n)
+                * np.sqrt(self.n - 1)
+                * HarmonicOscillator(
+                    self.n - 2, center=self.center, mass=self.mass, omega=self.omega
+                )(x)
+            )
+
+        def k(x):
+            return (
+                self.mass * self.omega * (raised_2(x) + inner(x) + lowered_2(x)) / 4.0
+            )
+
+        return k
 
     @property
     def energy(self):

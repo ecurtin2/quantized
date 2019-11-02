@@ -8,7 +8,6 @@ from pytest import raises
 from transit_chem.basis import (
     HarmonicOscillator,
     overlap1d,
-    kinetic_integral,
     make_potential_integral,
 )
 from transit_chem.config import (
@@ -69,10 +68,12 @@ def test_overlap1d_harmonic_oscillators_is_orthonormal():
 
 
 def test_kinetic_integral_of_harmonic_oscillator():
-    ho0 = HarmonicOscillator(n=0, center=0.0)
 
-    ke = kinetic_integral(ho0, ho0)
-    pe_integral = make_potential_integral(ho0.potential)
-    pe = pe_integral(ho0, ho0)
+    for n in range(10):
+        ho0 = HarmonicOscillator(n=n, center=0.0)
 
-    assert isclose(pe + ke, ho0.energy, abs_tol=SMALL_NUMBER)
+        ke = overlap1d(ho0, ho0.__kinetic__())
+        pe_integral = make_potential_integral(ho0.potential)
+        pe = pe_integral(ho0, ho0)
+
+        assert isclose(pe + ke, ho0.energy, abs_tol=SMALL_NUMBER)
