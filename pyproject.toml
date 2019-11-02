@@ -3,6 +3,8 @@ name = "transit-chem"
 version = "0.5.7"
 description = "Quantifying Probabilistic Electron Transit times."
 authors = ["Evan Curtin <fakeemail@gmail.com>"]
+readme = "README.rst"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7.0"
