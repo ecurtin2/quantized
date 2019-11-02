@@ -16,10 +16,8 @@ jobs:
     - name: Build and publish
       uses: abatilo/actions-poetry@v1.0.0
       with:
-        args: install
+        args: ["poetry", "publish", "-u", "$PYPI_USERNAME", "-p", "$PYPI_PASSWORD", "--build"]
       env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+
