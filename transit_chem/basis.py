@@ -80,8 +80,10 @@ class Basis:
             if zmax is None:
                 zmax = max(self.z0, other.z0) + interval
 
-            #  Check to see if the midpoint of the overlapped functions falls outside integration range.
-            #  The maximum value between the centers, and if it's sufficiently far from the region of integration
+            #  Check to see if the midpoint of the overlapped functions
+            # falls outside integration range.
+            #  The maximum value between the centers,
+            # and if it's sufficiently far from the region of integration
             #  we can return 0.0 and not lose anything.
 
             midpoint = (
