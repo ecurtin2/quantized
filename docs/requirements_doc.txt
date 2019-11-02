@@ -1,5 +1,0 @@
-IPython
-nbsphinx
-sphinx
-sphinx-autodoc-typehints
-sphinx_bootstrap_theme

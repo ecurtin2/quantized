@@ -20,8 +20,19 @@
 #
 
 import sphinx_bootstrap_theme
-from transit_chem import __version__ as version  # noqa 401
+from pathlib import Path
+import re
 
+pyproj_path = Path(__file__).parents[2] / "pyproject.toml"
+print(pyproj_path)
+pyproj = pyproj_path.read_text()
+
+for line in pyproj.splitlines():
+    pattern = 'version\s+=\s"(\d+.\d+.\w+)"'
+    match = re.match(pattern, line)
+    if match is not None:
+        version = match.group(1)
+        break
 
 # -- General configuration ---------------------------------------------
 
@@ -100,13 +111,11 @@ html_theme_options = {
     "source_link_position": "exclude",
     "bootswatch_theme": "lumen",
     "navbar_links": [
+        ("Table Of Contents", "table_of_contents"),
         ("Installation", "installation"),
         ("Tutorials", "tutorials"),
         ("API Reference", "api_reference"),
-        ("Contributing", "contributing"),
         ("Index", "genindex"),
-        ("Credits", "authors"),
-        ("History", "history"),
     ],
 }
 
@@ -115,11 +124,9 @@ html_sidebars = {
     "modules/**": ["modules_sidebar.html"],
     "genindex": ["genindex_sidebar.html"],
     "api_reference": ["localtoc.html"],
+    "table_of_contents": ["localtoc.html"],
     "tutorials": ["localtoc.html"],
     "installation": ["localtoc.html"],
-    "history": ["localtoc.html"],
-    "authors": ["localtoc.html"],
-    "contributing": ["localtoc.html"],
     "index": ["localtoc.html"],
 }
 

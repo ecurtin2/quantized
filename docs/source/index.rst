@@ -1,14 +1,9 @@
-.. automodule:: transit_chem
+===============
+Transit-Chem!
+===============
 
-
-Contents
-======================================
+Implementation of the algorithm from the paper: https://doi.org/10.1142/S0219633618500463
 
 .. toctree::
 
-    installation
-    tutorials
-    api_reference
-    contributing
-    authors
-    history
+    table_of_contents

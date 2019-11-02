@@ -1,10 +1,6 @@
 API Reference
 ==============
 
+Here is the library Documentation
 
-.. autosummary::
-    :toctree: modules
-
-    transit_chem.basis
-
-    
+.. toctree:: modules/transit_chem.basis
