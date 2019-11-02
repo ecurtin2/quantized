@@ -1,3 +1,4 @@
+
 import math
 from dataclasses import dataclass
 from typing import Tuple
@@ -8,6 +9,8 @@ from scipy import integrate, special
 from scipy.misc import derivative
 
 from . import utils
+from transit_chem.validation import check_range_inclusive
+from transit_chem import config
 
 ___all__ = [
     "HarmonicOscillatorWaveFunction",
@@ -154,7 +157,7 @@ def overlap1d(
     second: callable,
     *args,
     lower_limit: float = -np.inf,
-    upper_limit: float = np.inf
+    upper_limit: float = np.inf,
 ) -> float:
     """Compute the overlap integral in 1 dimension over the specified range
 
@@ -206,7 +209,7 @@ def kinetic_integral(
     second: callable,
     *args,
     lower_limit: float = -np.inf,
-    upper_limit: float = np.inf
+    upper_limit: float = np.inf,
 ) -> float:
     """Return kinetic energy integral of two functions
 
@@ -254,7 +257,7 @@ def make_potential_integral(potential: callable):
         second: callable,
         *args,
         lower_limit: float = -np.inf,
-        upper_limit: float = np.inf
+        upper_limit: float = np.inf,
     ) -> float:
         """Return kinetic energy integral of two functions
 
@@ -287,7 +290,7 @@ def make_potential_integral(potential: callable):
             potential_func,
             *args,
             lower_limit=lower_limit,
-            upper_limit=upper_limit
+            upper_limit=upper_limit,
         )
 
     return potential_integral
@@ -325,8 +328,17 @@ class HarmonicOscillator:
 
     n: int
     center: float
-    mass: int = 1
+    mass: float = 1.0
     omega: float = 1.0
+
+    def __post_init__(self):
+        errors = [
+            check_range_inclusive("n", self.n, 0, config.HARMONIC_OSCILLATOR_MAX_N),
+            check_range_inclusive("mass", self.mass, config.SMALL_NUMBER, config.LARGE_NUMBER),
+            check_range_inclusive("omega", self.omega, config.SMALL_NUMBER, config.LARGE_NUMBER)
+        ]
+        if any(errors):
+            raise ValueError(" ".join(errors))
 
     @staticmethod
     def from_potential_points(
