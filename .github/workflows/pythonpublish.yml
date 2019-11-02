@@ -14,6 +14,8 @@ jobs:
       with:
         python-version: '3.x'
     - uses: dschep/install-poetry-action@v1.2
+    - name: Turn off poetry venv 
+      run: poetry config settings.virtualenvs.create false
     - name: Build and publish
       run: poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD --build
       env:
