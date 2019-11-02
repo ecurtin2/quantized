@@ -1,12 +1,11 @@
-from abc import ABC
 import itertools
 import logging
+from abc import ABC
 
 import numpy as np
 from scipy import linalg
 
-from transittime.log_helper import log_block, TimeLevel
-
+from transittime.log_helper import TimeLevel, log_block
 
 mod_log = logging.getLogger(__name__)
 

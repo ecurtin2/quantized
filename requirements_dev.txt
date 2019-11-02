@@ -5,12 +5,6 @@ isort
 hypothesis
 flake8
 tox
-sphinx
-nbsphinx
 pip
-bumpversion
-wheel
-watchdog
 coverage
-twine
 mypy

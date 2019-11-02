@@ -2,7 +2,6 @@ from typing import Tuple
 
 import numpy as np
 
-
 __all__ = [
     "pairwise_array_from_func",
     "parabola_from_points",

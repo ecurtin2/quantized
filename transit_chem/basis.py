@@ -1,11 +1,10 @@
+import math
 from dataclasses import dataclass
-
 from typing import Tuple
 
 import numba
-import math
 import numpy as np
-from scipy import special, integrate
+from scipy import integrate, special
 from scipy.misc import derivative
 
 from . import utils

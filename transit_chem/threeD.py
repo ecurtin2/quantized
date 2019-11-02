@@ -1,8 +1,8 @@
 import numpy as np
 
 from transit_chem.basis import Basis
-from . import transittimeanalyzer
-from . import utils
+
+from . import transittimeanalyzer, utils
 
 
 class ThreeD(transittimeanalyzer.TransitTime):

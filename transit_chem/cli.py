@@ -2,6 +2,7 @@
 
 """Console script for transit_chem."""
 import sys
+
 import click
 
 
