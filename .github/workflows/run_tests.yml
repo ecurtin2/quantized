@@ -14,10 +14,10 @@ jobs:
       with:
         python-version: 3.7
     - uses: dschep/install-poetry-action@v1.2
+    - name: Turn off poetry venv 
+      run: poetry config settings.virtualenvs.create false
     - name: Install dependencies
       run: poetry install
-    - name: Poetry Activate Shell
-      run: poetry shell
     - name: Lint with flake8
       run: "flake8 ."
     - name: Test with pytest
