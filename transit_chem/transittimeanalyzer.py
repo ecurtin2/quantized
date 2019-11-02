@@ -1,19 +1,17 @@
-from abc import abstractmethod, abstractproperty, ABCMeta
+from abc import ABC
 import itertools
-import json
 import logging
 
 import numpy as np
 from scipy import linalg
 
-from transittime import utils
 from transittime.log_helper import log_block, TimeLevel
 
 
 mod_log = logging.getLogger(__name__)
 
 
-class TransitTime(metaclass=ABCMeta):
+class TransitTime(ABC):
     """The transit time Class. This is the base class from which OneD and
     ThreeD inherit. The time-dependence is all in this class. The details
     of spatially dependent quantities, like potentials and integrators are
@@ -24,7 +22,8 @@ class TransitTime(metaclass=ABCMeta):
     yourself.
 
     """
-    @log_block('Transittime Init', mod_log, logging.DEBUG)
+
+    @log_block("Transittime Init", mod_log, logging.DEBUG)
     def __init__(self, nregions):
         """Initializer for Transit time object.
 
@@ -49,8 +48,12 @@ class TransitTime(metaclass=ABCMeta):
         self.Nbasis = 0
         self.state_mo_coefficients = None
 
-    @log_block("Calculating both time independent and time-dependent quantities.",
-               mod_log, logging.INFO, TimeLevel.ALWAYS)
+    @log_block(
+        "Calculating both time independent and time-dependent quantities.",
+        mod_log,
+        logging.INFO,
+        TimeLevel.ALWAYS,
+    )
     def calc_all(self, initialstate):
         """Calculate both time independent and time-dependent quantities.
 
@@ -64,7 +67,12 @@ class TransitTime(metaclass=ABCMeta):
         self.set_initial_state(initialstate)
         self.calc_time_dependent()
 
-    @log_block("Calculate all the time independent quantities", mod_log, logging.INFO, TimeLevel.OFTEN)
+    @log_block(
+        "Calculate all the time independent quantities",
+        mod_log,
+        logging.INFO,
+        TimeLevel.OFTEN,
+    )
     def calc_time_independent(self):
         """Calculate all the time independent quantities.
 
@@ -74,8 +82,15 @@ class TransitTime(metaclass=ABCMeta):
         self.get_eigen_basis()
         self.calc_partial_overlap()
 
-    @log_block("Calculate all the time dependent quantities", mod_log, logging.INFO, TimeLevel.OFTEN)
-    def calc_time_dependent(self, guess_t_max=500, p_not_threshold=0.05, stepsize=1.0, maxsteps=10**4):
+    @log_block(
+        "Calculate all the time dependent quantities",
+        mod_log,
+        logging.INFO,
+        TimeLevel.OFTEN,
+    )
+    def calc_time_dependent(
+        self, guess_t_max=500, p_not_threshold=0.05, stepsize=1.0, maxsteps=10 ** 4
+    ):
         """Calculate the time dependent quantities. Must be after time-independent is done.
 
         Calculates occupancy probabilities, the change matrix and pnot.
@@ -96,25 +111,39 @@ class TransitTime(metaclass=ABCMeta):
             p_not = self.P_not[-2]
             t_max *= 2
 
-    def set_initial_state(self, initialstate): raise NotImplementedError
+    def set_initial_state(self, initialstate):
+        raise NotImplementedError
 
-    def calc_partial_overlap(self): raise NotImplementedError
+    def calc_partial_overlap(self):
+        raise NotImplementedError
 
-    def normalize(self, vec): raise NotImplementedError
+    def normalize(self, vec):
+        raise NotImplementedError
 
-    def get_S(self): raise NotImplementedError
+    def get_S(self):
+        raise NotImplementedError
 
-    def get_H(self): raise NotImplementedError
+    def get_H(self):
+        raise NotImplementedError
 
-    def vec_to_ao(self, vec): raise NotImplementedError
+    def vec_to_ao(self, vec):
+        raise NotImplementedError
 
-    def vec_to_mo(self, vec): raise NotImplementedError
+    def vec_to_mo(self, vec):
+        raise NotImplementedError
 
-    def propagate_state(self, state): raise NotImplementedError
+    def propagate_state(self, state):
+        raise NotImplementedError
 
-    def get_eigen_basis(self): raise NotImplementedError
+    def get_eigen_basis(self):
+        raise NotImplementedError
 
-    @log_block("Diagonalize the Hamiltonian", mod_log, level=logging.INFO, time_level=TimeLevel.RARELY)
+    @log_block(
+        "Diagonalize the Hamiltonian",
+        mod_log,
+        level=logging.INFO,
+        time_level=TimeLevel.RARELY,
+    )
     def diagonalize_H(self):
         """Calculate H, S, V, T and diagonalize. Form eigenbasis.
 
@@ -133,33 +162,39 @@ class TransitTime(metaclass=ABCMeta):
         norm = np.linalg.norm(self.eigvecs, axis=0)
         self.eigvecs /= norm[None, :]
 
-    @log_block('ao to mo transformation', mod_log, level=logging.DEBUG)
+    @log_block("ao to mo transformation", mod_log, level=logging.DEBUG)
     def ao_to_mo(self, ao_vec):
         """Given a vector of coefficients in AO basis, return coefficients in MO basis."""
         mo = np.dot(self.eigvecs.T, ao_vec)
         mo /= np.linalg.norm(mo)
         return mo
 
-    @log_block('Mo to ao transformation', mod_log, level=logging.DEBUG)
+    @log_block("Mo to ao transformation", mod_log, level=logging.DEBUG)
     def mo_to_ao(self, mo_vec):
         """Given a vector of coefficients in MO basis, return coefficients in AO basis."""
         ao = np.dot(self.eigvecs, mo_vec)
         ao /= np.linalg.norm(ao)
         return ao
 
-    @log_block('Matrix ao to mo transformation', mod_log, level=logging.DEBUG)
+    @log_block("Matrix ao to mo transformation", mod_log, level=logging.DEBUG)
     def matrix_ao_to_mo(self, matrix):
         inv = np.linalg.inv
         return inv(self.eigvecs) @ inv(self.S) @ matrix @ self.eigvecs
 
-    @log_block('Determine the occupancy probability', mod_log, level=logging.INFO)
+    @log_block("Determine the occupancy probability", mod_log, level=logging.INFO)
     def calc_occupancy_probability(self):
         """Calculate the time-dependent occupancy probabilities"""
         c_conjugate = []
         c = []
         for i in range(self.Nbasis):
-            c.append(self.state_mo_coefficients[i] * np.exp(-1j * self.eigvals[i] * self.times))
-            c_conjugate.append(self.state_mo_coefficients[i] * np.exp(1j * self.eigvals[i] * self.times))
+            c.append(
+                self.state_mo_coefficients[i]
+                * np.exp(-1j * self.eigvals[i] * self.times)
+            )
+            c_conjugate.append(
+                self.state_mo_coefficients[i]
+                * np.exp(1j * self.eigvals[i] * self.times)
+            )
 
         occ_prob = np.zeros((self.Nregions, len(self.times)), dtype=np.complex128)
 
@@ -174,12 +209,14 @@ class TransitTime(metaclass=ABCMeta):
     @log_block("Determine the change/transition matrix", mod_log, level=logging.INFO)
     def get_change_mat(self):
         """calculate the change matrix over time, currently supports 3 regions"""
-        A = np.zeros((len(self.times) - 1, self.Nregions, self.Nregions))  # change matrix
+        A = np.zeros(
+            (len(self.times) - 1, self.Nregions, self.Nregions)
+        )  # change matrix
         dOccProb = [np.diff(i) for i in self.OccProb]  # change for each region
         sign_of_change = [np.sign(i) for i in dOccProb]
-        two_states_increasing = (sign_of_change[0]
-                                 * sign_of_change[1]
-                                 * sign_of_change[2] < 0)
+        two_states_increasing = (
+            sign_of_change[0] * sign_of_change[1] * sign_of_change[2] < 0
+        )
 
         for t in range(len(self.times) - 1):
             if two_states_increasing[t]:
@@ -224,8 +261,12 @@ class TransitTime(metaclass=ABCMeta):
         self.ChangeMat = A
         return A
 
-    @log_block('Determine p_not - this gets called multiple times until it finds desired threshold',
-               mod_log, level=logging.INFO, time_level=TimeLevel.OFTEN)
+    @log_block(
+        "Determine p_not - this gets called multiple times until it finds desired threshold",
+        mod_log,
+        level=logging.INFO,
+        time_level=TimeLevel.OFTEN,
+    )
     def get_p_not(self, acceptor):
         """Determine P_not, the probability than acceptor state has never been occupied.
 

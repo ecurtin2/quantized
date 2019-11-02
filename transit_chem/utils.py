@@ -4,9 +4,8 @@ import numpy as np
 
 
 __all__ = [
-    'pairwise_array_from_func',
-    'parabola_from_points',
-
+    "pairwise_array_from_func",
+    "parabola_from_points",
 ]
 
 
@@ -62,9 +61,9 @@ def pairwise_array_from_func(items, func, *args, symmetric=False, **kwargs):
 
 
 def parabola_from_points(
-        point1: Tuple[float, float],
-        point2: Tuple[float, float],
-        point3: Tuple[float, float]
+    point1: Tuple[float, float],
+    point2: Tuple[float, float],
+    point3: Tuple[float, float],
 ):
     """Return a coefficients for a parabola passing through 3 points.
 
@@ -90,11 +89,7 @@ def parabola_from_points(
     # The polynomial coefficients are the solution to the
     # linear equation Ax = b where
     # x = [a, b, c]
-    A = np.array([
-        [x1 ** 2, x1, 1],
-        [x2 ** 2, x2, 1],
-        [x3 ** 2, x3, 1]
-    ])
+    A = np.array([[x1 ** 2, x1, 1], [x2 ** 2, x2, 1], [x3 ** 2, x3, 1]])
     b = np.array([y1, y2, y3])
     coeffs = np.linalg.solve(A, b)
     return coeffs

@@ -6,10 +6,11 @@ from . import units
 
 class Atom(object):
     """Atom class containing coordinates, basis and mass."""
+
     dir = os.path.dirname(__file__)
     fname = os.path.join(dir, "elements.dat")
     with open(fname) as f:
-        splitlines = [line.split(' ') for line in f.readlines()]
+        splitlines = [line.split(" ") for line in f.readlines()]
         Z, symbols = zip(*splitlines)
         Z = [int(i) for i in Z]
         symbols = [s.strip() for s in symbols]
@@ -17,21 +18,21 @@ class Atom(object):
     ZtoSymbol = {z: symbol for z, symbol in zip(Z, symbols)}
     SymboltoZ = {symbol: z for z, symbol in zip(Z, symbols)}
     minimal_pz_orbital_coeff_dict = {
-                          1: None,
-                          6: 1.5679,
-                          7: 1.9170,
-                          8: 2.2266,
-                         }
+        1: None,
+        6: 1.5679,
+        7: 1.9170,
+        8: 2.2266,
+    }
 
     # Atomic number to Valence Orbital Ionization Energy in eV
     VOIEdict_eV = {
-                1: None,
-                6: 10.77,
-                7: 13.19,
-                8: 15.80,
-               }
+        1: None,
+        6: 10.77,
+        7: 13.19,
+        8: 15.80,
+    }
 
-    def __init__(self, atom_type, coords, basistype='minimalpz'):
+    def __init__(self, atom_type, coords, basistype="minimalpz"):
         """Constructor for Atom class. Currently supports only minimal pz basis
 
         :param atom_type: Atom symbol or atomic number.
@@ -91,15 +92,15 @@ class Atom(object):
         except ValueError:
             try:
                 z = self.SymboltoZ[z]
-            except:
-                raise ValueError('Atom type not understood.')
+            except KeyError:
+                raise ValueError("Atom type not understood.")
         return z
 
     def get_voie(self):
         """Return the Valence Orbital Ionization Energy in Hartrees."""
         voie = self.VOIEdict_eV[self.Z]
         if voie is not None:
-            return units.conversion_factors['EV_TO_HARTREE'] * voie
+            return units.conversion_factors["EV_TO_HARTREE"] * voie
         else:
             return None
 
@@ -109,7 +110,7 @@ class Atom(object):
 
 
 def main():
-    a = Atom('H', coords=(4, 5, 6))
+    a = Atom("H", coords=(4, 5, 6))
     print(a)
 
 

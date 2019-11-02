@@ -1,13 +1,14 @@
 import numpy as np
 
-from . import basis
+from transit_chem.basis import Basis
 from . import transittimeanalyzer
 from . import utils
 
 
 class ThreeD(transittimeanalyzer.TransitTime):
-
-    def __init__(self, nregions, boundaries, molecule, basis, id='unlabeled'):
+    def __init__(
+        self, nregions, boundaries, molecule, basis: Basis, id: str = "unlabeled"
+    ):
         """
         :param boundaries: A list of the x coordinates of planes dividing the regions.
         :type boundaries: iterable
@@ -21,7 +22,7 @@ class ThreeD(transittimeanalyzer.TransitTime):
         #  dimensions, but has no easy way to do it in x due to the integrals over the various regions.
         #
         self.neg_infty = -3 + min(atom.x for atom in self.molecule)
-        self.pos_infty =  3 + max(atom.x for atom in self.molecule)
+        self.pos_infty = 3 + max(atom.x for atom in self.molecule)
 
         bounds = sorted([self.neg_infty, self.pos_infty] + list(boundaries))
         self.boundaries = list(utils.pairwise(bounds))
@@ -38,12 +39,14 @@ class ThreeD(transittimeanalyzer.TransitTime):
         self.H = np.zeros((self.Nbasis, self.Nbasis))
 
         for i in range(self.Nbasis):
-            self.H[i, i] = - self.molecule.atoms[i].VOIE
+            self.H[i, i] = -self.molecule.atoms[i].VOIE
 
         for i in range(self.Nbasis):
             for j in range(self.Nbasis):
                 if i != j:
-                    self.H[i, j] = (1.75 * (self.H[i, i] + self.H[j, j]) * self.S[i, j] / 2.0)
+                    self.H[i, j] = (
+                        1.75 * (self.H[i, i] + self.H[j, j]) * self.S[i, j] / 2.0
+                    )
 
     def get_S(self):
         """Create the overlap matrix"""
@@ -54,15 +57,17 @@ class ThreeD(transittimeanalyzer.TransitTime):
 
         if not np.all(np.isclose(np.diag(self.S), 1.0, atol=1e-2)):
             print(self.S)
-            raise ValueError('Basis is not normalized!')
+            raise ValueError("Basis is not normalized!")
 
     def create_mo_func(self, i):
         """Create the i'th MO function, f(x, y, z)."""
+
         def mo_func(x, y, z):
             val = 0.0
             for j in range(self.Nbasis):
                 val += self.basis_funcs[j](x, y, z) * self.eigvecs[j, i]
             return val
+
         return mo_func
 
     def get_eigen_basis(self):
@@ -123,4 +128,3 @@ class ThreeD(transittimeanalyzer.TransitTime):
         """
         self.initial_state = initial_state
         self.state_mo_coefficients = self.func_to_mo(self.initial_state)
-

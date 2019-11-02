@@ -11,13 +11,12 @@ from scipy.misc import derivative
 from . import utils
 
 ___all__ = [
-    'HarmonicOscillatorWaveFunction',
-    'overlap1d',
+    "HarmonicOscillatorWaveFunction",
+    "overlap1d",
 ]
 
 
 class Basis:
-
     def __init__(self, factory, x0, y0, z0, alpha):
         """Create a basis object from some parameters and a function-factory function.
 
@@ -36,8 +35,18 @@ class Basis:
     def __call__(self, x, y, z):
         return self.f(x, y, z)
 
-    def overlap(self, other, distance_cutoff=5.0, interval=5.0, xmin=None, xmax=None, ymin=None, ymax=None,
-                zmin=None, zmax=None):
+    def overlap(
+        self,
+        other,
+        distance_cutoff=5.0,
+        interval=5.0,
+        xmin=None,
+        xmax=None,
+        ymin=None,
+        ymax=None,
+        zmin=None,
+        zmax=None,
+    ):
         """Return the overlap of this with another
 
         This is to reduce the calculations performed by naively integrating over
@@ -50,7 +59,11 @@ class Basis:
 
         """
         assert isinstance(other, __class__)
-        r = np.sqrt((self.x0 - other.x0)**2 + (self.y0 - other.y0)**2 + (self.z0 - other.z0)**2)
+        r = np.sqrt(
+            (self.x0 - other.x0) ** 2
+            + (self.y0 - other.y0) ** 2
+            + (self.z0 - other.z0) ** 2
+        )
         if r > distance_cutoff:
             return 0.0
         else:
@@ -71,7 +84,11 @@ class Basis:
             #  The maximum value between the centers, and if it's sufficiently far from the region of integration
             #  we can return 0.0 and not lose anything.
 
-            midpoint = (0.5 * (self.x0 + other.x0), 0.5 * (self.y0 + other.y0), 0.5 * (self.z0 + other.z0))
+            midpoint = (
+                0.5 * (self.x0 + other.x0),
+                0.5 * (self.y0 + other.y0),
+                0.5 * (self.z0 + other.z0),
+            )
             if midpoint[0] > (xmax + interval) or midpoint[0] < (xmin - interval):
                 return 0.0
             if midpoint[1] > (ymax + interval) or midpoint[1] < (ymin - interval):
@@ -81,15 +98,19 @@ class Basis:
 
             # Finally actually do the overlap if none of the zero-conditions apply
             ovlp = overlap_factory(self.f, other.f)
-            integrator = utils.integrate_region_gen_3D([[xmin, xmax], [ymin, ymax], [zmin, zmax]])
+            integrator = utils.integrate_region_gen_3D(
+                [[xmin, xmax], [ymin, ymax], [zmin, zmax]]
+            )
             return integrator(ovlp)
 
 
 def overlap_factory(f1, f2):
     """Generate a jitted function of f1(x, y, z) * f2(x, y, z). Only works on f1, f2 that are numba jitted."""
-    @numba.jit('float64(float64, float64, float64)', nopython=True)
+
+    @numba.jit("float64(float64, float64, float64)", nopython=True)
     def overlap(x, y, z):
         return f1(x, y, z) * f2(x, y, z)
+
     return overlap
 
 
@@ -100,15 +121,16 @@ def pz_gaussian_orbital_factory(x0, y0, z0, alpha):
 
     The pz orbital is compiled at runtime using numba's jit LLVM compiler. As such, it is fast!"""
 
-    #TODO: FIX NORMALIZATION CONSTANT.
+    # TODO: FIX NORMALIZATION CONSTANT.
     N = alpha ** 2.5
 
-    @numba.jit('float64(float64, float64, float64)', nopython=True)
+    @numba.jit("float64(float64, float64, float64)", nopython=True)
     def gaussian_orbital(x, y, z):
 
-        #TODO: MAKE THIS FUNCTION WHATEVER IS DESIRED.
-        r = math.sqrt((x - x0)**2 + (y - y0)**2 + (z - z0)**2)
-        return N * (z - z0) * math.exp(-(alpha * r)**2)
+        # TODO: MAKE THIS FUNCTION WHATEVER IS DESIRED.
+        r = math.sqrt((x - x0) ** 2 + (y - y0) ** 2 + (z - z0) ** 2)
+        return N * (z - z0) * math.exp(-((alpha * r) ** 2))
+
     return gaussian_orbital
 
 
@@ -118,19 +140,20 @@ def pz_orbital_factory(x0, y0, z0, alpha):
     The pz orbital is compiled at runtime using numba's jit LLVM compiler. As such, it is fast!"""
     N = alpha ** 2.5 / math.sqrt(math.pi)
 
-    @numba.jit('float64(float64, float64, float64)', nopython=True)
+    @numba.jit("float64(float64, float64, float64)", nopython=True)
     def pz_orbital(x, y, z):
-        r = math.sqrt((x - x0)**2 + (y - y0)**2 + (z - z0)**2)
+        r = math.sqrt((x - x0) ** 2 + (y - y0) ** 2 + (z - z0) ** 2)
         return N * (z - z0) * math.exp(-alpha * r)
+
     return pz_orbital
 
 
 def overlap1d(
-        first: callable,
-        second: callable,
-        *args,
-        lower_limit: float=-np.inf,
-        upper_limit: float=np.inf
+    first: callable,
+    second: callable,
+    *args,
+    lower_limit: float = -np.inf,
+    upper_limit: float = np.inf
 ) -> float:
     """Compute the overlap integral in 1 dimension over the specified range
 
@@ -170,17 +193,19 @@ def overlap1d(
     3.141592653589793
 
     """
+
     def integrand(x, *args_):
         return first(x, *args_) * second(x, *args_)
+
     return integrate.quad(integrand, a=lower_limit, b=upper_limit, args=args)[0]
 
 
 def kinetic_integral(
-        first: callable,
-        second: callable,
-        *args,
-        lower_limit: float=-np.inf,
-        upper_limit: float=np.inf
+    first: callable,
+    second: callable,
+    *args,
+    lower_limit: float = -np.inf,
+    upper_limit: float = np.inf
 ) -> float:
     """Return kinetic energy integral of two functions
 
@@ -203,9 +228,13 @@ def kinetic_integral(
         The value of the kinetic energy integral.
 
     """
+
     def kinetic_func(x, *args_):
         return -0.5 * derivative(second, x, dx=1e-8, n=2, args=args_)
-    return overlap1d(first, kinetic_func, *args, lower_limit=lower_limit, upper_limit=upper_limit)
+
+    return overlap1d(
+        first, kinetic_func, *args, lower_limit=lower_limit, upper_limit=upper_limit
+    )
 
 
 def make_potential_integral(potential: callable):
@@ -220,11 +249,11 @@ def make_potential_integral(potential: callable):
     """
 
     def potential_integral(
-            first: callable,
-            second: callable,
-            *args,
-            lower_limit: float=-np.inf,
-            upper_limit: float=np.inf
+        first: callable,
+        second: callable,
+        *args,
+        lower_limit: float = -np.inf,
+        upper_limit: float = np.inf
     ) -> float:
         """Return kinetic energy integral of two functions
 
@@ -248,9 +277,17 @@ def make_potential_integral(potential: callable):
             The value of the kinetic energy integral.
 
         """
+
         def potential_func(x, *args_):
             return potential(x) * second(x, *args_)
-        return overlap1d(first, potential_func, *args, lower_limit=lower_limit, upper_limit=upper_limit)
+
+        return overlap1d(
+            first,
+            potential_func,
+            *args,
+            lower_limit=lower_limit,
+            upper_limit=upper_limit
+        )
 
     return potential_integral
 
@@ -292,11 +329,11 @@ class HarmonicOscillator:
 
     @staticmethod
     def from_potential_points(
-            point1: Tuple[float, float],
-            point2: Tuple[float, float],
-            point3: Tuple[float, float],
-            n: int,
-            mass: float=1.0
+        point1: Tuple[float, float],
+        point2: Tuple[float, float],
+        point3: Tuple[float, float],
+        n: int,
+        mass: float = 1.0,
     ):
         """Create a harmonic oscillator wave function from 3 samples of the potential.
 
@@ -338,19 +375,21 @@ class HarmonicOscillator:
 
         """
         a, b, c = utils.parabola_from_points(point1, point2, point3)
-        center = -b / (2*a)
+        center = -b / (2 * a)
 
         # a = m/2 * w**2
         # 2a / m = w**2
         # sqrt(2a/m) = w
-        w = np.sqrt(2*a / mass)
+        w = np.sqrt(2 * a / mass)
         return HarmonicOscillator(n=n, center=center, omega=w, mass=mass)
-
-
 
     @property
     def N(self):
-        return (1.0 / math.sqrt(2 ** n * math.factorial(n)) * ((mass * omega) / math.pi) ** 0.25)
+        return (
+            1.0
+            / math.sqrt(2 ** self.n * math.factorial(self.n))
+            * ((self.mass * self.omega) / math.pi) ** 0.25
+        )
 
     @property
     def _hermite(self):
@@ -358,4 +397,4 @@ class HarmonicOscillator:
 
     def __call__(self, x):
         y = (np.sqrt(self.mass * self.omega)) * (x - self.center)
-        return self.N * np.exp(-y**2 / 2.0) * self._hermite(y)
+        return self.N * np.exp(-(y ** 2) / 2.0) * self._hermite(y)

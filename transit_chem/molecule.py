@@ -13,7 +13,7 @@ class Molecule(object):
     Contains functions for rotating, aligning and scaling. Iterating over the molecule gives each atom.
     """
 
-    def __init__(self, xyz_file, basis_type='minimalpz'):
+    def __init__(self, xyz_file, basis_type="minimalpz"):
         """Constructor for Molecule from an xyzfile.
 
         The xyzfile can be either of these forms:
@@ -35,7 +35,7 @@ class Molecule(object):
         :type basis_type: str
         """
         self.xyzfile = xyz_file
-        self.comment = ''
+        self.comment = ""
         self._atoms_saved, self.comment = self.xyz_to_atoms(self.xyzfile, basis_type)
         self.atoms = copy.deepcopy(self._atoms_saved)
 
@@ -48,7 +48,7 @@ class Molecule(object):
         return np.asarray([atom.coords for atom in self.atoms])
 
     def trim_hydrogens(self):
-        self.atoms = [atom for atom in self._atoms_saved if not atom.symbol == 'H']
+        self.atoms = [atom for atom in self._atoms_saved if not atom.symbol == "H"]
 
     def show_hydrogens(self):
         self.atoms = self._atoms_saved
@@ -66,8 +66,10 @@ class Molecule(object):
         r = np.zeros((self.Natoms, self.Natoms))
         for i in range(self.Natoms):
             for j in range(self.Natoms):
-                diffs = np.asarray(self.atoms[i].coords) - np.asarray(self.atoms[j].coords)
-                r[i, j] = np.sqrt(np.sum(diffs**2))
+                diffs = np.asarray(self.atoms[i].coords) - np.asarray(
+                    self.atoms[j].coords
+                )
+                r[i, j] = np.sqrt(np.sum(diffs ** 2))
         return r
 
     @property
@@ -77,16 +79,16 @@ class Molecule(object):
         mx = 0.0
         my = 0.0
         mz = 0.0
-        for atom in self.atoms:
-            total_mass += atom.Z
-            mx += atom.Z * atom.coords[0]
-            my += atom.Z * atom.coords[1]
-            mz += atom.Z * atom.coords[2]
+        for a in self.atoms:
+            total_mass += a.Z
+            mx += a.Z * a.coords[0]
+            my += a.Z * a.coords[1]
+            mz += a.Z * a.coords[2]
         return mx / total_mass, my / total_mass, mz / total_mass
 
     def translate(self, x, y, z):
-        for atom in self.atoms:
-            atom.translate(x, y, z)
+        for a in self.atoms:
+            a.translate(x, y, z)
 
     @staticmethod
     def xyz_to_atoms(xyz_file, basis_type):
@@ -101,7 +103,7 @@ class Molecule(object):
         with open(xyz_file) as f:
             text = f.readlines()
             comment = [line.rstrip() for line in text[:2]]
-            text = text[2:] # First two are number and comment lines
+            text = text[2:]  # First two are number and comment lines
             atomlist = [line.rstrip().split() for line in text]
             atomtypes, coords = zip(*[(line[0], line[1:]) for line in atomlist])
             coords = [[float(c) for c in line] for line in coords]
@@ -117,66 +119,66 @@ class Molecule(object):
         after aligning atom1 and atom2 to x axis, rotate the molecule about the x axis such that
         the xy_anchor atom lies in the xy plane.
         """
-        midpoint = [0.5 * (coord2 + coord1) for coord1, coord2 in zip(atom1.coords, atom2.coords)]
+        midpoint = [
+            0.5 * (coord2 + coord1)
+            for coord1, coord2 in zip(atom1.coords, atom2.coords)
+        ]
         self.translate(-midpoint[0], -midpoint[1], -midpoint[2])
 
         #  Rotating atom1 to be in the xz plane
         x, y, z = atom1.coords
-        theta = - np.arctan(y / x)
+        theta = -np.arctan(y / x)
         Rz = np.asarray(
             [
                 [np.cos(theta), -np.sin(theta), 0],
                 [np.sin(theta), np.cos(theta), 0],
-                [     0       ,       0      , 1]
-             ]
+                [0, 0, 1],
+            ]
         )
-        for atom in self.atoms:
-            atom.rotate(Rz)
+        for a in self.atoms:
+            a.rotate(Rz)
 
         # Rotate to put atom1 in on the +x axis from within xz plane
         x, y, z = atom1.coords
-        theta = - np.arctan(z / x)
+        theta = -np.arctan(z / x)
         Ry = np.asarray(
             [
                 [np.cos(theta), 0, -np.sin(theta)],
-                [     0       , 1,        0      ],
-                [np.sin(theta), 0,  np.cos(theta)]
-             ]
+                [0, 1, 0],
+                [np.sin(theta), 0, np.cos(theta)],
+            ]
         )
-        for atom in self.atoms:
-            atom.rotate(Ry)
-
+        for a in self.atoms:
+            a.rotate(Ry)
 
         # Rotate to put xy anchor on the xy plane
         if xy_anchor is not None:
             x, y, z = xy_anchor.coords
-            theta = - np.arctan(z / y)
+            theta = -np.arctan(z / y)
             Rx = np.asarray(
                 [
-                    [1,      0       ,       0       ],
+                    [1, 0, 0],
                     [0, np.cos(theta), -np.sin(theta)],
-                    [0, np.sin(theta),  np.cos(theta)]
-                 ]
+                    [0, np.sin(theta), np.cos(theta)],
+                ]
             )
-            for atom in self.atoms:
-                atom.rotate(Rx)
-
-
+            for a in self.atoms:
+                a.rotate(Rx)
 
     def scale(self, factor):
-        for atom in self.atoms:
-            atom.scale(factor)
+        for a in self.atoms:
+            a.scale(factor)
 
     def flip_x(self):
-        for atom in self.atoms:
-            atom.flip_x()
+        for a in self.atoms:
+            a.flip_x()
 
     def sort(self, atomic_key):
         self.atoms = sorted(self.atoms, key=atomic_key)
 
     def __str__(self):
         my_list = self.comment + [str(atom) for atom in self.atoms]
-        s = '\n'.join(my_list)
+        s = "\n".join(my_list)
         return s
 
 
@@ -198,5 +200,5 @@ def main(argv):
         print(M.coords)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

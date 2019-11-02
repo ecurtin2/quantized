@@ -44,7 +44,7 @@ def triple_well_potential(center1, barrier12, center2, barrier23, center3):
 
     # Wells are in expected left to right ordering.
     if not center1[0] < barrier12[0] < center2[0] < barrier23[0] < center3[0]:
-        raise ValueError('Points are not in ascending x-value order.')
+        raise ValueError("Points are not in ascending x-value order.")
 
     # Wells are below the barriers
     assert center1[1] < barrier12[1]
@@ -56,7 +56,7 @@ def triple_well_potential(center1, barrier12, center2, barrier23, center3):
         center_x, center_y = center
         barrier_x, barrier_y = barrier
         # Third point is reflecting barrier about center
-        x = - barrier_x + 2*center_x
+        x = -barrier_x + 2 * center_x
         y = barrier_y
         return np.poly1d(parabola_from_points(center, barrier, (x, y)))
 
@@ -80,9 +80,14 @@ def triple_well_potential(center1, barrier12, center2, barrier23, center3):
     return np.vectorize(potential)
 
 
-def centers_barriers_from_params(well1_depth, well1_halfwidth,
-                                 bridge_length, bridge_depth,
-                                 well3_halfwidth, well3_depth):
+def centers_barriers_from_params(
+    well1_depth,
+    well1_halfwidth,
+    bridge_length,
+    bridge_depth,
+    well3_halfwidth,
+    well3_depth,
+):
     center1 = [0, 0]
     barrier1 = [center1[0] + well1_halfwidth, center1[1] + well1_depth]
     center2 = [barrier1[0] + 0.5 * bridge_length, barrier1[1] - bridge_depth]
@@ -92,6 +97,7 @@ def centers_barriers_from_params(well1_depth, well1_halfwidth,
     centers = np.asarray([center1, center2, center3])
     barriers = np.asarray([barrier1, barrier2])
     return centers, barriers
+
 
 #
 #     def get_eigen_basis(self):

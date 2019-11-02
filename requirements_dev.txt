@@ -13,3 +13,4 @@ wheel
 watchdog
 coverage
 twine
+mypy
