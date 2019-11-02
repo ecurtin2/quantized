@@ -15,7 +15,9 @@ jobs:
         python-version: 3.7
     - uses: dschep/install-poetry-action@v1.2
     - name: Install dependencies
-      run: "poetry install"
+      run: |
+      poetry install
+      poetry shell
     - name: Lint with flake8
       run: "flake8 ."
     - name: Test with pytest
