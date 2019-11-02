@@ -1,16 +1,16 @@
-
 import math
-from dataclasses import dataclass
-from typing import Tuple
+from typing import Callable, Tuple
 
+import attr
 import numba
 import numpy as np
 from scipy import integrate, special
 from scipy.misc import derivative
 
-from . import utils
-from transit_chem.validation import check_range_inclusive
 from transit_chem import config
+from transit_chem.validation import Range
+
+from . import utils
 
 ___all__ = [
     "HarmonicOscillatorWaveFunction",
@@ -153,8 +153,8 @@ def pz_orbital_factory(x0, y0, z0, alpha):
 
 
 def overlap1d(
-    first: callable,
-    second: callable,
+    first: Callable,
+    second: Callable,
     *args,
     lower_limit: float = -np.inf,
     upper_limit: float = np.inf,
@@ -205,8 +205,8 @@ def overlap1d(
 
 
 def kinetic_integral(
-    first: callable,
-    second: callable,
+    first: Callable,
+    second: Callable,
     *args,
     lower_limit: float = -np.inf,
     upper_limit: float = np.inf,
@@ -234,14 +234,14 @@ def kinetic_integral(
     """
 
     def kinetic_func(x, *args_):
-        return -0.5 * derivative(second, x, dx=1e-8, n=2, args=args_)
+        return -0.5 * derivative(second, x, dx=config.SMALL_NUMBER, n=2, args=args_)
 
     return overlap1d(
         first, kinetic_func, *args, lower_limit=lower_limit, upper_limit=upper_limit
     )
 
 
-def make_potential_integral(potential: callable):
+def make_potential_integral(potential: Callable):
     """
 
     Parameters
@@ -253,8 +253,8 @@ def make_potential_integral(potential: callable):
     """
 
     def potential_integral(
-        first: callable,
-        second: callable,
+        first: Callable,
+        second: Callable,
         *args,
         lower_limit: float = -np.inf,
         upper_limit: float = np.inf,
@@ -296,7 +296,23 @@ def make_potential_integral(potential: callable):
     return potential_integral
 
 
-@dataclass
+@attr.s(frozen=True)
+class HarmonicPotential:
+    center: float = attr.ib(
+        validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)]
+    )
+    mass: float = attr.ib(
+        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
+    )
+    omega: float = attr.ib(
+        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
+    )
+
+    def __call__(self, x: float) -> float:
+        return 0.5 * self.mass * (self.omega ** 2) * (x ** 2)
+
+
+@attr.s(frozen=True)
 class HarmonicOscillator:
     """A 1D quantum harmonic oscillator wave function.
 
@@ -326,19 +342,16 @@ class HarmonicOscillator:
 
     """
 
-    n: int
-    center: float
-    mass: float = 1.0
-    omega: float = 1.0
-
-    def __post_init__(self):
-        errors = [
-            check_range_inclusive("n", self.n, 0, config.HARMONIC_OSCILLATOR_MAX_N),
-            check_range_inclusive("mass", self.mass, config.SMALL_NUMBER, config.LARGE_NUMBER),
-            check_range_inclusive("omega", self.omega, config.SMALL_NUMBER, config.LARGE_NUMBER)
-        ]
-        if any(errors):
-            raise ValueError(" ".join(errors))
+    n: int = attr.ib(validator=[Range(0, config.HARMONIC_OSCILLATOR_MAX_N)])
+    center: float = attr.ib(
+        validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)]
+    )
+    mass: float = attr.ib(
+        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
+    )
+    omega: float = attr.ib(
+        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
+    )
 
     @staticmethod
     def from_potential_points(
@@ -395,6 +408,14 @@ class HarmonicOscillator:
         # sqrt(2a/m) = w
         w = np.sqrt(2 * a / mass)
         return HarmonicOscillator(n=n, center=center, omega=w, mass=mass)
+
+    @property
+    def energy(self):
+        return (self.n + 0.5) * self.omega
+
+    @property
+    def potential(self):
+        return HarmonicPotential(center=self.center, mass=self.mass, omega=self.omega)
 
     @property
     def N(self):
