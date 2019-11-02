@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "transit-chem"
-version = "0.0.125"
+version = "0.5.7"
 description = "Quantifying Probabilistic Electron Transit times."
 authors = ["Evan Curtin <fakeemail@gmail.com>"]
 
