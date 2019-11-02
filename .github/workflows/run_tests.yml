@@ -14,13 +14,9 @@ jobs:
       with:
         python-version: 3.7
     - name: Install dependencies
-      uses: abatilo/actions-poetry@v1.0.0
-      with:
-        args: ["install"]
+      uses: dschep/install-poetry-action@v1.2
+      run: "poetry install"
     - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 .
+      run: "flake8 ."
     - name: Test with pytest
-      run: |
-        pytest .
+      run: "pytest ."
