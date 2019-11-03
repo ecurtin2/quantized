@@ -4,9 +4,10 @@ from typing import Callable, Tuple
 import attr
 import numba
 import numpy as np
-from scipy import integrate, special
+from scipy import special
 
 from transit_chem import config
+from transit_chem.utils import Parabola
 from transit_chem.validation import Range
 
 from . import utils
@@ -148,58 +149,6 @@ def pz_orbital_factory(x0, y0, z0, alpha):
     return pz_orbital
 
 
-def overlap1d(
-    first: Callable,
-    second: Callable,
-    *args,
-    lower_limit: float = -np.inf,
-    upper_limit: float = np.inf,
-) -> float:
-    """Compute the overlap integral in 1 dimension over the specified range
-
-    Parameters
-    -----------
-    first
-        The first function
-    second
-        The second function
-    *args
-        Extra args to pass to **both** first and second function
-    lower_limit
-        The lower limit of integration
-    upper_limit
-        The upper limit of integration
-
-    Returns
-    --------
-    overlap
-        The value of the overlap integral.
-
-    Examples
-    ---------
-
-    >>> from transit_chem import overlap
-    >>> from numpy import sin, pi
-    >>>
-    >>> def f1(x):
-    ...     return sin(x)
-    ...
-    >>> def f2(x):
-    ...     return sin(2*x)
-    ...
-    >>> overlap(f1, f2, lower_limit=0, upper_limit=2*pi)
-    6.869054119163646e-17
-    >>> overlap(f1, f1, lower_limit=0, upper_limit=2*pi)
-    3.141592653589793
-
-    """
-
-    def integrand(x, *args_):
-        return first(x, *args_) * second(x, *args_)
-
-    return integrate.quad(integrand, a=lower_limit, b=upper_limit, args=args)[0]
-
-
 @attr.s(frozen=True)
 class HarmonicPotential:
     center: float = attr.ib(
@@ -304,14 +253,12 @@ class HarmonicOscillator:
 
 
         """
-        a, b, c = utils.parabola_from_points(point1, point2, point3)
-        center = -b / (2 * a)
-
+        p = Parabola.from_points(point1, point2, point3)
         # a = m/2 * w**2
         # 2a / m = w**2
         # sqrt(2a/m) = w
-        w = np.sqrt(2 * a / mass)
-        return HarmonicOscillator(n=n, center=center, omega=w, mass=mass)
+        w = np.sqrt(2 * p.a / mass)
+        return HarmonicOscillator(n=n, center=p.vertex, omega=w, mass=mass)
 
     def __kinetic__(self):
         """Return kinetic energy operator applied on this.
@@ -357,7 +304,7 @@ class HarmonicOscillator:
                     * attr.evolve(self, n=self.n - 2)(x)
                 )
 
-            return self.mass * self.omega * (first + inner + last) / 4.0
+            return - self.mass * self.omega * (first - inner - last) / 4.0
 
         return k
 

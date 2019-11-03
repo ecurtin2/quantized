@@ -1,9 +1,17 @@
-import numpy as np
+from typing import Tuple
+
+import attr
 
 from transit_chem.utils import Parabola
 
 
-def triple_well_potential(center1, barrier12, center2, barrier23, center3):
+@attr.s()
+class TripleWellPotential:
+    center1: Tuple[float, float] = attr.ib()
+    barrier12: Tuple[float, float] = attr.ib()
+    center2: Tuple[float, float] = attr.ib()
+    barrier23: Tuple[float, float] = attr.ib()
+    center3: Tuple[float, float] = attr.ib()
     """Construct a well potential from the points.
 
     x                                                         x
@@ -17,86 +25,64 @@ def triple_well_potential(center1, barrier12, center2, barrier23, center3):
        center1            x         x           x       x
                            x       x             center3
                             center2
-
-    Returns
-    --------
-    callable
-        A function f(x) that returns the y value of the potential at coordinate x.
-
-    Examples
-    ---------
-
-    >>> f = triple_well_potential(
-    ...     center1=(0, 0),
-    ...     barrier12=(0.5, 1),
-    ...     center2=(2, 0.5),
-    ...     barrier23=(3, 1.5),
-    ...     center3=(4, 1.0),
-    ... )
-    >>> f(0)
-    array(0.)
-    >>> f(3)
-    array(1.5)
-    >>> f([1, 2, 3])
-    array([0.56666667, 0.5       , 1.5       ])
-
     """
 
-    # Wells are in expected left to right ordering.
-    if not center1[0] < barrier12[0] < center2[0] < barrier23[0] < center3[0]:
-        raise ValueError("Points are not in ascending x-value order.")
+    def __attrs_post_init__(self):
+        # Wells are in expected left to right ordering.
+        if (
+            not self.center1[0]
+            < self.barrier12[0]
+            < self.center2[0]
+            < self.barrier23[0]
+            < self.center3[0]
+        ):
+            raise ValueError("Points are not in ascending x-value order.")
 
-    # Wells are below the barriers
-    assert center1[1] < barrier12[1]
-    assert center2[1] < barrier12[1]
-    assert center2[1] < barrier23[1]
-    assert center3[1] < barrier23[1]
+        # Wells are below the barriers
+        assert self.center1[1] < self.barrier12[1]
+        assert self.center2[1] < self.barrier12[1]
+        assert self.center2[1] < self.barrier23[1]
+        assert self.center3[1] < self.barrier23[1]
 
-    def fit_well(center, barrier):
-        center_x, center_y = center
-        barrier_x, barrier_y = barrier
-        # Third point is reflecting barrier about center
-        x = -barrier_x + 2 * center_x
-        y = barrier_y
-        return Parabola.from_points(center, barrier, (x, y))
+        def fit_well(center, barrier):
+            center_x, center_y = center
+            barrier_x, barrier_y = barrier
+            # Third point is reflecting barrier about center
+            x = -barrier_x + 2 * center_x
+            y = barrier_y
+            return Parabola.from_points(center, barrier, (x, y))
 
-    well1 = fit_well(center1, barrier12)
-    well2 = Parabola.from_points(barrier12, center2, barrier23)
-    well3 = fit_well(center3, barrier23)
+        self.well1 = fit_well(self.center1, self.barrier12)
+        self.well2 = Parabola.from_points(self.barrier12, self.center2, self.barrier23)
+        self.well3 = fit_well(self.center3, self.barrier23)
 
-    # Pre fetch to avoid repeated lookup
-    barrier12_x = barrier12[0]
-    barrier23_x = barrier23[0]
+        # Pre fetch to avoid repeated lookup
+        self.barrier12_x = self.barrier12[0]
+        self.barrier23_x = self.barrier23[0]
 
-    def potential(x):
-        if x < barrier12_x:
-            return well1(x)
-        elif barrier12_x <= x <= barrier23_x:
-            return well2(x)
-        elif x > barrier23_x:
-            return well3(x)
+    def __call__(self, x):
+        if x < self.barrier12_x:
+            return self.well1(x)
+        elif self.barrier12_x <= x <= self.barrier23_x:
+            return self.well2(x)
+        elif x > self.barrier23_x:
+            return self.well3(x)
 
-    # vectorize so it can work on numpy arrays
-    return np.vectorize(potential)
-
-
-def centers_barriers_from_params(
-    well1_depth,
-    well1_halfwidth,
-    bridge_length,
-    bridge_depth,
-    well3_halfwidth,
-    well3_depth,
-):
-    center1 = [0, 0]
-    barrier1 = [center1[0] + well1_halfwidth, center1[1] + well1_depth]
-    center2 = [barrier1[0] + 0.5 * bridge_length, barrier1[1] - bridge_depth]
-    barrier2 = [barrier1[0] + bridge_length, barrier1[1]]
-    center3 = [barrier2[0] + well3_halfwidth, barrier2[1] - well3_depth]
-
-    centers = np.asarray([center1, center2, center3])
-    barriers = np.asarray([barrier1, barrier2])
-    return centers, barriers
+    @staticmethod
+    def from_params(
+        well1_depth: float,
+        well1_halfwidth: float,
+        bridge_length: float,
+        bridge_depth: float,
+        well3_halfwidth: float,
+        well3_depth: float,
+    ):
+        center1 = (0, 0)
+        barrier1 = (center1[0] + well1_halfwidth, center1[1] + well1_depth)
+        center2 = (barrier1[0] + 0.5 * bridge_length, barrier1[1] - bridge_depth)
+        barrier2 = (barrier1[0] + bridge_length, barrier1[1])
+        center3 = (barrier2[0] + well3_halfwidth, barrier2[1] - well3_depth)
+        return TripleWellPotential(center1, barrier1, center2, barrier2, center3)
 
 
 #
@@ -107,40 +93,6 @@ def centers_barriers_from_params(
 #             for i in range(self.Nbasis):
 #                 self.eigenbasis[j] += self.eigvecs[i, j] * self.basis_vec[i]
 #         self.eigenbasis = [i * self.normalize(i) for i in self.eigenbasis]
-#
-#     def get_H(self):
-#         """Calculate the hamiltonian"""
-#         self.V = np.zeros((self.Nbasis, self.Nbasis))  # Potential
-#         for i in range(self.Nbasis):
-#             for j in range(i + 1):
-#                 Vij = self.integrate(self.basis_vec[j] * self.potential_array
-#                                     *self.basis_vec[i])
-#                 self.V[i, j] = self.V[j, i] = Vij
-#
-#         self.T = np.zeros((self.Nbasis, self.Nbasis))
-#         for i in range(self.Nbasis):
-#             for j in range(self.Nbasis):
-#                 # < i | T | j > = - 0.5 p*p, apply p in each direction since it is Hermitian
-#                 # the finite difference behaves better this way
-#                 di = utils.np_finite_diff(self.basis_vec[i], self.coords, 1)
-#                 dj = utils.np_finite_diff(self.basis_vec[j], self.coords, 1)
-#                 # Duplicate the first value so the length is the same.
-#                 # This is good approximation with smooth function and
-#                 # dense enough grid.
-#                 di = np.insert(di, 0, di[0])
-#                 dj = np.insert(dj, 0, dj[0])
-#                 # negative sign not here since - 0.5 * p * p = -0.5 * i(dxi)*i(dxj) = 0.5(dxi)(dxj)
-#                 self.T[i, j] = (0.5 / self.mass) * self.integrate(di * dj)
-#
-#         self.H = self.V + self.T
-#
-#     def get_S(self):
-#         """Calculate the overlap matrix."""
-#         self.S = np.zeros((self.Nbasis, self.Nbasis))
-#         for i in range(self.Nbasis):
-#             for j in range(i + 1):
-#                 Sij = self.overlap(self.basis_vec[j], self.basis_vec[i])
-#                 self.S[i, j] = self.S[j, i] = Sij
 #
 #     def calc_partial_overlap(self):
 #         """Calculate the partial overlap integrals in the MO basis."""
