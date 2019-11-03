@@ -1,6 +1,6 @@
 import numpy as np
 
-from transit_chem.utils import parabola_from_points
+from transit_chem.utils import Parabola
 
 
 def triple_well_potential(center1, barrier12, center2, barrier23, center3):
@@ -58,10 +58,10 @@ def triple_well_potential(center1, barrier12, center2, barrier23, center3):
         # Third point is reflecting barrier about center
         x = -barrier_x + 2 * center_x
         y = barrier_y
-        return np.poly1d(parabola_from_points(center, barrier, (x, y)))
+        return Parabola.from_points(center, barrier, (x, y))
 
     well1 = fit_well(center1, barrier12)
-    well2 = np.poly1d(parabola_from_points(barrier12, center2, barrier23))
+    well2 = Parabola.from_points(barrier12, center2, barrier23)
     well3 = fit_well(center3, barrier23)
 
     # Pre fetch to avoid repeated lookup

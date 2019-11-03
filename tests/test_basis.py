@@ -2,42 +2,25 @@ from math import isclose
 
 import pytest
 from hypothesis import given
-from hypothesis.strategies import floats, integers
+from hypothesis.strategies import integers
 from pytest import raises
 
-from transit_chem.basis import (
-    HarmonicOscillator,
-    overlap1d,
-    make_potential_integral,
-)
+from transit_chem.basis import HarmonicOscillator, overlap1d
 from transit_chem.config import (
     FLOAT_TOL,
     HARMONIC_OSCILLATOR_MAX_N,
-    LARGE_NUMBER,
     SMALL_NUMBER,
 )
 
 
+from utils import reasonable_floats, reasonable_pos_floats
+
+
 @given(
     integers(min_value=0, max_value=HARMONIC_OSCILLATOR_MAX_N),
-    floats(
-        min_value=-LARGE_NUMBER,
-        max_value=LARGE_NUMBER,
-        allow_nan=False,
-        allow_infinity=False,
-    ),
-    floats(
-        min_value=SMALL_NUMBER,
-        max_value=LARGE_NUMBER,
-        allow_nan=False,
-        allow_infinity=False,
-    ),
-    floats(
-        min_value=SMALL_NUMBER,
-        max_value=LARGE_NUMBER,
-        allow_nan=False,
-        allow_infinity=False,
-    ),
+    reasonable_floats,
+    reasonable_pos_floats,
+    reasonable_pos_floats,
 )
 def test_harmonic_oscillator_properties(
     n: int, center: float, mass: float, omega: float
@@ -67,13 +50,16 @@ def test_overlap1d_harmonic_oscillators_is_orthonormal():
     assert isclose(overlap1d(ho0, ho1), 0.0, abs_tol=SMALL_NUMBER)
 
 
-def test_kinetic_integral_of_harmonic_oscillator():
+def test_total_energy_integral_of_harmonic_oscillator():
 
     for n in range(10):
         ho0 = HarmonicOscillator(n=n, center=0.0)
 
         ke = overlap1d(ho0, ho0.__kinetic__())
-        pe_integral = make_potential_integral(ho0.potential)
-        pe = pe_integral(ho0, ho0)
+
+        def v(x):
+            return ho0.potential(x) * ho0(x)
+
+        pe = overlap1d(ho0, v)
 
         assert isclose(pe + ke, ho0.energy, abs_tol=SMALL_NUMBER)

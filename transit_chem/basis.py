@@ -11,10 +11,7 @@ from transit_chem.validation import Range
 
 from . import utils
 
-___all__ = [
-    "HarmonicOscillatorWaveFunction",
-    "overlap1d",
-]
+___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
 
 
 class Basis:
@@ -59,7 +56,7 @@ class Basis:
         0.0 is returned.
 
         """
-        assert isinstance(other, __class__)
+        assert isinstance(other, Basis)
         r = np.sqrt(
             (self.x0 - other.x0) ** 2
             + (self.y0 - other.y0) ** 2
@@ -203,61 +200,6 @@ def overlap1d(
     return integrate.quad(integrand, a=lower_limit, b=upper_limit, args=args)[0]
 
 
-def make_potential_integral(potential: Callable):
-    """
-
-    Parameters
-    -----------
-
-    potential
-        A function V(x) that takes x and returns the potential energy.
-:
-    """
-
-    def potential_integral(
-        first: Callable,
-        second: Callable,
-        *args,
-        lower_limit: float = -np.inf,
-        upper_limit: float = np.inf,
-    ) -> float:
-        """Return kinetic energy integral of two functions
-
-        Parameters
-        -----------
-        first
-            The first function
-        second
-            The second function
-
-        *args
-            Extra args to pass to **both** first and second function
-        lower_limit
-            The lower limit of integration
-        upper_limit
-            The upper limit of integration
-
-        Returns
-        --------
-        float
-            The value of the kinetic energy integral.
-
-        """
-
-        def potential_func(x, *args_):
-            return potential(x) * second(x, *args_)
-
-        return overlap1d(
-            first,
-            potential_func,
-            *args,
-            lower_limit=lower_limit,
-            upper_limit=upper_limit,
-        )
-
-    return potential_integral
-
-
 @attr.s(frozen=True)
 class HarmonicPotential:
     center: float = attr.ib(
@@ -388,35 +330,34 @@ class HarmonicOscillator:
         k = - (m w hbar) / 4 * []
         """
 
-        def raised_2(x):
-            return (
+        def k(x):
+            first = (
                 np.sqrt(self.n + 1)
                 * np.sqrt(self.n + 2)
-                * HarmonicOscillator(
-                    n=self.n + 2, center=self.center, mass=self.mass, omega=self.omega
-                )(x)
+                * attr.evolve(self, n=self.n + 2)(x)
             )
 
-        def inner(x):
             if self.n == 0:
-                return (self.n + 1) * self(x)  # second term is zero
-            return (2 * self.n + 1) * self(x)
+                # Lowering operator on n=0
+                # means the second term is zero
+                inner = (self.n + 1) * self(x)
+            else:
+                inner = (2 * self.n + 1) * self(x)
 
-        def lowered_2(x):
             if self.n <= 1:
-                return 0.0 * x
-            return (
-                np.sqrt(self.n)
-                * np.sqrt(self.n - 1)
-                * HarmonicOscillator(
-                    self.n - 2, center=self.center, mass=self.mass, omega=self.omega
-                )(x)
-            )
+                # Lowering operator twice on n=0 or n=1 will be 0
+                # if x is numpy array, we want to return a numpy
+                # array of zeros, so multiply x by zeros will work on
+                # numpy array or float.
+                last = 0.0 * x
+            else:
+                last = (
+                    np.sqrt(self.n)
+                    * np.sqrt(self.n - 1)
+                    * attr.evolve(self, n=self.n - 2)(x)
+                )
 
-        def k(x):
-            return (
-                self.mass * self.omega * (raised_2(x) + inner(x) + lowered_2(x)) / 4.0
-            )
+            return self.mass * self.omega * (first + inner + last) / 4.0
 
         return k
 

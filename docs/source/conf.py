@@ -174,7 +174,7 @@ latex_documents = [
         u"transit-chem Documentation",
         u"Evan M Curtin",
         "manual",
-    ),
+    )
 ]
 
 
@@ -199,5 +199,5 @@ texinfo_documents = [
         "transit_chem",
         "One line description of project.",
         "Miscellaneous",
-    ),
+    )
 ]
