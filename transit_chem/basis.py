@@ -161,7 +161,7 @@ class HarmonicPotential:
     )
 
     def __call__(self, x: float) -> float:
-        return 0.5 * self.mass * (self.omega ** 2) * (x ** 2)
+        return 0.5 * self.mass * (self.omega ** 2) * ((x - self.center) ** 2)
 
 
 @attr.s(frozen=True)
