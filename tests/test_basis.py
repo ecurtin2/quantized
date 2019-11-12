@@ -5,7 +5,8 @@ from hypothesis import given
 from hypothesis.strategies import integers
 from pytest import raises
 
-from transit_chem.basis import HarmonicOscillator, overlap1d
+from transit_chem.basis import HarmonicOscillator
+from transit_chem.operators import overlap
 from transit_chem.config import (
     FLOAT_TOL,
     HARMONIC_OSCILLATOR_MAX_N,
@@ -46,8 +47,8 @@ def test_harmonic_oscillator_raises_on_invalid(n, center, mass, omega):
 def test_overlap1d_harmonic_oscillators_is_orthonormal():
     ho0 = HarmonicOscillator(n=0, center=0.0)
     ho1 = HarmonicOscillator(n=1, center=0.0)
-    assert isclose(overlap1d(ho0, ho0), 1.0, abs_tol=SMALL_NUMBER)
-    assert isclose(overlap1d(ho0, ho1), 0.0, abs_tol=SMALL_NUMBER)
+    assert isclose(overlap(ho0, ho0), 1.0, abs_tol=SMALL_NUMBER)
+    assert isclose(overlap(ho0, ho1), 0.0, abs_tol=SMALL_NUMBER)
 
 
 def test_total_energy_integral_of_harmonic_oscillator():
@@ -55,11 +56,11 @@ def test_total_energy_integral_of_harmonic_oscillator():
     for n in range(10):
         ho0 = HarmonicOscillator(n=n, center=0.0)
 
-        ke = overlap1d(ho0, ho0.__kinetic__())
+        ke = overlap(ho0, ho0.__kinetic__())
 
         def v(x):
             return ho0.potential(x) * ho0(x)
 
-        pe = overlap1d(ho0, v)
+        pe = overlap(ho0, v)
 
         assert isclose(pe + ke, ho0.energy, abs_tol=SMALL_NUMBER)

@@ -1,5 +1,5 @@
 import math
-from typing import Callable, Tuple
+from typing import Tuple
 
 import attr
 import numba
@@ -10,7 +10,6 @@ from transit_chem import config
 from transit_chem.utils import Parabola
 from transit_chem.validation import Range
 
-from . import utils
 
 ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
 
@@ -34,75 +33,75 @@ class Basis:
     def __call__(self, x, y, z):
         return self.f(x, y, z)
 
-    def overlap(
-        self,
-        other,
-        distance_cutoff=5.0,
-        interval=5.0,
-        xmin=None,
-        xmax=None,
-        ymin=None,
-        ymax=None,
-        zmin=None,
-        zmax=None,
-    ):
-        """Return the overlap of this with another
+    # def overlap(
+    #     self,
+    #     other,
+    #     distance_cutoff=5.0,
+    #     interval=5.0,
+    #     xmin=None,
+    #     xmax=None,
+    #     ymin=None,
+    #     ymax=None,
+    #     zmin=None,
+    #     zmax=None,
+    # ):
+    #     """Return the overlap of this with another
 
-        This is to reduce the calculations performed by naively integrating over
-        all space for all combinations of basis functions.
-        Return 0.0 if the basis functions are separated by more than distance_cutoff.
-        Integrate from interval away from the centers. If bounds are not given.
+    #     This is to reduce the calculations performed by naively integrating over
+    #     all space for all combinations of basis functions.
+    #     Return 0.0 if the basis functions are separated by more than distance_cutoff.
+    #     Integrate from interval away from the centers. If bounds are not given.
 
-        If the midpoint of the centers of the functions is more than distance_cutoff from the boundaries,
-        0.0 is returned.
+    #     If the midpoint of the centers of the functions is more than distance_cutoff from the boundaries,
+    #     0.0 is returned.
 
-        """
-        assert isinstance(other, Basis)
-        r = np.sqrt(
-            (self.x0 - other.x0) ** 2
-            + (self.y0 - other.y0) ** 2
-            + (self.z0 - other.z0) ** 2
-        )
-        if r > distance_cutoff:
-            return 0.0
-        else:
-            if xmin is None:
-                xmin = min(self.x0, other.x0) - interval
-            if ymin is None:
-                ymin = min(self.y0, other.y0) - interval
-            if zmin is None:
-                zmin = min(self.z0, other.z0) - interval
-            if xmax is None:
-                xmax = max(self.x0, other.x0) + interval
-            if ymax is None:
-                ymax = max(self.y0, other.y0) + interval
-            if zmax is None:
-                zmax = max(self.z0, other.z0) + interval
+    #     """
+    #     assert isinstance(other, Basis)
+    #     r = np.sqrt(
+    #         (self.x0 - other.x0) ** 2
+    #         + (self.y0 - other.y0) ** 2
+    #         + (self.z0 - other.z0) ** 2
+    #     )
+    #     if r > distance_cutoff:
+    #         return 0.0
+    #     else:
+    #         if xmin is None:
+    #             xmin = min(self.x0, other.x0) - interval
+    #         if ymin is None:
+    #             ymin = min(self.y0, other.y0) - interval
+    #         if zmin is None:
+    #             zmin = min(self.z0, other.z0) - interval
+    #         if xmax is None:
+    #             xmax = max(self.x0, other.x0) + interval
+    #         if ymax is None:
+    #             ymax = max(self.y0, other.y0) + interval
+    #         if zmax is None:
+    #             zmax = max(self.z0, other.z0) + interval
 
-            #  Check to see if the midpoint of the overlapped functions
-            # falls outside integration range.
-            #  The maximum value between the centers,
-            # and if it's sufficiently far from the region of integration
-            #  we can return 0.0 and not lose anything.
+    #         #  Check to see if the midpoint of the overlapped functions
+    #         # falls outside integration range.
+    #         #  The maximum value between the centers,
+    #         # and if it's sufficiently far from the region of integration
+    #         #  we can return 0.0 and not lose anything.
 
-            midpoint = (
-                0.5 * (self.x0 + other.x0),
-                0.5 * (self.y0 + other.y0),
-                0.5 * (self.z0 + other.z0),
-            )
-            if midpoint[0] > (xmax + interval) or midpoint[0] < (xmin - interval):
-                return 0.0
-            if midpoint[1] > (ymax + interval) or midpoint[1] < (ymin - interval):
-                return 0.0
-            if midpoint[2] > (zmax + interval) or midpoint[2] < (zmin - interval):
-                return 0.0
+    #         midpoint = (
+    #             0.5 * (self.x0 + other.x0),
+    #             0.5 * (self.y0 + other.y0),
+    #             0.5 * (self.z0 + other.z0),
+    #         )
+    #         if midpoint[0] > (xmax + interval) or midpoint[0] < (xmin - interval):
+    #             return 0.0
+    #         if midpoint[1] > (ymax + interval) or midpoint[1] < (ymin - interval):
+    #             return 0.0
+    #         if midpoint[2] > (zmax + interval) or midpoint[2] < (zmin - interval):
+    #             return 0.0
 
-            # Finally actually do the overlap if none of the zero-conditions apply
-            ovlp = overlap_factory(self.f, other.f)
-            integrator = utils.integrate_region_gen_3D(
-                [[xmin, xmax], [ymin, ymax], [zmin, zmax]]
-            )
-            return integrator(ovlp)
+    #         # Finally actually do the overlap if none of the zero-conditions apply
+    #         ovlp = overlap_factory(self.f, other.f)
+    #         integrator = integrate_region_gen_3D(
+    #             [[xmin, xmax], [ymin, ymax], [zmin, zmax]]
+    #         )
+    #         return integrator(ovlp)
 
 
 def overlap_factory(f1, f2):
@@ -304,7 +303,7 @@ class HarmonicOscillator:
                     * attr.evolve(self, n=self.n - 2)(x)
                 )
 
-            return - self.mass * self.omega * (first - inner - last) / 4.0
+            return -self.mass * self.omega * (first - inner - last) / 4.0
 
         return k
 
