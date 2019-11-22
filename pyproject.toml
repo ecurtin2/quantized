@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "transit-chem"
-version = "0.5.7"
+version = "0.5.8"
 description = "Quantifying Probabilistic Electron Transit times."
 authors = ["Evan Curtin <fakeemail@gmail.com>"]
 readme = "README.rst"
@@ -30,3 +30,5 @@ nbsphinx = "^0.4.3"
 sphinx = "^2.2"
 sphinx-autodoc-typehints = "^1.9"
 sphinx_bootstrap_theme = "^0.7.1"
+jupyter = "^1.0"
+jupyterlab = "^1.2"
