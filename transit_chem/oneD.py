@@ -1,6 +1,7 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import attr
+import numpy as np
 
 from transit_chem.utils import Parabola
 
@@ -28,6 +29,7 @@ class TripleWellPotential:
     """
 
     def __attrs_post_init__(self):
+
         # Wells are in expected left to right ordering.
         if (
             not self.center1[0]
@@ -60,13 +62,33 @@ class TripleWellPotential:
         self.barrier12_x = self.barrier12[0]
         self.barrier23_x = self.barrier23[0]
 
-    def __call__(self, x):
+    def _call_numpy(self, x: np.ndarray) -> np.ndarray:
+        y = np.zeros_like(x)
+        
+        mask1 = np.where(x < self.barrier12_x)
+        y[mask1] = self.well1(x[mask1])
+        
+        mask2 = np.where((self.barrier12_x <= x) & (x <= self.barrier23_x))
+        y[mask2] = self.well2(x[mask2])
+        
+        mask3 = np.where(x > self.barrier23_x)
+        y[mask3] = self.well3(x[mask3])
+        
+        return y
+
+    def _call_scalar(self, x: float) -> float:
         if x < self.barrier12_x:
             return self.well1(x)
         elif self.barrier12_x <= x <= self.barrier23_x:
             return self.well2(x)
         elif x > self.barrier23_x:
             return self.well3(x)
+
+    def __call__(self, x: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
+        if isinstance(x, np.ndarray):
+            return self._call_numpy(x)
+        else:
+            return self._call_scalar(x)
 
     @staticmethod
     def from_params(

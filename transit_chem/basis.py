@@ -1,3 +1,5 @@
+from __future__ import annotations
+from itertools import count, takewhile
 import math
 from typing import Tuple
 
@@ -206,13 +208,21 @@ class HarmonicOscillator:
     )
 
     @staticmethod
+    def from_parabola(p: Parabola, n: int, mass: float = 1.0) -> HarmonicOscillator:
+        # a = m/2 * w**2
+        # 2a / m = w**2
+        # sqrt(2a/m) = w
+        w = np.sqrt(2 * p.a / mass)
+        return HarmonicOscillator(n=n, center=p.vertex, omega=w, mass=mass)
+
+    @staticmethod
     def from_potential_points(
         point1: Tuple[float, float],
         point2: Tuple[float, float],
         point3: Tuple[float, float],
         n: int,
         mass: float = 1.0,
-    ):
+    ) -> HarmonicOscillator:
         """Create a harmonic oscillator wave function from 3 samples of the potential.
 
         The three points are fit to a parabola (harmonic potential), then the parameters
@@ -253,11 +263,8 @@ class HarmonicOscillator:
 
         """
         p = Parabola.from_points(point1, point2, point3)
-        # a = m/2 * w**2
-        # 2a / m = w**2
-        # sqrt(2a/m) = w
-        w = np.sqrt(2 * p.a / mass)
-        return HarmonicOscillator(n=n, center=p.vertex, omega=w, mass=mass)
+        return HarmonicOscillator.from_parabola(p)
+
 
     def __kinetic__(self):
         """Return kinetic energy operator applied on this.
@@ -330,3 +337,8 @@ class HarmonicOscillator:
     def __call__(self, x):
         y = (np.sqrt(self.mass * self.omega)) * (x - self.center)
         return self.N * np.exp(-(y ** 2) / 2.0) * self._hermite(y)
+
+
+def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[HarmonicOscillator]:
+    hos = (HarmonicOscillator.from_parabola(p, n=i) for i in count())
+    return list(takewhile(lambda ho: ho.energy <= cutoff_energy, hos))

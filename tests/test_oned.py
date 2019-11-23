@@ -88,3 +88,15 @@ def test_triple_well():
     # Potential should go as x^2, so bigger than x at large x
     assert v(LARGE_NUMBER) > LARGE_NUMBER
     assert v(-LARGE_NUMBER) > LARGE_NUMBER
+
+
+def test_triple_well_runs_on_numpy_array():
+    x = np.linspace(-10, 10, 100)
+    triple_well = TripleWellPotential(
+        center1=(0, 0),
+        center2=(1, 0.2), 
+        center3=(2, 0.1),
+        barrier12=(0.5, 0.4),
+        barrier23=(1.4, 0.3)
+    )
+    triple_well(x)

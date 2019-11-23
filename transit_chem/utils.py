@@ -4,6 +4,7 @@ from typing import Callable, Sequence, Tuple, TypeVar
 
 import attr
 import numpy as np
+from tqdm import tqdm
 
 from transit_chem.validation import not_inf, not_nan, Range
 from transit_chem.config import SMALL_NUMBER, LARGE_NUMBER
@@ -58,13 +59,17 @@ def pairwise_array_from_func(
     result = np.zeros((n, n))
 
     if symmetric:
-        for i in range(n):
-            for j in range(i + 1):
-                result[i, j] = result[j, i] = func(items[i], items[j])
+        with tqdm(total=((n * (n+1)) // 2)) as pbar:
+            for i in range(n):
+                for j in range(i + 1):
+                    result[i, j] = result[j, i] = func(items[i], items[j])
+                    pbar.update(1)
     else:
-        for i in range(n):
-            for j in range(n):
-                result[i, j] = func(items[i], items[j])
+        with tqdm(total=n**2) as pbar:
+            for i in range(n):
+                for j in range(n):
+                    result[i, j] = func(items[i], items[j])
+                    pbar.update(1)
     return result
 
 
