@@ -7,11 +7,7 @@ from pytest import raises
 
 from transit_chem.basis import HarmonicOscillator
 from transit_chem.operators import overlap
-from transit_chem.config import (
-    FLOAT_TOL,
-    HARMONIC_OSCILLATOR_MAX_N,
-    SMALL_NUMBER,
-)
+from transit_chem.config import FLOAT_TOL, HARMONIC_OSCILLATOR_MAX_N, SMALL_NUMBER
 
 
 from utils import reasonable_floats, reasonable_pos_floats

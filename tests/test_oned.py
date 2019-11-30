@@ -31,6 +31,10 @@ def is_identity(x: np.ndarray) -> bool:
     return np.allclose(np.eye(n, m), x)
 
 
+def is_hermitian(x: np.ndarray) -> bool:
+    return np.allclose(x, np.conj(x).T)
+
+
 def test_ho_eigen_basis_overlap_is_diagonal(ho_eigen_basis):
     S = pairwise_array_from_func(ho_eigen_basis, op.overlap)
     assert is_diagonal(S)
@@ -42,6 +46,7 @@ def test_ho_eigen_basis_kinetic(ho_eigen_basis):
     energies = np.asarray([b.energy for b in ho_eigen_basis])
     expected = energies / 2.0
     assert np.allclose(np.diag(K), expected)
+    assert is_hermitian(K)
 
 
 def test_ho_eigen_basis_potential(ho_eigen_basis):
@@ -51,6 +56,7 @@ def test_ho_eigen_basis_potential(ho_eigen_basis):
     energies = np.asarray([b.energy for b in ho_eigen_basis])
     expected = energies / 2.0
     assert np.allclose(np.diag(V), expected)
+    assert is_hermitian(V)
 
 
 def test_ho_eigen_basis_hamiltonian(ho_eigen_basis):
@@ -94,9 +100,9 @@ def test_triple_well_runs_on_numpy_array():
     x = np.linspace(-10, 10, 100)
     triple_well = TripleWellPotential(
         center1=(0, 0),
-        center2=(1, 0.2), 
+        center2=(1, 0.2),
         center3=(2, 0.1),
         barrier12=(0.5, 0.4),
-        barrier23=(1.4, 0.3)
+        barrier23=(1.4, 0.3),
     )
     triple_well(x)

@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+from concurrent.futures import Future, ProcessPoolExecutor, as_completed
+from itertools import combinations_with_replacement, product
 from math import isclose
 from typing import Callable, Sequence, Tuple, TypeVar
 
@@ -6,14 +9,24 @@ import attr
 import numpy as np
 from tqdm import tqdm
 
-from transit_chem.validation import not_inf, not_nan, Range
-from transit_chem.config import SMALL_NUMBER, LARGE_NUMBER
+from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
+from transit_chem.validation import Range, not_inf, not_nan
 
-
-__all__ = ["pairwise_array_from_func", "Parabola"]
+__all__ = ["pairwise_array_from_func", "Parabola", "LinearComb"]
 
 
 T = TypeVar("T")
+
+
+
+class LinearComb:
+    def __init__(self, c, f):
+        self.c = c
+        self.f = f
+    def __call__(self, x):
+        return sum(ci * fi(x) for ci, fi in zip(self.c, self.f))
+    def __repr__(self):
+        return " + ".join(f"{c} * {f}" for c, f in zip(self.c, self.f))
 
 
 def pairwise_array_from_func(
@@ -58,18 +71,37 @@ def pairwise_array_from_func(
     n = len(items)
     result = np.zeros((n, n))
 
+    fut_res = {}
+
     if symmetric:
-        with tqdm(total=((n * (n+1)) // 2)) as pbar:
-            for i in range(n):
-                for j in range(i + 1):
-                    result[i, j] = result[j, i] = func(items[i], items[j])
-                    pbar.update(1)
+        combs = list(combinations_with_replacement(range(n), 2))
     else:
-        with tqdm(total=n**2) as pbar:
-            for i in range(n):
-                for j in range(n):
-                    result[i, j] = func(items[i], items[j])
+        combs = list(product(range(n), repeat=2))
+
+
+    try:
+        with ProcessPoolExecutor() as exc:
+            for i, j in combs:
+                fut_res[exc.submit(func, items[i], items[j])] = (i, j)
+
+            with tqdm(total=len(combs)) as pbar:
+                for future in as_completed(fut_res.keys()):
+                    res = future.result()
+                    i, j = fut_res[future]
+                    if symmetric:
+                        result[i, j] = result[j, i] = res
+                    else:
+                        result[i, j] = res
                     pbar.update(1)
+
+    # Fall back to non futures approach
+    except:
+        for i, j in combs:
+            if symmetric:
+                result[i, j] = result[j, i] = func(items[i], items[j])
+            else:
+                result[i, j] = func(items[i], items[j])
+
     return result
 
 

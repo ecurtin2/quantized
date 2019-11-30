@@ -64,16 +64,16 @@ class TripleWellPotential:
 
     def _call_numpy(self, x: np.ndarray) -> np.ndarray:
         y = np.zeros_like(x)
-        
+
         mask1 = np.where(x < self.barrier12_x)
         y[mask1] = self.well1(x[mask1])
-        
+
         mask2 = np.where((self.barrier12_x <= x) & (x <= self.barrier23_x))
         y[mask2] = self.well2(x[mask2])
-        
+
         mask3 = np.where(x > self.barrier23_x)
         y[mask3] = self.well3(x[mask3])
-        
+
         return y
 
     def _call_scalar(self, x: float) -> float:

@@ -1,15 +1,17 @@
 from __future__ import annotations
 from itertools import count, takewhile
 import math
-from typing import Tuple
+from typing import Callable, List, Tuple
 
 import attr
 import numba
 import numpy as np
 from scipy import special
+from scipy.linalg import eigh
 
 from transit_chem import config
-from transit_chem.utils import Parabola
+from transit_chem.operators import overlap
+from transit_chem.utils import LinearComb, Parabola
 from transit_chem.validation import Range
 
 
@@ -265,7 +267,6 @@ class HarmonicOscillator:
         p = Parabola.from_points(point1, point2, point3)
         return HarmonicOscillator.from_parabola(p)
 
-
     def __kinetic__(self):
         """Return kinetic energy operator applied on this.
 
@@ -310,7 +311,7 @@ class HarmonicOscillator:
                     * attr.evolve(self, n=self.n - 2)(x)
                 )
 
-            return -self.mass * self.omega * (first - inner - last) / 4.0
+            return -self.mass * self.omega * (first - inner + last) / 4.0
 
         return k
 
@@ -339,6 +340,33 @@ class HarmonicOscillator:
         return self.N * np.exp(-(y ** 2) / 2.0) * self._hermite(y)
 
 
-def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[HarmonicOscillator]:
+def harmonic_basis_from_parabola(
+    p: Parabola, cutoff_energy: float
+) -> List[HarmonicOscillator]:
     hos = (HarmonicOscillator.from_parabola(p, n=i) for i in count())
     return list(takewhile(lambda ho: ho.energy <= cutoff_energy, hos))
+
+
+@attr.s(frozen=True)
+class EigenBasis:
+    states: List[Callable] = attr.ib()
+    energies: List[float] = attr.ib()
+
+    @staticmethod
+    def from_basis(basis: List[Callable], H: np.array, S: np.array) -> EigenBasis:
+        # Sort vals/vecs
+        eigvals, eigvecs = eigh(H, S)
+        idx = np.argsort(eigvals)
+        eigvals = eigvals[idx]
+        eigvecs = eigvecs[:, idx]
+
+        states = [LinearComb(c, basis) for c in eigvecs.T]
+        return EigenBasis(states=states, energies=list(eigvals))
+
+    def time_evolving(self, f: Callable):
+        coeffs = [overlap(f, state) for state in self.states]
+
+        def time_evolved(x, t):
+            return sum([c * np.exp(-1j * e * t) * state(x) for state, e, c in zip(self.states, self.energies, coeffs)])
+
+        return time_evolved
