@@ -9,7 +9,7 @@ import attr
 import numpy as np
 from tqdm import tqdm
 
-from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
+from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER, ENABLE_PROGRESSBAR
 from transit_chem.validation import Range, not_inf, not_nan
 
 __all__ = ["pairwise_array_from_func", "Parabola", "LinearComb"]
@@ -86,7 +86,7 @@ def pairwise_array_from_func(
         for i, j in combs:
             fut_res[exc.submit(func, items[i], items[j])] = (i, j)
 
-        with tqdm(total=len(combs)) as pbar:
+        with tqdm(total=len(combs), disable=not ENABLE_PROGRESSBAR) as pbar:
             for future in as_completed(fut_res.keys()):
                 res = future.result()
                 i, j = fut_res[future]
