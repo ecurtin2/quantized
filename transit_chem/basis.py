@@ -363,10 +363,15 @@ class EigenBasis:
         states = [LinearComb(c, basis) for c in eigvecs.T]
         return EigenBasis(states=states, energies=list(eigvals))
 
-    def time_evolving(self, f: Callable):
+    def time_evolving(self, f: Callable) -> Callable:
         coeffs = [overlap(f, state) for state in self.states]
 
         def time_evolved(x, t):
-            return sum([c * np.exp(-1j * e * t) * state(x) for state, e, c in zip(self.states, self.energies, coeffs)])
+            return sum(
+                [
+                    c * np.exp(-1j * e * t) * state(x)
+                    for state, e, c in zip(self.states, self.energies, coeffs)
+                ]
+            )
 
         return time_evolved

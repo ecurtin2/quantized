@@ -83,6 +83,11 @@ class TripleWellPotential:
             return self.well2(x)
         elif x > self.barrier23_x:
             return self.well3(x)
+        else:
+            raise ValueError(
+                f"Value {x} is not valid for {self}. "
+                "Probably the well/barrier parameters are invalid"
+            )
 
     def __call__(self, x: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         if isinstance(x, np.ndarray):
