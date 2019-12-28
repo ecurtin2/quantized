@@ -19,9 +19,10 @@
 # absolute, like shown here.
 #
 
-import sphinx_bootstrap_theme
-from pathlib import Path
 import re
+from pathlib import Path
+
+import sphinx_bootstrap_theme
 
 pyproj_path = Path(__file__).parents[2] / "pyproject.toml"
 print(pyproj_path)

@@ -1,6 +1,6 @@
 from hypothesis.strategies import floats
 
-from transit_chem.config import SMALL_NUMBER, LARGE_NUMBER
+from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
 
 reasonable_floats = floats(
     allow_infinity=False,

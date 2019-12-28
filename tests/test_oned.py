@@ -3,11 +3,11 @@ from math import isclose
 import numpy as np
 import pytest
 
+from transit_chem import operators as op
 from transit_chem.basis import HarmonicOscillator
 from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
-from transit_chem.utils import pairwise_array_from_func
 from transit_chem.oneD import TripleWellPotential
-from transit_chem import operators as op
+from transit_chem.utils import pairwise_array_from_func
 
 
 @pytest.fixture

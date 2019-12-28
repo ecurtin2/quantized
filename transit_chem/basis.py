@@ -1,11 +1,13 @@
 from __future__ import annotations
-from itertools import count, takewhile
+
 import math
+from itertools import count, takewhile
 from typing import Callable, List, Tuple
 
 import attr
 import numba
 import numpy as np
+from numpy.linalg import inv
 from scipy import special
 from scipy.linalg import eigh
 
@@ -13,7 +15,6 @@ from transit_chem import config
 from transit_chem.operators import overlap
 from transit_chem.utils import LinearComb, Parabola
 from transit_chem.validation import Range
-
 
 ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
 
@@ -351,6 +352,8 @@ def harmonic_basis_from_parabola(
 class EigenBasis:
     states: List[Callable] = attr.ib()
     energies: List[float] = attr.ib()
+    ao_S: np.array = attr.ib()
+    eigvecs: np.array = attr.ib()
 
     @staticmethod
     def from_basis(basis: List[Callable], H: np.array, S: np.array) -> EigenBasis:
@@ -361,7 +364,12 @@ class EigenBasis:
         eigvecs = eigvecs[:, idx]
 
         states = [LinearComb(c, basis) for c in eigvecs.T]
-        return EigenBasis(states=states, energies=list(eigvals))
+        return EigenBasis(
+            states=states, energies=list(eigvals), eigvecs=eigvecs, ao_S=S
+        )
+
+    def transformed(self, matrix: np.array) -> np.array:
+        return inv(self.eigvecs) @ inv(self.ao_S) @ matrix @ self.eigvecs
 
     def time_evolving(self, f: Callable) -> Callable:
         coeffs = [overlap(f, state) for state in self.states]

@@ -1,8 +1,7 @@
 from abc import abstractmethod
-
-import attr
 from typing import Callable
 
+import attr
 import numpy as np
 from scipy import integrate
 

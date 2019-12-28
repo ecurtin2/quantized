@@ -1,15 +1,15 @@
 from math import isclose
 
+import numpy as np
 import pytest
 from hypothesis import given
 from hypothesis.strategies import integers
 from pytest import raises
 
-from transit_chem.basis import HarmonicOscillator
+from transit_chem.basis import EigenBasis, HarmonicOscillator
+from transit_chem.config import (FLOAT_TOL, HARMONIC_OSCILLATOR_MAX_N,
+                                 SMALL_NUMBER)
 from transit_chem.operators import overlap
-from transit_chem.config import FLOAT_TOL, HARMONIC_OSCILLATOR_MAX_N, SMALL_NUMBER
-
-
 from utils import reasonable_floats, reasonable_pos_floats
 
 
@@ -60,3 +60,20 @@ def test_total_energy_integral_of_harmonic_oscillator():
         pe = overlap(ho0, v)
 
         assert isclose(pe + ke, ho0.energy, abs_tol=SMALL_NUMBER)
+
+
+def test_eigen_basis_on_diagonals():
+    H = np.array([[1.0, 0.0], [0.0, 2.0]])
+    S = np.eye(2)
+
+    basis = [lambda x: 2 for _ in range(2)]
+    eigb = EigenBasis.from_basis(basis, H, S)
+
+    expected_vecs = np.array([[1.0, 0.0], [0.0, 1.0]])
+    expected_energies = [1.0, 2.0]
+
+    assert np.allclose(expected_vecs, eigb.eigvecs, atol=SMALL_NUMBER)
+    assert all(
+        isclose(e1, e2, abs_tol=SMALL_NUMBER)
+        for e1, e2 in zip(expected_energies, eigb.energies)
+    )
