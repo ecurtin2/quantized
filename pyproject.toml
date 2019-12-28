@@ -33,3 +33,8 @@ sphinx-autodoc-typehints = "^1.9"
 sphinx_bootstrap_theme = "^0.7.1"
 jupyter = "^1.0"
 jupyterlab = "^1.2"
+
+
+[tool.black]
+line-length = 100
+target-version = ['py37']

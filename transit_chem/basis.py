@@ -155,15 +155,9 @@ def pz_orbital_factory(x0, y0, z0, alpha):
 
 @attr.s(frozen=True)
 class HarmonicPotential:
-    center: float = attr.ib(
-        validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)]
-    )
-    mass: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
-    omega: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
+    center: float = attr.ib(validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)])
+    mass: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
+    omega: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
 
     def __call__(self, x: float) -> float:
         return 0.5 * self.mass * (self.omega ** 2) * ((x - self.center) ** 2)
@@ -200,15 +194,9 @@ class HarmonicOscillator:
     """
 
     n: int = attr.ib(validator=[Range(0, config.HARMONIC_OSCILLATOR_MAX_N)])
-    center: float = attr.ib(
-        validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)]
-    )
-    mass: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
-    omega: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
+    center: float = attr.ib(validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)])
+    mass: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
+    omega: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
 
     @staticmethod
     def from_parabola(p: Parabola, n: int, mass: float = 1.0) -> HarmonicOscillator:
@@ -266,7 +254,7 @@ class HarmonicOscillator:
 
         """
         p = Parabola.from_points(point1, point2, point3)
-        return HarmonicOscillator.from_parabola(p)
+        return HarmonicOscillator.from_parabola(p, n=n, mass=mass)
 
     def __kinetic__(self):
         """Return kinetic energy operator applied on this.
@@ -286,11 +274,7 @@ class HarmonicOscillator:
         """
 
         def k(x):
-            first = (
-                np.sqrt(self.n + 1)
-                * np.sqrt(self.n + 2)
-                * attr.evolve(self, n=self.n + 2)(x)
-            )
+            first = np.sqrt(self.n + 1) * np.sqrt(self.n + 2) * attr.evolve(self, n=self.n + 2)(x)
 
             if self.n == 0:
                 # Lowering operator on n=0
@@ -306,11 +290,7 @@ class HarmonicOscillator:
                 # numpy array or float.
                 last = 0.0 * x
             else:
-                last = (
-                    np.sqrt(self.n)
-                    * np.sqrt(self.n - 1)
-                    * attr.evolve(self, n=self.n - 2)(x)
-                )
+                last = np.sqrt(self.n) * np.sqrt(self.n - 1) * attr.evolve(self, n=self.n - 2)(x)
 
             return -self.mass * self.omega * (first - inner + last) / 4.0
 
@@ -341,9 +321,7 @@ class HarmonicOscillator:
         return self.N * np.exp(-(y ** 2) / 2.0) * self._hermite(y)
 
 
-def harmonic_basis_from_parabola(
-    p: Parabola, cutoff_energy: float
-) -> List[HarmonicOscillator]:
+def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[HarmonicOscillator]:
     hos = (HarmonicOscillator.from_parabola(p, n=i) for i in count())
     return list(takewhile(lambda ho: ho.energy <= cutoff_energy, hos))
 
@@ -364,9 +342,7 @@ class EigenBasis:
         eigvecs = eigvecs[:, idx]
 
         states = [LinearComb(c, basis) for c in eigvecs.T]
-        return EigenBasis(
-            states=states, energies=list(eigvals), eigvecs=eigvecs, ao_S=S
-        )
+        return EigenBasis(states=states, energies=list(eigvals), eigvecs=eigvecs, ao_S=S)
 
     def transformed(self, matrix: np.array) -> np.array:
         return inv(self.eigvecs) @ inv(self.ao_S) @ matrix @ self.eigvecs

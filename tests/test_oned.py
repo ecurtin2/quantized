@@ -3,6 +3,7 @@ from math import isclose
 import numpy as np
 import pytest
 
+from tests.utils import is_diagonal, is_identity, is_hermitian
 from transit_chem import operators as op
 from transit_chem.basis import HarmonicOscillator
 from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
@@ -18,21 +19,6 @@ def ho_eigen_basis():
         HarmonicOscillator(n=2, center=0),
         HarmonicOscillator(n=3, center=0),
     ]
-
-
-def is_diagonal(x: np.ndarray) -> bool:
-    n, m = x.shape
-    off_diags = x[~np.eye(n, m, dtype=bool)]
-    return np.allclose(off_diags, 0)
-
-
-def is_identity(x: np.ndarray) -> bool:
-    n, m = x.shape
-    return np.allclose(np.eye(n, m), x)
-
-
-def is_hermitian(x: np.ndarray) -> bool:
-    return np.allclose(x, np.conj(x).T)
 
 
 def test_ho_eigen_basis_overlap_is_diagonal(ho_eigen_basis):
