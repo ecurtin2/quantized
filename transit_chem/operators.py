@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 import attr
 from typing import Callable
 
@@ -6,7 +8,11 @@ from scipy import integrate
 
 
 class Operator:
-    pass
+    @abstractmethod
+    def __call__(
+        self, first: Callable[[float], float], second: Callable[[float], float]
+    ) -> float:
+        pass
 
 
 def overlap(

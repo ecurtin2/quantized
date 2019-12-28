@@ -1,6 +1,10 @@
 from math import isnan, isinf
+from typing import Any, Callable
 
 import attr
+from attr import Attribute
+
+Validator = Callable[[Any, Attribute,], Any]
 
 
 __all__ = ["Range", "not_inf", "not_nan"]
@@ -33,7 +37,7 @@ class Range:
                 f"Min must be below max got min={self.min}, max={self.max}"
             )
 
-    def __call__(self, instance, attribute, value):
+    def __call__(self, instance: Any, attribute: Attribute, value: Any) -> Any:
         if not self.min <= value <= self.max:
             raise ValidationError(
                 f"Validation error for {instance}. "
@@ -42,14 +46,14 @@ class Range:
             )
 
 
-def not_nan(instance, attribute, value):
+def not_nan(instance: Any, attribute: Attribute, value: float):
     if isnan(value):
         raise ValidationError(
             f"Validation error for {instance}. {attribute.name} is NaN but that's not allowed"
         )
 
 
-def not_inf(instance, attribute, value):
+def not_inf(instance: Any, attribute: Attribute, value: float):
     if isinf(value):
         raise ValidationError(
             f"Validation error for {instance}. {attribute.name} is Infinite but that's not allowed"
