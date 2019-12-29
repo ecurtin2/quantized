@@ -2,6 +2,7 @@ from itertools import count
 from typing import Iterable, Union
 
 import numpy as np
+from loguru import logger
 
 
 def hopping_matrix(s1, s2, s3):
@@ -90,7 +91,7 @@ def accumulate(iterable, func, *, initial=None):
         yield total
 
 
-def get_p_not(acceptor: int, hopping_matrix: callable, p0: np.ndarray, delta_t):
+def p_not_generator(acceptor: int, hopping_matrix: callable, p0: np.ndarray, delta_t):
     """Determine P_not, the probability than acceptor state has never been occupied.
 
     Parameters
@@ -119,4 +120,3 @@ def get_p_not(acceptor: int, hopping_matrix: callable, p0: np.ndarray, delta_t):
     #  Taking [a, b, c, d, ...] -> [(b @ a), (c @ b @ a), (d @ c @ b @ a), ...]
     a_prod = accumulate(A_tilde, lambda a, b: b @ a, initial=p0_tilde)
     pnot = map(np.sum, a_prod)
-    return pnot

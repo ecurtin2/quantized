@@ -13,7 +13,7 @@ from transit_chem.basis import (
     TimeEvolvingState,
     harmonic_basis_from_parabola,
 )
-from transit_chem.hopping_matrix import get_p_not, hopping_matrix
+from transit_chem.hopping_matrix import hopping_matrix, p_not_array, p_not_generator
 from transit_chem.operators import Hamiltonian, overlap
 from transit_chem.plotting import plot_occupancies_over_time
 from transit_chem.potentials import TripleWell
@@ -40,13 +40,13 @@ def main():
         + harmonic_basis_from_parabola(V.well3, cutoff_energy=cutoff_energy)
     )
 
-    logger.info("Calculating the Hamiltonian...")
+    logger.info("Calculating the Hamiltonian")
     H = pairwise_array_from_func(basis, Hamiltonian(V))
 
-    logger.info("Calculating the overlap matrix...")
+    logger.info("Calculating the overlap matrix")
     S = pairwise_array_from_func(basis, overlap)
 
-    logger.info("Calculating the eigen basis...")
+    logger.info("Calculating the eigen basis")
     eig_basis = EigenBasis.from_basis(basis, H, S)
 
     logger.info("Time evolving the initial state")
@@ -65,11 +65,29 @@ def main():
     At = hopping_matrix(s1t, s2t, s3t)
 
     delta_t = 1e-2
-    p_not = get_p_not(
-        acceptor=2, hopping_matrix=At, p0=np.array([s1t(0), s2t(0), s3t(0)]), delta_t=delta_t
+    p0 = np.array([s1t(0), s2t(0), s3t(0)])
+    p_not = p_not_generator(acceptor=2, hopping_matrix=At, p0=p0, delta_t=delta_t)
+
+    from itertools import count
+    from tqdm import tqdm
+
+    logger.info("Starting p_not generator computation")
+    val = None
+    n_iters = None
+    tau = 0.9
+    for val, n_iters in tqdm(takewhile(lambda x: x[0] >= tau, zip(p_not, count()))):
+        pass
+    val = next(p_not)
+    n_iters += 1
+    logger.info(
+        f"P_not ({val}) reached tau ({tau}) after {n_iters} iterations. t = {n_iters * delta_t}"
     )
 
-    print(list(takewhile(lambda x: x > 0.9, p_not)))
+    logger.info("Starting array p_not calculation")
+
+    p_not_ary = p_not_array(acceptor=2, hopping_matrix=At, p0=p0, delta_t=delta_t, n=1300)
+    idx_tau = np.argmin(np.abs(p_not_ary - tau))
+    logger.info(f"Array index of min {idx_tau}")
 
     times = np.linspace(0, 10, 10)
     plot_occupancies_over_time(times, s1t, s2t, s3t, save_to=Path() / "occupancies_over_time.png")
