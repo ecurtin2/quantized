@@ -12,7 +12,8 @@ from scipy import special
 from scipy.linalg import eigh
 
 from transit_chem import config
-from transit_chem.operators import Operator, overlap
+from transit_chem.operators import overlap
+from transit_chem.potentials import Harmonic
 from transit_chem.utils import LinearComb, Parabola, cache, pairwise_array_from_func
 from transit_chem.validation import Range
 
@@ -154,16 +155,6 @@ def pz_orbital_factory(x0, y0, z0, alpha):
 
 
 @attr.s(frozen=True)
-class HarmonicPotential:
-    center: float = attr.ib(validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)])
-    mass: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
-    omega: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
-
-    def __call__(self, x: float) -> float:
-        return 0.5 * self.mass * (self.omega ** 2) * ((x - self.center) ** 2)
-
-
-@attr.s(frozen=True)
 class HarmonicOscillator:
     """A 1D quantum harmonic oscillator wave function.
 
@@ -302,7 +293,7 @@ class HarmonicOscillator:
 
     @property
     def potential(self):
-        return HarmonicPotential(center=self.center, mass=self.mass, omega=self.omega)
+        return Harmonic(center=self.center, mass=self.mass, omega=self.omega)
 
     @property
     def N(self):
@@ -376,7 +367,7 @@ class TimeEvolvingState:
             ]
         )
 
-    def observable(self, operator: Operator):
+    def observable(self, operator: Callable):
         e = self.eigen_basis.energies
         N = len(self.eigen_basis)
         c = self.expansion_coeffs

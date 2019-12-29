@@ -6,7 +6,7 @@ import pytest
 from transit_chem import operators as op
 from transit_chem.basis import HarmonicOscillator
 from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
-from transit_chem.oneD import TripleWellPotential
+from transit_chem.potentials import TripleWell
 from transit_chem.utils import pairwise_array_from_func
 from utils import is_diagonal, is_hermitian, is_identity
 
@@ -62,7 +62,7 @@ def test_triple_well():
     bd = 1
     w3w = 1.5
     w3d = 0.5
-    v = TripleWellPotential.from_params(
+    v = TripleWell.from_params(
         well1_depth=w1d,
         well1_halfwidth=w1h,
         bridge_length=bl,
@@ -84,7 +84,7 @@ def test_triple_well():
 
 def test_triple_well_runs_on_numpy_array():
     x = np.linspace(-10, 10, 100)
-    triple_well = TripleWellPotential(
+    triple_well = TripleWell(
         center1=(0, 0),
         center2=(1, 0.2),
         center3=(2, 0.1),

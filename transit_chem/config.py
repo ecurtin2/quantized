@@ -7,6 +7,5 @@ LARGE_NUMBER = float(getenv("TRANSIT_LARGE_NUMBER", 1000))
 FLOAT_TOL = float(getenv("TRANSIT_FLOAT_TOL", 1e-6))
 ENABLE_PROGRESSBAR = getenv("TRANSIT_ENABLE_PROGRESSBAR", "False").lower() == "true"
 
-
-JOBLIB_CACHE_DIR = getenv("TRANSIT_CACHE_DIR", str(Path.home() / ".transit_chem_cache"))
+JOBLIB_CACHE_DIR = getenv("TRANSIT_CACHE_DIR")
 JOBLIB_VERBOSITY = getenv("TRANSIT_JOBLIB_VERBOSITY", 0)

@@ -6,6 +6,7 @@ import numpy as np
 from scipy import integrate
 
 
+# TODO: get the type hints to work for Operator throughout codebase
 class Operator:
     @abstractmethod
     def __call__(self, first: Callable[[float], float], second: Callable[[float], float]) -> float:

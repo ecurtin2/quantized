@@ -6,7 +6,8 @@ from hypothesis import given
 from hypothesis.strategies import integers
 from pytest import raises
 
-from transit_chem.basis import EigenBasis, HarmonicOscillator, HarmonicPotential, TimeEvolvingState
+from transit_chem import Harmonic
+from transit_chem.basis import EigenBasis, HarmonicOscillator, TimeEvolvingState
 from transit_chem.config import FLOAT_TOL, HARMONIC_OSCILLATOR_MAX_N, SMALL_NUMBER
 from transit_chem.operators import Hamiltonian, overlap
 from transit_chem.utils import pairwise_array_from_func
@@ -110,7 +111,7 @@ def test_eigen_basis_non_orthogonal():
     ]
 
     S = pairwise_array_from_func(basis, overlap)
-    H = pairwise_array_from_func(basis, Hamiltonian(HarmonicPotential(center=0.0)))
+    H = pairwise_array_from_func(basis, Hamiltonian(Harmonic(center=0.0)))
     eigb = EigenBasis.from_basis(basis, H, S)
 
     # check the first 3 energy levels, we won't have converged
@@ -176,7 +177,7 @@ def test_eigenbasis_transformation_non_orthogonal():
     ]
 
     S = pairwise_array_from_func(basis, overlap)
-    H = pairwise_array_from_func(basis, Hamiltonian(HarmonicPotential(center=0.0)))
+    H = pairwise_array_from_func(basis, Hamiltonian(Harmonic(center=0.0)))
     eigb = EigenBasis.from_basis(basis, H, S)
     xform_H = eigb.transformed(H)
 
