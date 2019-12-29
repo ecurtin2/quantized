@@ -3,11 +3,12 @@ from math import isclose
 import numpy as np
 import pytest
 
+from transit_chem import operators as op
 from transit_chem.basis import HarmonicOscillator
 from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
+from transit_chem.potentials import TripleWell
 from transit_chem.utils import pairwise_array_from_func
-from transit_chem.oneD import TripleWellPotential
-from transit_chem import operators as op
+from utils import is_diagonal, is_hermitian, is_identity
 
 
 @pytest.fixture
@@ -18,21 +19,6 @@ def ho_eigen_basis():
         HarmonicOscillator(n=2, center=0),
         HarmonicOscillator(n=3, center=0),
     ]
-
-
-def is_diagonal(x: np.ndarray) -> bool:
-    n, m = x.shape
-    off_diags = x[~np.eye(n, m, dtype=bool)]
-    return np.allclose(off_diags, 0)
-
-
-def is_identity(x: np.ndarray) -> bool:
-    n, m = x.shape
-    return np.allclose(np.eye(n, m), x)
-
-
-def is_hermitian(x: np.ndarray) -> bool:
-    return np.allclose(x, np.conj(x).T)
 
 
 def test_ho_eigen_basis_overlap_is_diagonal(ho_eigen_basis):
@@ -76,7 +62,7 @@ def test_triple_well():
     bd = 1
     w3w = 1.5
     w3d = 0.5
-    v = TripleWellPotential.from_params(
+    v = TripleWell.from_params(
         well1_depth=w1d,
         well1_halfwidth=w1h,
         bridge_length=bl,
@@ -98,7 +84,7 @@ def test_triple_well():
 
 def test_triple_well_runs_on_numpy_array():
     x = np.linspace(-10, 10, 100)
-    triple_well = TripleWellPotential(
+    triple_well = TripleWell(
         center1=(0, 0),
         center2=(1, 0.2),
         center3=(2, 0.1),

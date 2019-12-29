@@ -6,9 +6,7 @@ from . import transittimeanalyzer, utils
 
 
 class ThreeD(transittimeanalyzer.TransitTime):
-    def __init__(
-        self, nregions, boundaries, molecule, basis: Basis, id: str = "unlabeled"
-    ):
+    def __init__(self, nregions, boundaries, molecule, basis: Basis, id: str = "unlabeled"):
         """
         :param boundaries: A list of the x coordinates of planes dividing the regions.
         :type boundaries: iterable
@@ -44,9 +42,7 @@ class ThreeD(transittimeanalyzer.TransitTime):
         for i in range(self.Nbasis):
             for j in range(self.Nbasis):
                 if i != j:
-                    self.H[i, j] = (
-                        1.75 * (self.H[i, i] + self.H[j, j]) * self.S[i, j] / 2.0
-                    )
+                    self.H[i, j] = 1.75 * (self.H[i, i] + self.H[j, j]) * self.S[i, j] / 2.0
 
     def get_S(self):
         """Create the overlap matrix"""

@@ -1,6 +1,6 @@
 from __future__ import annotations
-import attr
 
+import attr
 import numpy as np
 
 from transit_chem.elements import Element

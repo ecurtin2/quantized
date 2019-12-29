@@ -1,19 +1,21 @@
 from __future__ import annotations
-from itertools import count, takewhile
+
 import math
-from typing import Callable, List, Tuple
+from itertools import count, takewhile
+from typing import Callable, List, Tuple, Union
 
 import attr
 import numba
 import numpy as np
+from numpy.linalg import inv
 from scipy import special
 from scipy.linalg import eigh
 
 from transit_chem import config
 from transit_chem.operators import overlap
-from transit_chem.utils import LinearComb, Parabola
+from transit_chem.potentials import Harmonic
+from transit_chem.utils import LinearComb, Parabola, cache, pairwise_array_from_func
 from transit_chem.validation import Range
-
 
 ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
 
@@ -112,10 +114,10 @@ def overlap_factory(f1, f2):
     """Generate a jitted function of f1(x, y, z) * f2(x, y, z). Only works on f1, f2 that are numba jitted."""
 
     @numba.jit("float64(float64, float64, float64)", nopython=True)
-    def overlap(x, y, z):
+    def overlap_function(x, y, z):
         return f1(x, y, z) * f2(x, y, z)
 
-    return overlap
+    return overlap_function
 
 
 def pz_gaussian_orbital_factory(x0, y0, z0, alpha):
@@ -153,22 +155,6 @@ def pz_orbital_factory(x0, y0, z0, alpha):
 
 
 @attr.s(frozen=True)
-class HarmonicPotential:
-    center: float = attr.ib(
-        validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)]
-    )
-    mass: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
-    omega: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
-
-    def __call__(self, x: float) -> float:
-        return 0.5 * self.mass * (self.omega ** 2) * ((x - self.center) ** 2)
-
-
-@attr.s(frozen=True)
 class HarmonicOscillator:
     """A 1D quantum harmonic oscillator wave function.
 
@@ -199,15 +185,9 @@ class HarmonicOscillator:
     """
 
     n: int = attr.ib(validator=[Range(0, config.HARMONIC_OSCILLATOR_MAX_N)])
-    center: float = attr.ib(
-        validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)]
-    )
-    mass: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
-    omega: float = attr.ib(
-        default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER)
-    )
+    center: float = attr.ib(validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)])
+    mass: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
+    omega: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
 
     @staticmethod
     def from_parabola(p: Parabola, n: int, mass: float = 1.0) -> HarmonicOscillator:
@@ -265,7 +245,7 @@ class HarmonicOscillator:
 
         """
         p = Parabola.from_points(point1, point2, point3)
-        return HarmonicOscillator.from_parabola(p)
+        return HarmonicOscillator.from_parabola(p, n=n, mass=mass)
 
     def __kinetic__(self):
         """Return kinetic energy operator applied on this.
@@ -285,11 +265,7 @@ class HarmonicOscillator:
         """
 
         def k(x):
-            first = (
-                np.sqrt(self.n + 1)
-                * np.sqrt(self.n + 2)
-                * attr.evolve(self, n=self.n + 2)(x)
-            )
+            first = np.sqrt(self.n + 1) * np.sqrt(self.n + 2) * attr.evolve(self, n=self.n + 2)(x)
 
             if self.n == 0:
                 # Lowering operator on n=0
@@ -305,11 +281,7 @@ class HarmonicOscillator:
                 # numpy array or float.
                 last = 0.0 * x
             else:
-                last = (
-                    np.sqrt(self.n)
-                    * np.sqrt(self.n - 1)
-                    * attr.evolve(self, n=self.n - 2)(x)
-                )
+                last = np.sqrt(self.n) * np.sqrt(self.n - 1) * attr.evolve(self, n=self.n - 2)(x)
 
             return -self.mass * self.omega * (first - inner + last) / 4.0
 
@@ -321,7 +293,7 @@ class HarmonicOscillator:
 
     @property
     def potential(self):
-        return HarmonicPotential(center=self.center, mass=self.mass, omega=self.omega)
+        return Harmonic(center=self.center, mass=self.mass, omega=self.omega)
 
     @property
     def N(self):
@@ -340,17 +312,22 @@ class HarmonicOscillator:
         return self.N * np.exp(-(y ** 2) / 2.0) * self._hermite(y)
 
 
-def harmonic_basis_from_parabola(
-    p: Parabola, cutoff_energy: float
-) -> List[HarmonicOscillator]:
+def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[HarmonicOscillator]:
     hos = (HarmonicOscillator.from_parabola(p, n=i) for i in count())
     return list(takewhile(lambda ho: ho.energy <= cutoff_energy, hos))
 
 
 @attr.s(frozen=True)
 class EigenBasis:
+    # TODO: validate shapes, properties
     states: List[Callable] = attr.ib()
     energies: List[float] = attr.ib()
+    ao_S: np.array = attr.ib()
+    eigvecs: np.array = attr.ib()
+    ao_basis: List[Callable] = attr.ib()
+
+    def __len__(self):
+        return len(self.states)
 
     @staticmethod
     def from_basis(basis: List[Callable], H: np.array, S: np.array) -> EigenBasis:
@@ -361,17 +338,49 @@ class EigenBasis:
         eigvecs = eigvecs[:, idx]
 
         states = [LinearComb(c, basis) for c in eigvecs.T]
-        return EigenBasis(states=states, energies=list(eigvals))
+        return EigenBasis(
+            states=states, energies=list(eigvals), eigvecs=eigvecs, ao_S=S, ao_basis=basis
+        )
 
-    def time_evolving(self, f: Callable) -> Callable:
-        coeffs = [overlap(f, state) for state in self.states]
+    def transformed(self, matrix: np.array) -> np.array:
+        return inv(self.eigvecs) @ inv(self.ao_S) @ matrix @ self.eigvecs
 
-        def time_evolved(x, t):
-            return sum(
-                [
-                    c * np.exp(-1j * e * t) * state(x)
-                    for state, e, c in zip(self.states, self.energies, coeffs)
-                ]
+
+@cache
+def get_expansion_coeffs(state: Callable, basis: List[Callable]) -> List[float]:
+    return [overlap(state, basis_func) for basis_func in basis]
+
+
+class TimeEvolvingState:
+    def __init__(self, initial_state: Callable, eigen_basis: EigenBasis):
+        self.initial_state = initial_state
+        self.eigen_basis = eigen_basis
+        self.expansion_coeffs = get_expansion_coeffs(initial_state, eigen_basis.states)
+
+    def __call__(self, x: Union[float, np.ndarray], t: float) -> float:
+        return sum(
+            [
+                c * np.exp(-1j * e * t) * state(x)
+                for state, e, c in zip(
+                    self.eigen_basis.states, self.eigen_basis.energies, self.expansion_coeffs
+                )
+            ]
+        )
+
+    def observable(self, operator: Callable):
+        e = self.eigen_basis.energies
+        N = len(self.eigen_basis)
+        c = self.expansion_coeffs
+
+        ao_matrix = pairwise_array_from_func(self.eigen_basis.ao_basis, operator)
+        eigen_basis_matrix = self.eigen_basis.transformed(ao_matrix)
+
+        def f(t: float) -> float:
+            val = sum(
+                c[i] * c[j] * np.exp(1j * (e[j] - e[i]) * t) * eigen_basis_matrix[i, j]
+                for i in range(N)
+                for j in range(N)
             )
+            return np.real(np.abs(val))
 
-        return time_evolved
+        return f

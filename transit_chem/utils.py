@@ -3,17 +3,27 @@ from __future__ import annotations
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from itertools import combinations_with_replacement, product
 from math import isclose
-from typing import Dict, Callable, Sequence, Tuple, TypeVar
+from typing import Callable, Dict, Sequence, Tuple, TypeVar
 
 import attr
 import numpy as np
+from joblib import Memory
 from tqdm import tqdm
 
-from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER, ENABLE_PROGRESSBAR
+from transit_chem.config import (
+    ENABLE_PROGRESSBAR,
+    JOBLIB_CACHE_DIR,
+    JOBLIB_VERBOSITY,
+    LARGE_NUMBER,
+    SMALL_NUMBER,
+)
 from transit_chem.validation import Range, not_inf, not_nan
 
-__all__ = ["pairwise_array_from_func", "Parabola", "LinearComb"]
+__all__ = ["pairwise_array_from_func", "Parabola", "LinearComb", "cache"]
 
+
+memory = Memory(JOBLIB_CACHE_DIR, verbose=JOBLIB_VERBOSITY)
+cache = memory.cache
 
 T = TypeVar("T")
 
@@ -33,8 +43,9 @@ class LinearComb:
         return LinearComb(c=self.c, f=[f.__kinetic__() for f in self.f])
 
 
+@cache
 def pairwise_array_from_func(
-    items: Sequence[T], func: Callable[[T, T], float], *args, symmetric=False, **kwargs
+    items: Sequence[T], func: Callable[[T, T], float], symmetric=False
 ) -> np.ndarray:
     """Create a pairwise array by applying a function to all pairs of items.
 
@@ -120,9 +131,7 @@ class Parabola:
 
     @staticmethod
     def from_points(
-        point1: Tuple[float, float],
-        point2: Tuple[float, float],
-        point3: Tuple[float, float],
+        point1: Tuple[float, float], point2: Tuple[float, float], point3: Tuple[float, float]
     ) -> Parabola:
         """Create a Parabola passing through 3 points.
 

@@ -1,7 +1,7 @@
 from math import isclose
 
-from hypothesis import given
 import numpy as np
+from hypothesis import given
 
 from transit_chem.config import SMALL_NUMBER
 from transit_chem.utils import Parabola, pairwise_array_from_func

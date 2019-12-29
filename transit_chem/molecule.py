@@ -66,9 +66,7 @@ class Molecule(object):
         r = np.zeros((self.Natoms, self.Natoms))
         for i in range(self.Natoms):
             for j in range(self.Natoms):
-                diffs = np.asarray(self.atoms[i].coords) - np.asarray(
-                    self.atoms[j].coords
-                )
+                diffs = np.asarray(self.atoms[i].coords) - np.asarray(self.atoms[j].coords)
                 r[i, j] = np.sqrt(np.sum(diffs ** 2))
         return r
 
@@ -119,21 +117,14 @@ class Molecule(object):
         after aligning atom1 and atom2 to x axis, rotate the molecule about the x axis such that
         the xy_anchor atom lies in the xy plane.
         """
-        midpoint = [
-            0.5 * (coord2 + coord1)
-            for coord1, coord2 in zip(atom1.coords, atom2.coords)
-        ]
+        midpoint = [0.5 * (coord2 + coord1) for coord1, coord2 in zip(atom1.coords, atom2.coords)]
         self.translate(-midpoint[0], -midpoint[1], -midpoint[2])
 
         #  Rotating atom1 to be in the xz plane
         x, y, z = atom1.coords
         theta = -np.arctan(y / x)
         Rz = np.asarray(
-            [
-                [np.cos(theta), -np.sin(theta), 0],
-                [np.sin(theta), np.cos(theta), 0],
-                [0, 0, 1],
-            ]
+            [[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(theta), 0], [0, 0, 1]]
         )
         for a in self.atoms:
             a.rotate(Rz)
@@ -142,11 +133,7 @@ class Molecule(object):
         x, y, z = atom1.coords
         theta = -np.arctan(z / x)
         Ry = np.asarray(
-            [
-                [np.cos(theta), 0, -np.sin(theta)],
-                [0, 1, 0],
-                [np.sin(theta), 0, np.cos(theta)],
-            ]
+            [[np.cos(theta), 0, -np.sin(theta)], [0, 1, 0], [np.sin(theta), 0, np.cos(theta)]]
         )
         for a in self.atoms:
             a.rotate(Ry)
@@ -156,11 +143,7 @@ class Molecule(object):
             x, y, z = xy_anchor.coords
             theta = -np.arctan(z / y)
             Rx = np.asarray(
-                [
-                    [1, 0, 0],
-                    [0, np.cos(theta), -np.sin(theta)],
-                    [0, np.sin(theta), np.cos(theta)],
-                ]
+                [[1, 0, 0], [0, np.cos(theta), -np.sin(theta)], [0, np.sin(theta), np.cos(theta)]]
             )
             for a in self.atoms:
                 a.rotate(Rx)
