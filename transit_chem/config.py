@@ -1,5 +1,4 @@
 from os import getenv
-from pathlib import Path
 
 HARMONIC_OSCILLATOR_MAX_N = int(getenv("TRANSIT_HARMONIC_OSCILLATOR_MAX_N", 50))
 SMALL_NUMBER = float(getenv("TRANSIT_SMALL_NUMBER", 1e-8))

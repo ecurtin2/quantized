@@ -3,7 +3,7 @@ from typing import Tuple, Union
 import attr
 import numpy as np
 
-import config
+from transit_chem import config
 from transit_chem.utils import Parabola
 from transit_chem.validation import Range
 
