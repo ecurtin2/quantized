@@ -1,6 +1,7 @@
 """Console script for transit_chem."""
 from functools import partial
 from itertools import takewhile
+
 from pathlib import Path
 
 import click
@@ -15,7 +16,7 @@ from transit_chem.basis import (
 )
 from transit_chem.hopping_matrix import hopping_matrix, p_not_generator
 from transit_chem.operators import Hamiltonian, overlap
-from transit_chem.plotting import plot_occupancies_over_time
+from transit_chem.plotting import plot_occupancies_over_time, plot_p_not
 from transit_chem.potentials import TripleWell
 from transit_chem.utils import pairwise_array_from_func
 
@@ -36,7 +37,7 @@ def main():
     cutoff_energy = 4
     basis = (
         harmonic_basis_from_parabola(V.well1, cutoff_energy=cutoff_energy)
-        + harmonic_basis_from_parabola(V.well2, cutoff_energy=cutoff_energy)[:3]
+        + harmonic_basis_from_parabola(V.well2, cutoff_energy=cutoff_energy)
         + harmonic_basis_from_parabola(V.well3, cutoff_energy=cutoff_energy)
     )
 
@@ -72,19 +73,21 @@ def main():
     from tqdm import tqdm
 
     logger.info("Starting p_not generator computation")
-    val = None
-    n_iters = None
-    tau = 0.9
-    for val, n_iters in tqdm(takewhile(lambda x: x[0] >= tau, zip(p_not, count()))):
-        pass
-    val = next(p_not)
-    n_iters += 1
+    tau = 0.1
+
+    time_gen = (delta_t * i for i in count())
+    result = tqdm(takewhile(lambda x: x[0] >= tau, zip(p_not, time_gen)))
+    p_not_list, times = zip(*result)
+
     logger.info(
-        f"P_not ({val}) reached tau ({tau}) after {n_iters} iterations. t = {n_iters * delta_t}"
+        f"P_not ({p_not_list[-1]}) reached tau ({tau}) after {len(p_not_list)} iterations. t = {times[-1]}"
     )
 
-    times = np.linspace(0, 10, 10)
-    plot_occupancies_over_time(times, s1t, s2t, s3t, save_to=Path() / "occupancies_over_time.png")
+    plot_occupancies_over_time(
+        np.array(times), s1t, s2t, s3t, save_to=Path() / "occupancies_over_time.png"
+    )
+
+    plot_p_not(p_not_list, s3t, times, save_to=Path() / "p_not.png")
 
     return 0
 

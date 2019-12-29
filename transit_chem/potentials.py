@@ -8,13 +8,16 @@ from transit_chem.utils import Parabola
 from transit_chem.validation import Range
 
 
-@attr.s()
+@attr.s(frozen=True)
 class TripleWell:
     center1: Tuple[float, float] = attr.ib()
     barrier12: Tuple[float, float] = attr.ib()
     center2: Tuple[float, float] = attr.ib()
     barrier23: Tuple[float, float] = attr.ib()
     center3: Tuple[float, float] = attr.ib()
+    well1: Parabola = attr.ib()
+    well2: Parabola = attr.ib()
+    well3: Parabola = attr.ib()
     """Construct a well potential from the points.
 
     x                                                         x
@@ -48,42 +51,26 @@ class TripleWell:
         assert self.center2[1] < self.barrier23[1]
         assert self.center3[1] < self.barrier23[1]
 
-        def fit_well(center, barrier):
-            center_x, center_y = center
-            barrier_x, barrier_y = barrier
-            # Third point is reflecting barrier about center
-            x = -barrier_x + 2 * center_x
-            y = barrier_y
-            return Parabola.from_points(center, barrier, (x, y))
-
-        self.well1 = fit_well(self.center1, self.barrier12)
-        self.well2 = Parabola.from_points(self.barrier12, self.center2, self.barrier23)
-        self.well3 = fit_well(self.center3, self.barrier23)
-
-        # Pre fetch to avoid repeated lookup
-        self.barrier12_x = self.barrier12[0]
-        self.barrier23_x = self.barrier23[0]
-
     def _call_numpy(self, x: np.ndarray) -> np.ndarray:
         y = np.zeros_like(x)
 
-        mask1 = np.where(x < self.barrier12_x)
+        mask1 = np.where(x < self.barrier12[0])
         y[mask1] = self.well1(x[mask1])
 
-        mask2 = np.where((self.barrier12_x <= x) & (x <= self.barrier23_x))
+        mask2 = np.where((self.barrier12[0] <= x) & (x <= self.barrier23[0]))
         y[mask2] = self.well2(x[mask2])
 
-        mask3 = np.where(x > self.barrier23_x)
+        mask3 = np.where(x > self.barrier23[0])
         y[mask3] = self.well3(x[mask3])
 
         return y
 
     def _call_scalar(self, x: float) -> float:
-        if x < self.barrier12_x:
+        if x < self.barrier12[0]:
             return self.well1(x)
-        elif self.barrier12_x <= x <= self.barrier23_x:
+        elif self.barrier12[0] <= x <= self.barrier23[0]:
             return self.well2(x)
-        elif x > self.barrier23_x:
+        elif x > self.barrier23[0]:
             return self.well3(x)
         else:
             raise ValueError(
@@ -111,7 +98,20 @@ class TripleWell:
         center2 = (barrier1[0] + 0.5 * bridge_length, barrier1[1] - bridge_depth)
         barrier2 = (barrier1[0] + bridge_length, barrier1[1])
         center3 = (barrier2[0] + well3_halfwidth, barrier2[1] - well3_depth)
-        return TripleWell(center1, barrier1, center2, barrier2, center3)
+
+        def fit_well(center, barrier):
+            center_x, center_y = center
+            barrier_x, barrier_y = barrier
+            # Third point is reflecting barrier about center
+            x = -barrier_x + 2 * center_x
+            y = barrier_y
+            return Parabola.from_points(center, barrier, (x, y))
+
+        well1 = fit_well(center1, barrier1)
+        well2 = Parabola.from_points(barrier1, center2, barrier2)
+        well3 = fit_well(center3, barrier2)
+
+        return TripleWell(center1, barrier1, center2, barrier2, center3, well1, well2, well3)
 
 
 @attr.s(frozen=True)

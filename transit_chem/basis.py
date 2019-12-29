@@ -375,12 +375,41 @@ class TimeEvolvingState:
         ao_matrix = pairwise_array_from_func(self.eigen_basis.ao_basis, operator)
         eigen_basis_matrix = self.eigen_basis.transformed(ao_matrix)
 
+        # The following code is equivalent to the definition of f below.
+        # f is written that way to optimize for speed.
+        # On my machine, it was roughly 7x faster
+        #
+        # def f(t: float):
+        #     return sum(
+        #         c[i] * c[j] * np.exp(1j * (e[j] - e[i]) * t) * eigen_basis_matrix[i, j]
+        #         for i in range(N)
+        #         for j in range(N)
+        #     )
+
+        # Precalculate reused terms
+        # P is a real matrix, but we cast it to complex here so that it doesn't
+        # get casted inside the function during the multiplication.
+        P = np.zeros_like(eigen_basis_matrix, dtype=np.complex128)
+        W = np.zeros_like(eigen_basis_matrix, dtype=np.complex128)
+        for i in range(N):
+            for j in range(N):
+                P[i, j] = c[i] * c[j] * eigen_basis_matrix[i, j]
+                W[i, j] = np.exp(1j * (e[j] - e[i]))
+
+        # Via exponentiation rules, exp(W[i, j] * t) = exp(W[i, j]) ** t
+        from numba import jit, float64
+
+        @jit(float64(float64), nopython=True)
         def f(t: float) -> float:
-            val = sum(
-                c[i] * c[j] * np.exp(1j * (e[j] - e[i]) * t) * eigen_basis_matrix[i, j]
-                for i in range(N)
-                for j in range(N)
-            )
-            return np.real(np.abs(val))
+            total = 0.0j
+            for i in range(N):
+                for j in range(N):
+                    total += P[i, j] * W[i, j] ** t
+            return abs(total)
+
+        # Pure numpy implementation
+        # in case numba dependency wants to go away
+        # def f(t: float) -> float:
+        #     return np.abs(np.sum(P * (W ** t)))
 
         return f

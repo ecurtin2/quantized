@@ -97,7 +97,7 @@ def pairwise_array_from_func(
         for i, j in combs:
             fut_res[exc.submit(func, items[i], items[j])] = (i, j)
 
-        with tqdm(total=len(combs), disable=not ENABLE_PROGRESSBAR) as pbar:
+        with tqdm(total=len(combs), disable=not ENABLE_PROGRESSBAR, ncols=100) as pbar:
             for future in as_completed(fut_res.keys()):
                 res = future.result()
                 i, j = fut_res[future]
@@ -110,7 +110,7 @@ def pairwise_array_from_func(
     return result
 
 
-@attr.s
+@attr.s(frozen=True)
 class Parabola:
     a: float = attr.ib(validator=[not_nan, not_inf, Range(-LARGE_NUMBER, LARGE_NUMBER)])
     b: float = attr.ib(validator=[not_nan, not_inf, Range(-LARGE_NUMBER, LARGE_NUMBER)])

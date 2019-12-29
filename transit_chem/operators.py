@@ -1,10 +1,10 @@
+from __future__ import annotations
 from abc import abstractmethod
 from typing import Callable
 
 import attr
 import numpy as np
 from scipy import integrate
-
 
 # TODO: get the type hints to work for Operator throughout codebase
 class Operator:
@@ -69,7 +69,7 @@ def kinetic(first, second) -> float:
     return overlap(first, second.__kinetic__())
 
 
-@attr.s
+@attr.s(frozen=True)
 class Hamiltonian:
     potential: Callable[[float], float] = attr.ib()
 
@@ -77,7 +77,7 @@ class Hamiltonian:
         return Potential(self.potential)(first, second) + kinetic(first, second)
 
 
-@attr.s
+@attr.s(frozen=True)
 class Potential:
     potential: Callable[[float], float] = attr.ib()
 
