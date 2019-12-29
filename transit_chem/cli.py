@@ -13,7 +13,7 @@ from transit_chem.basis import (
     TimeEvolvingState,
     harmonic_basis_from_parabola,
 )
-from transit_chem.hopping_matrix import hopping_matrix, p_not_array, p_not_generator
+from transit_chem.hopping_matrix import hopping_matrix, p_not_generator
 from transit_chem.operators import Hamiltonian, overlap
 from transit_chem.plotting import plot_occupancies_over_time
 from transit_chem.potentials import TripleWell
@@ -82,12 +82,6 @@ def main():
     logger.info(
         f"P_not ({val}) reached tau ({tau}) after {n_iters} iterations. t = {n_iters * delta_t}"
     )
-
-    logger.info("Starting array p_not calculation")
-
-    p_not_ary = p_not_array(acceptor=2, hopping_matrix=At, p0=p0, delta_t=delta_t, n=1300)
-    idx_tau = np.argmin(np.abs(p_not_ary - tau))
-    logger.info(f"Array index of min {idx_tau}")
 
     times = np.linspace(0, 10, 10)
     plot_occupancies_over_time(times, s1t, s2t, s3t, save_to=Path() / "occupancies_over_time.png")
