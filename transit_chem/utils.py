@@ -5,7 +5,6 @@ from itertools import combinations_with_replacement, product
 from math import isclose
 from typing import Callable, Dict, Sequence, Tuple, TypeVar
 
-
 import attr
 import numpy as np
 from joblib import Memory
@@ -14,13 +13,13 @@ from tqdm import tqdm
 from transit_chem.config import (
     ENABLE_PROGRESSBAR,
     JOBLIB_CACHE_DIR,
+    JOBLIB_VERBOSITY,
     LARGE_NUMBER,
     SMALL_NUMBER,
-    JOBLIB_VERBOSITY,
 )
 from transit_chem.validation import Range, not_inf, not_nan
 
-__all__ = ["pairwise_array_from_func", "Parabola", "LinearComb"]
+__all__ = ["pairwise_array_from_func", "Parabola", "LinearComb", "cache"]
 
 
 memory = Memory(JOBLIB_CACHE_DIR, verbose=JOBLIB_VERBOSITY)

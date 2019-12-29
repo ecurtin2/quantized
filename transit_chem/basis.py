@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from itertools import count, takewhile
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Union
 
 import attr
 import numba
@@ -113,10 +113,10 @@ def overlap_factory(f1, f2):
     """Generate a jitted function of f1(x, y, z) * f2(x, y, z). Only works on f1, f2 that are numba jitted."""
 
     @numba.jit("float64(float64, float64, float64)", nopython=True)
-    def overlap(x, y, z):
+    def overlap_function(x, y, z):
         return f1(x, y, z) * f2(x, y, z)
 
-    return overlap
+    return overlap_function
 
 
 def pz_gaussian_orbital_factory(x0, y0, z0, alpha):
@@ -362,11 +362,11 @@ def get_expansion_coeffs(state: Callable, basis: List[Callable]) -> List[float]:
 
 class TimeEvolvingState:
     def __init__(self, initial_state: Callable, eigen_basis: EigenBasis):
-        self.inital_state = initial_state
+        self.initial_state = initial_state
         self.eigen_basis = eigen_basis
         self.expansion_coeffs = get_expansion_coeffs(initial_state, eigen_basis.states)
 
-    def __call__(self, x: float, t: float) -> float:
+    def __call__(self, x: Union[float, np.ndarray], t: float) -> float:
         return sum(
             [
                 c * np.exp(-1j * e * t) * state(x)

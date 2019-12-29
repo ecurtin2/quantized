@@ -2,6 +2,7 @@ from functools import partial
 
 import numpy as np
 from loguru import logger
+from matplotlib import pyplot as plt
 
 from transit_chem.basis import (
     EigenBasis,
@@ -54,8 +55,6 @@ s1t = time_evolving.observable(overlap_well1)
 s2t = time_evolving.observable(overlap_well2)
 s3t = time_evolving.observable(overlap_well3)
 
-
-from matplotlib import pyplot as plt
 
 t = np.linspace(0, 1000, 10000)
 

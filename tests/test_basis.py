@@ -6,12 +6,11 @@ from hypothesis import given
 from hypothesis.strategies import integers
 from pytest import raises
 
-from transit_chem.basis import EigenBasis, HarmonicOscillator, HarmonicPotential
+from transit_chem.basis import EigenBasis, HarmonicOscillator, HarmonicPotential, TimeEvolvingState
 from transit_chem.config import FLOAT_TOL, HARMONIC_OSCILLATOR_MAX_N, SMALL_NUMBER
-from transit_chem.operators import overlap, Hamiltonian
+from transit_chem.operators import Hamiltonian, overlap
 from transit_chem.utils import pairwise_array_from_func
-
-from tests.utils import reasonable_floats, reasonable_pos_floats, is_diagonal
+from utils import is_diagonal, reasonable_floats, reasonable_pos_floats
 
 
 @given(
@@ -81,7 +80,7 @@ def test_eigen_basis_with_offdiagonal():
 
     H = np.array([[e, d], [d, e]])
     S = np.eye(2)
-    basis = [lambda x: 2 for _ in range(2)]
+    basis = [lambda _: 2 for _ in range(2)]
     eigb = EigenBasis.from_basis(basis, H, S)
 
     # The eigenvectors for the symmetric problem
@@ -101,11 +100,9 @@ def test_eigen_basis_with_offdiagonal():
 
 def test_eigen_basis_non_orthogonal():
     """
-    
-    This is the best thing I could think of to test this. 
-    Given a set of harmonic oscillators that aren't centered, 
+    This is the best thing I could think of to test this.
+    Given a set of harmonic oscillators that aren't centered,
     see if we can reproduce the solution to a QHO
-
     """
 
     basis = [HarmonicOscillator(n=i, center=0.25) for i in range(2)] + [
@@ -130,20 +127,25 @@ def test_time_evolution_of_stationary_state():
     # HO is the eigenbasis
     basis = [HarmonicOscillator(n=1, center=0.0), HarmonicOscillator(n=0, center=0.0)]
     eigbasis = EigenBasis(
-        states=basis, energies=[b.energy for b in basis], ao_S=np.eye(2), eigvecs=np.eye(2)
+        states=basis,
+        energies=[b.energy for b in basis],
+        ao_S=np.eye(2),
+        eigvecs=np.eye(2),
+        ao_basis=basis,
     )
 
     initial_state = basis[0]
-    time_evolve_initial = eigbasis.time_evolving(initial_state)
+
+    time_evolving = TimeEvolvingState(initial_state, eigbasis)
 
     x = np.linspace(-4, 4, 500)
 
     initial_density = np.conj(initial_state(x)) * initial_state(x)
-    d1 = np.conj(time_evolve_initial(x, t=0)) * time_evolve_initial(x, t=0)
-    d2 = np.conj(time_evolve_initial(x, t=0.3)) * time_evolve_initial(x, t=0.3)
+    d1 = np.conj(time_evolving(x, t=0)) * time_evolving(x, t=0)
+    d2 = np.conj(time_evolving(x, t=0.3)) * time_evolving(x, t=0.3)
 
     # They have different complex components
-    assert not np.allclose(time_evolve_initial(x, t=0.0), time_evolve_initial(x, t=0.3))
+    assert not np.allclose(time_evolving(x, t=0.0), time_evolving(x, t=0.3))
 
     # But the density is constant over time
     assert np.allclose(initial_density, d1, atol=SMALL_NUMBER)
