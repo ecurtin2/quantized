@@ -1,10 +1,12 @@
 from __future__ import annotations
+
 from abc import abstractmethod
 from typing import Callable
 
 import attr
 import numpy as np
 from scipy import integrate
+
 
 # TODO: get the type hints to work for Operator throughout codebase
 class Operator:

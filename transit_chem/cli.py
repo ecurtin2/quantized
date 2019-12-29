@@ -1,7 +1,6 @@
 """Console script for transit_chem."""
 from functools import partial
 from itertools import takewhile
-
 from pathlib import Path
 
 import click
