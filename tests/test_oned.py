@@ -83,12 +83,19 @@ def test_triple_well():
 
 
 def test_triple_well_runs_on_numpy_array():
+    w1d = 1
+    w1h = 2
+    bl = 5
+    bd = 1
+    w3w = 1.5
+    w3d = 0.5
     x = np.linspace(-10, 10, 100)
-    triple_well = TripleWell(
-        center1=(0, 0),
-        center2=(1, 0.2),
-        center3=(2, 0.1),
-        barrier12=(0.5, 0.4),
-        barrier23=(1.4, 0.3),
+    v = TripleWell.from_params(
+        well1_depth=w1d,
+        well1_halfwidth=w1h,
+        bridge_length=bl,
+        bridge_depth=bd,
+        well3_halfwidth=w3w,
+        well3_depth=w3d,
     )
-    triple_well(x)
+    v(x)
