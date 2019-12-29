@@ -8,9 +8,7 @@ from scipy import integrate
 
 class Operator:
     @abstractmethod
-    def __call__(
-        self, first: Callable[[float], float], second: Callable[[float], float]
-    ) -> float:
+    def __call__(self, first: Callable[[float], float], second: Callable[[float], float]) -> float:
         pass
 
 

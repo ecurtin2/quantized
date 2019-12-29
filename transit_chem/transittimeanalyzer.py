@@ -67,10 +67,7 @@ class TransitTime(ABC):
         self.calc_time_dependent()
 
     @log_block(
-        "Calculate all the time independent quantities",
-        mod_log,
-        logging.INFO,
-        TimeLevel.OFTEN,
+        "Calculate all the time independent quantities", mod_log, logging.INFO, TimeLevel.OFTEN
     )
     def calc_time_independent(self):
         """Calculate all the time independent quantities.
@@ -82,10 +79,7 @@ class TransitTime(ABC):
         self.calc_partial_overlap()
 
     @log_block(
-        "Calculate all the time dependent quantities",
-        mod_log,
-        logging.INFO,
-        TimeLevel.OFTEN,
+        "Calculate all the time dependent quantities", mod_log, logging.INFO, TimeLevel.OFTEN
     )
     def calc_time_dependent(
         self, guess_t_max=500, p_not_threshold=0.05, stepsize=1.0, maxsteps=10 ** 4
@@ -138,10 +132,7 @@ class TransitTime(ABC):
         raise NotImplementedError
 
     @log_block(
-        "Diagonalize the Hamiltonian",
-        mod_log,
-        level=logging.INFO,
-        time_level=TimeLevel.RARELY,
+        "Diagonalize the Hamiltonian", mod_log, level=logging.INFO, time_level=TimeLevel.RARELY
     )
     def diagonalize_H(self):
         """Calculate H, S, V, T and diagonalize. Form eigenbasis.
@@ -186,13 +177,9 @@ class TransitTime(ABC):
         c_conjugate = []
         c = []
         for i in range(self.Nbasis):
-            c.append(
-                self.state_mo_coefficients[i]
-                * np.exp(-1j * self.eigvals[i] * self.times)
-            )
+            c.append(self.state_mo_coefficients[i] * np.exp(-1j * self.eigvals[i] * self.times))
             c_conjugate.append(
-                self.state_mo_coefficients[i]
-                * np.exp(1j * self.eigvals[i] * self.times)
+                self.state_mo_coefficients[i] * np.exp(1j * self.eigvals[i] * self.times)
             )
 
         occ_prob = np.zeros((self.Nregions, len(self.times)), dtype=np.complex128)
@@ -208,14 +195,10 @@ class TransitTime(ABC):
     @log_block("Determine the change/transition matrix", mod_log, level=logging.INFO)
     def get_change_mat(self):
         """calculate the change matrix over time, currently supports 3 regions"""
-        A = np.zeros(
-            (len(self.times) - 1, self.Nregions, self.Nregions)
-        )  # change matrix
+        A = np.zeros((len(self.times) - 1, self.Nregions, self.Nregions))  # change matrix
         dOccProb = [np.diff(i) for i in self.OccProb]  # change for each region
         sign_of_change = [np.sign(i) for i in dOccProb]
-        two_states_increasing = (
-            sign_of_change[0] * sign_of_change[1] * sign_of_change[2] < 0
-        )
+        two_states_increasing = sign_of_change[0] * sign_of_change[1] * sign_of_change[2] < 0
 
         for t in range(len(self.times) - 1):
             if two_states_increasing[t]:

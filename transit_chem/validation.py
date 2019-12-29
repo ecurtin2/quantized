@@ -4,7 +4,7 @@ from typing import Any, Callable
 import attr
 from attr import Attribute
 
-Validator = Callable[[Any, Attribute,], Any]
+Validator = Callable[[Any, Attribute], Any]
 
 
 __all__ = ["Range", "not_inf", "not_nan"]
@@ -33,9 +33,7 @@ class Range:
     @min.validator
     def check(self, attribute, value):
         if not self.min <= self.max:
-            raise ValidationError(
-                f"Min must be below max got min={self.min}, max={self.max}"
-            )
+            raise ValidationError(f"Min must be below max got min={self.min}, max={self.max}")
 
     def __call__(self, instance: Any, attribute: Attribute, value: Any) -> Any:
         if not self.min <= value <= self.max:

@@ -12,8 +12,8 @@ from scipy import special
 from scipy.linalg import eigh
 
 from transit_chem import config
-from transit_chem.operators import overlap
-from transit_chem.utils import LinearComb, Parabola
+from transit_chem.operators import Operator, overlap
+from transit_chem.utils import LinearComb, Parabola, cache, pairwise_array_from_func
 from transit_chem.validation import Range
 
 ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
@@ -328,10 +328,15 @@ def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[Harm
 
 @attr.s(frozen=True)
 class EigenBasis:
+    # TODO: validate shapes, properties
     states: List[Callable] = attr.ib()
     energies: List[float] = attr.ib()
     ao_S: np.array = attr.ib()
     eigvecs: np.array = attr.ib()
+    ao_basis: List[Callable] = attr.ib()
+
+    def __len__(self):
+        return len(self.states)
 
     @staticmethod
     def from_basis(basis: List[Callable], H: np.array, S: np.array) -> EigenBasis:
@@ -342,20 +347,49 @@ class EigenBasis:
         eigvecs = eigvecs[:, idx]
 
         states = [LinearComb(c, basis) for c in eigvecs.T]
-        return EigenBasis(states=states, energies=list(eigvals), eigvecs=eigvecs, ao_S=S)
+        return EigenBasis(
+            states=states, energies=list(eigvals), eigvecs=eigvecs, ao_S=S, ao_basis=basis
+        )
 
     def transformed(self, matrix: np.array) -> np.array:
         return inv(self.eigvecs) @ inv(self.ao_S) @ matrix @ self.eigvecs
 
-    def time_evolving(self, f: Callable) -> Callable:
-        coeffs = [overlap(f, state) for state in self.states]
 
-        def time_evolved(x, t):
-            return sum(
-                [
-                    c * np.exp(-1j * e * t) * state(x)
-                    for state, e, c in zip(self.states, self.energies, coeffs)
-                ]
+@cache
+def get_expansion_coeffs(state: Callable, basis: List[Callable]) -> List[float]:
+    return [overlap(state, basis_func) for basis_func in basis]
+
+
+class TimeEvolvingState:
+    def __init__(self, initial_state: Callable, eigen_basis: EigenBasis):
+        self.inital_state = initial_state
+        self.eigen_basis = eigen_basis
+        self.expansion_coeffs = get_expansion_coeffs(initial_state, eigen_basis.states)
+
+    def __call__(self, x: float, t: float) -> float:
+        return sum(
+            [
+                c * np.exp(-1j * e * t) * state(x)
+                for state, e, c in zip(
+                    self.eigen_basis.states, self.eigen_basis.energies, self.expansion_coeffs
+                )
+            ]
+        )
+
+    def observable(self, operator: Operator):
+        e = self.eigen_basis.energies
+        N = len(self.eigen_basis)
+        c = self.expansion_coeffs
+
+        ao_matrix = pairwise_array_from_func(self.eigen_basis.ao_basis, operator)
+        eigen_basis_matrix = self.eigen_basis.transformed(ao_matrix)
+
+        def f(t: float) -> float:
+            val = sum(
+                c[i] * c[j] * np.exp(1j * (e[j] - e[i]) * t) * eigen_basis_matrix[i, j]
+                for i in range(N)
+                for j in range(N)
             )
+            return np.real(np.abs(val))
 
-        return time_evolved
+        return f
