@@ -1,32 +1,73 @@
-from itertools import count
-from typing import Iterable, Union
+import attr
+from itertools import count, tee, takewhile
+from math import isclose
+from typing import Iterable, Union, Generator, Tuple, Callable, List, Any
 
 import numpy as np
 
+from transit_chem.time_evolution import TimeEvolvingState
+from transit_chem.operators import Overlap
 
-def hopping_matrix(s1, s2, s3):
-    occ_probs = [s1, s2, s3]
 
-    def f(t: float, delta_t: float) -> np.array:
-        d1 = s1(t) - s1(t - delta_t)
-        d2 = s2(t) - s2(t - delta_t)
-        d3 = s3(t) - s3(t - delta_t)
-        increasing = [d > 0 for d in (d1, d2, d3)]
+from loguru import logger
 
-        d_occ_probs = [d1, d2, d3]
 
-        two_states_increasing = d1 * d2 * d3 < 0
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
-        A = np.zeros((3, 3))
+
+@attr.s(frozen=True)
+class OccupancyProbabilites:
+    s: Tuple = attr.ib(converter=tuple)
+
+    @property
+    def initial(self) -> np.array:
+        return self.__call__(0)
+
+    def __call__(self, t: float) -> np.array:
+        return np.array([s(t) for s in self.s])
+
+    def __getitem__(self, item) -> Callable:
+        return self.s[item]
+
+    def __iter__(self):
+        return iter(self.s)
+
+    @staticmethod
+    def from_1d_state(
+        state: TimeEvolvingState, borders: Tuple[float, ...]
+    ) -> "OccupancyProbabilites":
+
+        bounds = pairwise(borders)
+        overlaps = [Overlap(a, b) for a, b in bounds]
+        return OccupancyProbabilites(
+            tuple(state.observable(ovlp, hermitian=True) for ovlp in overlaps)
+        )
+
+
+@attr.s(frozen=True)
+class HoppingMatrix:
+    occ_probs: OccupancyProbabilites = attr.ib()
+    N: int = 3
+
+    def at_time(self, t: float, delta_t: float) -> np.array:
+        d_occ_probs = self.occ_probs(t) - self.occ_probs(t - delta_t)
+        increasing = d_occ_probs > 0
+        two_states_increasing = np.count_nonzero(increasing) == 2
+
+        A = np.zeros((self.N, self.N))
         if two_states_increasing:
             # If the state is decreasing in probability, the diagonal is
             # determined
             for j in range(3):
                 if not increasing[j]:
-                    A[j, j] = occ_probs[j](t) / occ_probs[j](t - delta_t)
+                    A[j, j] = self.occ_probs[j](t) / self.occ_probs[j](t - delta_t)
                     for k in range(3):
                         if k != j:
-                            A[k, j] = d_occ_probs[k] / occ_probs[j](t)
+                            A[k, j] = d_occ_probs[k] / self.occ_probs[j](t)
 
                 # If the state is increasing, diagonal is 1. Off diagonal
                 # columns = 0
@@ -41,7 +82,7 @@ def hopping_matrix(s1, s2, s3):
                 # If the state is decreasing in probability, the diagonal
                 # is determined
                 if not increasing[j]:
-                    A[j, j] = occ_probs[j](t) / occ_probs[j](t - delta_t)
+                    A[j, j] = self.occ_probs[j](t) / self.occ_probs[j](t - delta_t)
                     for k in range(3):
                         if k != j:
                             A[j, k] = 0
@@ -57,17 +98,14 @@ def hopping_matrix(s1, s2, s3):
 
         return A
 
-    # Wrap f such that it can be called with iterable of times
-    def maybe_array_wrapper(t: Union[float, np.ndarray], delta_t: float):
+    def __call__(self, t: Union[float, np.ndarray], delta_t: float):
         if isinstance(t, Iterable):
-            result = [f(t_, delta_t) for t_ in t]
+            result = [self.at_time(t_, delta_t) for t_ in t]
             if len(result) == 0:
                 raise ValueError("Call to hopping matrix had no elements in the iterable.")
             return np.stack(result)
         else:
-            return f(t, delta_t)
-
-    return maybe_array_wrapper
+            return self.at_time(t, delta_t)
 
 
 def accumulate(iterable, func, *, initial=None):
@@ -90,7 +128,11 @@ def accumulate(iterable, func, *, initial=None):
         yield total
 
 
-def p_not_generator(acceptor: int, hopping_matrix: callable, p0: np.ndarray, delta_t):
+@attr.s(frozen=True)
+class Pnot:
+    acceptor: int = attr.ib()
+    hopping_matrix: HoppingMatrix = attr.ib()
+    delta_t: float = attr.ib()
     """Determine P_not, the probability than acceptor state has never been occupied.
 
     Parameters
@@ -104,19 +146,58 @@ def p_not_generator(acceptor: int, hopping_matrix: callable, p0: np.ndarray, del
 
     """
 
-    if not 0 <= acceptor <= 2:
-        raise ValueError(f"Acceptor value out of range, must be 0, 1 or 2, got {acceptor}")
-    if not p0.shape == (3,):
-        raise ValueError(f"p0 shape must be (3,), fot {p0.shape}")
+    def __iter__(self):
+        times = (self.delta_t * i for i in count())
+        matrices = (self.hopping_matrix(t, self.delta_t) for t in times)
+        A_tilde = (
+            np.delete(np.delete(a, self.acceptor, axis=0), self.acceptor, axis=1) for a in matrices
+        )
+        p0_tilde = np.delete(self.hopping_matrix.occ_probs.initial, self.acceptor)
+        #  Taking [a, nb, c, d, ...] -> [(b @ a), (c @ b @ a), (d @ c @ b @ a), ...]
+        a_prod = accumulate(A_tilde, lambda a, b: b @ a, initial=p0_tilde)
+        pnot = map(np.sum, a_prod)
+        return ((self.delta_t * i, p) for i, p in enumerate(pnot))
 
-    #  Remove the acceptor rows and columns
-    p0_tilde = np.delete(p0, acceptor)
+    @property
+    def acceptor_occ_prob(self) -> Callable:
+        return self.hopping_matrix.occ_probs[self.acceptor]
 
-    times = (delta_t * i for i in count())
-    matrices = (hopping_matrix(t, delta_t) for t in times)
-    A_tilde = (np.delete(np.delete(a, acceptor, axis=0), acceptor, axis=1) for a in matrices)
+    def until_time(self, t: float):
+        return takewhile(lambda x: x[0] < t, self)
 
-    #  Taking [a, b, c, d, ...] -> [(b @ a), (c @ b @ a), (d @ c @ b @ a), ...]
-    a_prod = accumulate(A_tilde, lambda a, b: b @ a, initial=p0_tilde)
-    pnot = map(np.sum, a_prod)
-    return pnot
+    def until_prob(self, p: float):
+        return takewhile(lambda x: x[1] > p, self)
+
+    @staticmethod
+    def converged_with_timestep(
+        a: HoppingMatrix, tau: float, tolerance: float, max_dt: float = 1.0, min_dt: float = 1e-4
+    ) -> Tuple[List[float], List[float], "Pnot"]:
+        if not max_dt > min_dt:
+            raise ValueError(f"Min dt must be below max dt min_dt={min_dt}, max_dt={max_dt}")
+
+        dts = [max_dt]
+        last_dt = dts[-1]
+        while last_dt > min_dt:
+            dts.append(last_dt / 1.61)
+            last_dt = dts[-1]
+
+        logger.info(f"Delta_t set = {dts}")
+
+        last_t = -(10.0 ** 6)
+
+        for dt in dts:
+            logger.info(f"Getting tau for delta_t={dt}")
+            p_not = Pnot(acceptor=2, hopping_matrix=a, delta_t=dt)
+            times, p_not_list = zip(*p_not.until_prob(tau))
+            t = times[-1]
+            logger.info(f"Tau = {t}")
+            if isclose(times[-1], last_t, abs_tol=tolerance):
+                break
+            last_t = t
+        else:
+            raise ValueError(f"Tau={tau} did not converge with timestep to tolerance={tolerance}")
+        logger.info(
+            f"Yes!! tau ({tau}) successfully converged to {t} with difference of {t-last_t}"
+            f", which is within the given tolerance, {tolerance}"
+        )
+        return times, p_not_list, p_not

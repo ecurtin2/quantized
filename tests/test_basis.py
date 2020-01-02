@@ -6,7 +6,8 @@ from hypothesis import given
 from hypothesis.strategies import integers
 from pytest import raises
 
-from transit_chem.basis import EigenBasis, Harmonic, HarmonicOscillator, TimeEvolvingState
+from transit_chem.basis import EigenBasis, Harmonic, HarmonicOscillator
+from transit_chem.time_evolution import TimeEvolvingState
 from transit_chem.config import FLOAT_TOL, HARMONIC_OSCILLATOR_MAX_N, SMALL_NUMBER
 from transit_chem.operators import Hamiltonian, overlap
 from transit_chem.utils import pairwise_array_from_func

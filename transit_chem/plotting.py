@@ -1,28 +1,25 @@
 from pathlib import Path
-from typing import Callable, Iterable, Union
+from typing import List, Iterable, Union, Callable
 
 import numpy as np
 from matplotlib import pyplot as plt
 
+from transit_chem.hopping_matrix import OccupancyProbabilites, HoppingMatrix
+
 
 def plot_occupancies_over_time(
     times: Iterable[float],
-    s1t: Callable,
-    s2t: Callable,
-    s3t: Callable,
+    occ_probs: OccupancyProbabilites,
     save_to: Union[str, Path, None] = None,
 ):
     fig = plt.figure()
     t = np.array(times)
 
-    s1 = np.array([s1t(t) for t in times])
-    s2 = np.array([s2t(t) for t in times])
-    s3 = np.array([s3t(t) for t in times])
+    s_list = [np.array([s(t) for t in times]) for s in occ_probs]
 
-    plt.plot(t, s1, label="Well 1")
-    plt.plot(t, s2, label="Well 2")
-    plt.plot(t, s3, label="Well 3")
-    plt.plot(t, s1 + s2 + s3, "k--", label="Sum")
+    for i, s in enumerate(s_list):
+        plt.plot(t, s, label=f"Well {i+1}")
+    plt.plot(t, sum(s_list), "k--", label="Sum")
     plt.legend()
     if save_to is not None:
         plt.savefig(save_to)
@@ -30,19 +27,35 @@ def plot_occupancies_over_time(
 
 
 def plot_p_not(
-    p_not: Iterable[float],
-    acceptor_occprob: callable,
+    p_not: List[float],
     times: Iterable[float],
+    acceptor_occ_prob: Callable,
     save_to: Union[str, Path, None] = None,
 ):
     fig = plt.figure()
-    t = np.array(list(times))
-    p = np.array(list(p_not))
 
-    occprob = np.array([1.0 - acceptor_occprob(t) for t in times])
+    occprob = np.array([1.0 - acceptor_occ_prob(t) for t in times])
 
-    plt.plot(t, p)
-    plt.plot(t, occprob)
+    plt.plot(times, p_not, label="pnot")
+    plt.plot(times, occprob, label="occprob")
+    plt.legend()
     if save_to is not None:
         plt.savefig(save_to)
     return fig
+
+
+def plot_hopping_matrix(
+    m: HoppingMatrix, times: List[float], delta_t: float, save_to: Union[str, Path, None] = None,
+):
+    fig, axes = plt.subplots(m.N, m.N)
+
+    a_mat = m(np.array(times), delta_t=delta_t)
+
+    for i in range(m.N):
+        for j in range(m.N):
+            axes[i, j].plot(times, a_mat[:, i, j], label=f"{i}{j}")
+
+    plt.legend()
+    if save_to is not None:
+        plt.savefig("hopping_matrix.png")
+    return fig, axes

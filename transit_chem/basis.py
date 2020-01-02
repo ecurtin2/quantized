@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from itertools import count, takewhile
-from typing import Callable, List, Tuple, Union
+from typing import Callable, List, Tuple
 
 import attr
 import numba
@@ -12,9 +12,9 @@ from scipy import special
 from scipy.linalg import eigh
 
 from transit_chem import config
-from transit_chem.operators import overlap
+from transit_chem.operators import Overlap
 from transit_chem.potentials import Harmonic
-from transit_chem.utils import LinearComb, Parabola, cache, pairwise_array_from_func
+from transit_chem.utils import LinearComb, Parabola, cache
 from transit_chem.validation import Range
 
 ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
@@ -348,68 +348,4 @@ class EigenBasis:
 
 @cache
 def get_expansion_coeffs(state: Callable, basis: List[Callable]) -> List[float]:
-    return [overlap(state, basis_func) for basis_func in basis]
-
-
-class TimeEvolvingState:
-    def __init__(self, initial_state: Callable, eigen_basis: EigenBasis):
-        self.initial_state = initial_state
-        self.eigen_basis = eigen_basis
-        self.expansion_coeffs = get_expansion_coeffs(initial_state, eigen_basis.states)
-
-    def __call__(self, x: Union[float, np.ndarray], t: float) -> float:
-        return sum(
-            [
-                c * np.exp(-1j * e * t) * state(x)
-                for state, e, c in zip(
-                    self.eigen_basis.states, self.eigen_basis.energies, self.expansion_coeffs
-                )
-            ]
-        )
-
-    def observable(self, operator: Callable):
-        e = self.eigen_basis.energies
-        N = len(self.eigen_basis)
-        c = self.expansion_coeffs
-
-        ao_matrix = pairwise_array_from_func(self.eigen_basis.ao_basis, operator)
-        eigen_basis_matrix = self.eigen_basis.transformed(ao_matrix)
-
-        # The following code is equivalent to the definition of f below.
-        # f is written that way to optimize for speed.
-        # On my machine, it was roughly 7x faster
-        #
-        # def f(t: float):
-        #     return sum(
-        #         c[i] * c[j] * np.exp(1j * (e[j] - e[i]) * t) * eigen_basis_matrix[i, j]
-        #         for i in range(N)
-        #         for j in range(N)
-        #     )
-
-        # Precalculate reused terms
-        # P is a real matrix, but we cast it to complex here so that it doesn't
-        # get casted inside the function during the multiplication.
-        P = np.zeros_like(eigen_basis_matrix, dtype=np.complex128)
-        W = np.zeros_like(eigen_basis_matrix, dtype=np.complex128)
-        for i in range(N):
-            for j in range(N):
-                P[i, j] = c[i] * c[j] * eigen_basis_matrix[i, j]
-                W[i, j] = np.exp(1j * (e[j] - e[i]))
-
-        # Via exponentiation rules, exp(W[i, j] * t) = exp(W[i, j]) ** t
-        from numba import jit, float64
-
-        @jit(float64(float64), nopython=True)
-        def f(t: float) -> float:
-            total = 0.0j
-            for i in range(N):
-                for j in range(N):
-                    total += P[i, j] * W[i, j] ** t
-            return abs(total)
-
-        # Pure numpy implementation
-        # in case numba dependency wants to go away
-        # def f(t: float) -> float:
-        #     return np.abs(np.sum(P * (W ** t)))
-
-        return f
+    return [Overlap()(state, basis_func) for basis_func in basis]

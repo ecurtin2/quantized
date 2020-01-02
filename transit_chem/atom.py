@@ -2,34 +2,94 @@ from __future__ import annotations
 
 import attr
 import numpy as np
+from math import sqrt, sin, cos, isclose
 
-from transit_chem.elements import Element
+
+from transit_chem.elements import Element, element_from_string
+from transit_chem.utils import angle
+from transit_chem.config import SMALL_NUMBER
 
 
-@attr.s
+@attr.s(frozen=True, cmp=False)
 class Atom:
     """Atom class containing coordinates, basis and mass."""
 
-    element: Element = attr.ib()
+    element: Element = attr.ib(converter=element_from_string)
     x: float = attr.ib()
     y: float = attr.ib()
     z: float = attr.ib()
 
+    @property
+    def mass(self):
+        return self.element.z
 
-def translate(atom: Atom, x=0.0, y=0.0, z=0.0) -> Atom:
-    return attr.evolve(atom, x=atom.x + x, y=atom.y + y, z=atom.z + z)
+    @property
+    def coords(self):
+        return np.array([self.x, self.y, self.z])
 
+    def with_coords(self, x: float, y: float, z: float) -> "Atom":
+        return attr.evolve(self, x=x, y=y, z=z)
 
-def scale(atom: Atom, factor: float) -> Atom:
-    return attr.evolve(atom, x=factor * atom.x, y=factor * atom.y, z=factor * atom.z)
+    def translated(self, x=0.0, y=0.0, z=0.0) -> Atom:
+        return attr.evolve(self, x=self.x + x, y=self.y + y, z=self.z + z)
 
+    def scaled(self, factor: float) -> Atom:
+        return attr.evolve(self, x=factor * self.x, y=factor * self.y, z=factor * self.z)
 
-def rotate(atom: Atom, R: np.ndarray) -> Atom:
-    if not R.shape == (3, 3):
-        raise ValueError(f"Rotation matrix R must be 3x3, got {R.shape}")
-    x, y, z = R @ np.array([atom.x, atom.y, atom.z])
-    return attr.evolve(atom, x=x, y=y, z=z)
+    def rotated(self, r: np.ndarray) -> Atom:
+        if not r.shape == (3, 3):
+            raise ValueError(f"Rotation matrix R must be 3x3, got {r.shape}")
+        x, y, z = r @ np.array([self.x, self.y, self.z])
+        return attr.evolve(self, x=x, y=y, z=z)
 
+    def flipped_x(self) -> Atom:
+        return attr.evolve(self, x=-self.x)
 
-def flip_x(atom: Atom) -> Atom:
-    return attr.evolve(atom, x=-atom.x)
+    def distance(self, other: Atom) -> float:
+        return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2)
+
+    @property
+    def normalized_coords(self) -> np.array:
+        return self.coords / np.linalg.norm(self.coords)
+
+    def rotation_matrix_to(self, x: float, y: float, z: float):
+        """https://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d"""
+        a = self.normalized_coords
+        b = np.array([x, y, z])
+        b = b / np.linalg.norm(b)
+        v = np.cross(a, b)
+        s = np.linalg.norm(v)
+        c = np.dot(a, b)
+        I = np.eye(*a.shape)
+
+        v_x = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+        return I + v_x + v_x @ v_x * (1 - c) / s ** 2
+
+    def angle_to_xy_plane(self) -> float:
+        return angle(self.coords, [self.x, self.y, 0])
+
+    def angle_to_xz_plane(self) -> float:
+        return angle(self.coords, [self.x, 0, self.z])
+
+    def angle_to_yz_plane(self) -> float:
+        return angle(self.coords, [0, self.y, self.z])
+
+    def rotated_about_x(self, angle: float) -> "Atom":
+        r = np.array([[0, 0, 0], [0, cos(angle), -sin(angle)], [0, sin(angle), cos(angle)]])
+        return self.with_coords(*r @ self.coords)
+
+    def rotated_about_z(self, angle: float) -> "Atom":
+        r = np.array([[cos(angle), -sin(angle), 0], [sin(angle), cos(angle), 0], [0, 0, 0]])
+        return self.with_coords(*r @ self.coords)
+
+    def rotated_about_y(self, angle: float) -> "Atom":
+        r = np.array([[cos(angle), 0, -sin(angle)], [0, 0, 0], [sin(angle), 0, cos(angle)]])
+        return self.with_coords(*r @ self.coords)
+
+    def __eq__(self, other: "Atom") -> bool:
+        return (
+            self.element is other.element
+            and isclose(self.x, other.x, abs_tol=SMALL_NUMBER)
+            and isclose(self.y, other.y, abs_tol=SMALL_NUMBER)
+            and isclose(self.z, other.z, abs_tol=SMALL_NUMBER)
+        )

@@ -1,6 +1,4 @@
 """Console script for transit_chem."""
-from functools import partial
-from itertools import takewhile
 from pathlib import Path
 
 import click
@@ -10,14 +8,13 @@ from loguru import logger
 from transit_chem.basis import (
     EigenBasis,
     HarmonicOscillator,
-    TimeEvolvingState,
     harmonic_basis_from_parabola,
 )
-from transit_chem.hopping_matrix import hopping_matrix, p_not_generator
-from transit_chem.operators import Hamiltonian, overlap
-from transit_chem.plotting import plot_occupancies_over_time, plot_p_not
+from transit_chem.time_evolution import TimeEvolvingState
+from transit_chem.hopping_matrix import HoppingMatrix, Pnot, OccupancyProbabilites
+from transit_chem.operators import Hamiltonian, Overlap
+from transit_chem.plotting import plot_occupancies_over_time, plot_p_not, plot_hopping_matrix
 from transit_chem.potentials import TripleWell
-from transit_chem.utils import pairwise_array_from_func
 
 
 @click.command()
@@ -34,17 +31,20 @@ def main():
     )
 
     cutoff_energy = 4
-    basis = (
-        harmonic_basis_from_parabola(V.well1, cutoff_energy=cutoff_energy)
-        + harmonic_basis_from_parabola(V.well2, cutoff_energy=cutoff_energy)
-        + harmonic_basis_from_parabola(V.well3, cutoff_energy=cutoff_energy)
+    well1_basis = harmonic_basis_from_parabola(V.well1, cutoff_energy=cutoff_energy)
+    well2_basis = harmonic_basis_from_parabola(V.well2, cutoff_energy=cutoff_energy)
+    well3_basis = harmonic_basis_from_parabola(V.well3, cutoff_energy=cutoff_energy)
+    basis = well1_basis + well2_basis + well3_basis
+    logger.info(
+        f"Basis set size is well1: {len(well1_basis)} well2: {len(well2_basis)}"
+        f" well3: {len(well3_basis)} a total size of {len(basis)}"
     )
 
     logger.info("Calculating the Hamiltonian")
-    H = pairwise_array_from_func(basis, Hamiltonian(V))
+    H = Hamiltonian(V).matrix(basis)
 
     logger.info("Calculating the overlap matrix")
-    S = pairwise_array_from_func(basis, overlap)
+    S = Overlap().matrix(basis)
 
     logger.info("Calculating the eigen basis")
     eig_basis = EigenBasis.from_basis(basis, H, S)
@@ -53,42 +53,25 @@ def main():
     time_evolving = TimeEvolvingState(
         eigen_basis=eig_basis, initial_state=HarmonicOscillator(n=0, center=V.center1[0])
     )
-
-    overlap_well1 = partial(overlap, lower_limit=-np.inf, upper_limit=V.barrier12[0])
-    overlap_well2 = partial(overlap, lower_limit=V.barrier12[0], upper_limit=V.barrier23[0])
-    overlap_well3 = partial(overlap, lower_limit=V.barrier23[0], upper_limit=np.inf)
-
-    s1t = time_evolving.observable(overlap_well1)
-    s2t = time_evolving.observable(overlap_well2)
-    s3t = time_evolving.observable(overlap_well3)
-
-    At = hopping_matrix(s1t, s2t, s3t)
-
-    delta_t = 1e-2
-    p0 = np.array([s1t(0), s2t(0), s3t(0)])
-    p_not = p_not_generator(acceptor=2, hopping_matrix=At, p0=p0, delta_t=delta_t)
-
-    from itertools import count
-    from tqdm import tqdm
+    occ_probs = OccupancyProbabilites.from_1d_state(
+        time_evolving, borders=(-np.inf, V.barrier12[0], V.barrier23[0], np.inf)
+    )
+    At = HoppingMatrix(occ_probs)
 
     logger.info("Starting p_not generator computation")
     tau = 0.1
-
-    time_gen = (delta_t * i for i in count())
-    result = tqdm(takewhile(lambda x: x[0] >= tau, zip(p_not, time_gen)))
-    p_not_list, times = zip(*result)
-
+    times, p_not_list, p_not = Pnot.converged_with_timestep(At, tau=tau, tolerance=2.0)
     logger.info(
         f"P_not ({p_not_list[-1]}) reached tau ({tau}) after {len(p_not_list)} iterations. t = {times[-1]}"
     )
 
     plot_occupancies_over_time(
-        np.array(times), s1t, s2t, s3t, save_to=Path() / "occupancies_over_time.png"
+        np.array(times), occ_probs, save_to=Path() / "occupancies_over_time.png"
     )
-
-    plot_p_not(p_not_list, s3t, times, save_to=Path() / "p_not.png")
-
-    return 0
+    plot_p_not(p_not_list, times, p_not.acceptor_occ_prob, save_to=Path() / "p_not.png")
+    plot_hopping_matrix(
+        At, times=times, delta_t=p_not.delta_t, save_to=Path() / "hopping_matrix.png"
+    )
 
 
 if __name__ == "__main__":

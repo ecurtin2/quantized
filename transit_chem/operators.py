@@ -1,27 +1,35 @@
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from typing import Callable
 
 import attr
 import numpy as np
 from scipy import integrate
+from transit_chem.molecule import Molecule
+from transit_chem.utils import pairwise_array_from_func
 
 
 # TODO: get the type hints to work for Operator throughout codebase
-class Operator:
+class Operator(ABC):
     @abstractmethod
     def __call__(self, first: Callable[[float], float], second: Callable[[float], float]) -> float:
         pass
 
+    @property
+    @abstractmethod
+    def hermitian(self):
+        return True
 
-def overlap(
-    first: Callable,
-    second: Callable,
-    *args,
-    lower_limit: float = -np.inf,
-    upper_limit: float = np.inf,
-) -> float:
+    def matrix(self, basis) -> np.array:
+        return pairwise_array_from_func(basis, self, symmetric=self.hermitian)
+
+
+@attr.s(frozen=True)
+class Overlap(Operator):
+    lower_limit: float = attr.ib(default=-np.inf)
+    upper_limit: float = attr.ib(default=np.inf)
+    hermitian = True
     """Compute the overlap integral in 1 dimension over the specified range
 
     Parameters
@@ -30,8 +38,6 @@ def overlap(
         The first function
     second
         The second function
-    *args
-        Extra args to pass to **both** first and second function
     lower_limit
         The lower limit of integration
     upper_limit
@@ -61,30 +67,57 @@ def overlap(
 
     """
 
-    def integrand(x, *args_):
-        return first(x, *args_) * second(x, *args_)
+    def __call__(self, first: Callable, second: Callable) -> float:
+        def integrand(x):
+            return first(x) * second(x)
 
-    return integrate.quad(integrand, a=lower_limit, b=upper_limit, args=args)[0]
+        return integrate.quad(integrand, a=self.lower_limit, b=self.upper_limit)[0]
 
 
 def kinetic(first, second) -> float:
-    return overlap(first, second.__kinetic__())
+    return Overlap()(first, second.__kinetic__())
 
 
-@attr.s(frozen=True)
-class Hamiltonian:
+@attr.s()
+class Hamiltonian(Operator):
     potential: Callable[[float], float] = attr.ib()
+    hermitian = True
+
+    def __attrs_post_init__(self):
+        self.Potential = Potential(self.potential)
 
     def __call__(self, first, second) -> float:
-        return Potential(self.potential)(first, second) + kinetic(first, second)
+        return self.Potential(first, second) + kinetic(first, second)
 
 
 @attr.s(frozen=True)
-class Potential:
+class Potential(Operator):
     potential: Callable[[float], float] = attr.ib()
+    hermitian = True
 
     def __call__(self, first, second) -> float:
         def v(x):
             return self.potential(x) * second(x)
 
-        return overlap(first, v)
+        return Overlap()(first, v)
+
+
+@attr.s()
+class ExtendedHuckelHamiltonian:
+    S: np.array = attr.ib()
+    molecule: Molecule = attr.ib()
+
+    def matrix(self) -> np.array:
+        """Create the Hamiltonian under the Extended Hueckel Approximation."""
+
+        h = np.zeros(self.S.shape)
+        n = self.S.shape[0]
+
+        for i in range(n):
+            h[i, i] = -self.molecule.atoms[i].element.voie
+
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    h[i, j] = 1.75 * (h[i, i] + h[j, j]) * self.S[i, j] / 2.0
+        return h

@@ -1,95 +1,48 @@
-import copy
-import glob
-import sys
-
 import numpy as np
 
-from . import atom
+from typing import List, Callable, Optional
+from transit_chem.atom import Atom
+from transit_chem.utils import pairwise_array_from_func
+from functools import partial
 
 
-class Molecule(object):
-    """Molecule class. Contains list of atoms as well as collective properties.
+import attr
 
-    Contains functions for rotating, aligning and scaling. Iterating over the molecule gives each atom.
-    """
 
-    def __init__(self, xyz_file, basis_type="minimalpz"):
-        """Constructor for Molecule from an xyzfile.
+@attr.s(frozen=True, cmp=False)
+class Molecule:
+    atoms: List[Atom] = attr.ib()
 
-        The xyzfile can be either of these forms:
-
-        C 1.0  1.0  1.0
-        H 2.0 2.0 2.0
-        ...
-
-        or
-
-        6 1.0 1.0 1.0
-        1 1.0 1.0 1.0
-        ...
-
-        :param xyz_file: Name of xyzfile containing atoms and coordinates
-        :type xyz_file: str
-        :param basis_type: Descriptor for basis function. Currently supports
-        only one type across all atom types.
-        :type basis_type: str
-        """
-        self.xyzfile = xyz_file
-        self.comment = ""
-        self._atoms_saved, self.comment = self.xyz_to_atoms(self.xyzfile, basis_type)
-        self.atoms = copy.deepcopy(self._atoms_saved)
-
-    @property
-    def Natoms(self):
+    def __len__(self):
         return len(self.atoms)
 
     @property
     def coords(self):
-        return np.asarray([atom.coords for atom in self.atoms])
-
-    def trim_hydrogens(self):
-        self.atoms = [atom for atom in self._atoms_saved if not atom.symbol == "H"]
-
-    def show_hydrogens(self):
-        self.atoms = self._atoms_saved
-
-    def __iter__(self):
-        self._gen = iter(self.atoms)
-        return self
-
-    def __next__(self):
-        return next(self._gen)
+        return np.asarray([a.coords for a in self.atoms])
 
     @property
     def R(self):
         """Calculate the distances for each atom-atom pair."""
-        r = np.zeros((self.Natoms, self.Natoms))
-        for i in range(self.Natoms):
-            for j in range(self.Natoms):
-                diffs = np.asarray(self.atoms[i].coords) - np.asarray(self.atoms[j].coords)
-                r[i, j] = np.sqrt(np.sum(diffs ** 2))
-        return r
+        return pairwise_array_from_func(self.atoms, Atom.distance)
+
+    @property
+    def mass(self):
+        return sum(a.mass for a in self.atoms)
 
     @property
     def center_of_mass(self):
         """Determine the center of mass of the molecule."""
-        total_mass = 0.0
-        mx = 0.0
-        my = 0.0
-        mz = 0.0
-        for a in self.atoms:
-            total_mass += a.Z
-            mx += a.Z * a.coords[0]
-            my += a.Z * a.coords[1]
-            mz += a.Z * a.coords[2]
-        return mx / total_mass, my / total_mass, mz / total_mass
+        mx = sum(a.x * a.mass for a in self.atoms)
+        my = sum(a.y * a.mass for a in self.atoms)
+        mz = sum(a.z * a.mass for a in self.atoms)
+        return mx / self.mass, my / self.mass, mz / self.mass
 
-    def translate(self, x, y, z):
-        for a in self.atoms:
-            a.translate(x, y, z)
+    def translated(self, x: float, y: float, z: float) -> "Molecule":
+        f = partial(Atom.translated, x=x, y=y, z=z)
+        return self.map(f)
 
     @staticmethod
-    def xyz_to_atoms(xyz_file, basis_type):
+    def from_xyz(xyz: str) -> "Molecule":
         """Convert from xyzfile and basistype into list of atoms.
 
         :param xyz_file: Name of xyzfile containing atoms and coordinates
@@ -98,90 +51,51 @@ class Molecule(object):
         only one type across all atom types.
         :type basis_type: str
         """
-        with open(xyz_file) as f:
-            text = f.readlines()
-            comment = [line.rstrip() for line in text[:2]]
-            text = text[2:]  # First two are number and comment lines
-            atomlist = [line.rstrip().split() for line in text]
-            atomtypes, coords = zip(*[(line[0], line[1:]) for line in atomlist])
-            coords = [[float(c) for c in line] for line in coords]
+        text = (line.split() for line in xyz.splitlines()[2:])
 
-        atoms = []
-        for i, atomtype in enumerate(atomtypes):
-            atoms.append(atom.Atom(atomtype, coords[i], basis_type))
-        return atoms, comment
+        atoms = [Atom(element=e, x=x, y=y, z=z) for e, x, y, z in text]
+        return Molecule(atoms)
 
-    def align_to_x(self, atom1, atom2, xy_anchor=None):
-        """Align the line connecting atom1 and atom2 to the x axis and set the midpoint to the origin.
+    def com_as_origin(self) -> "Molecule":
+        x, y, z = self.center_of_mass
+        return self.translated(x=-x, y=-y, z=-z)
 
-        after aligning atom1 and atom2 to x axis, rotate the molecule about the x axis such that
-        the xy_anchor atom lies in the xy plane.
-        """
-        midpoint = [0.5 * (coord2 + coord1) for coord1, coord2 in zip(atom1.coords, atom2.coords)]
-        self.translate(-midpoint[0], -midpoint[1], -midpoint[2])
+    def with_atom_aligned_to(self, atom: Atom, x: float, y: float, z: float) -> "Molecule":
+        r = atom.rotation_matrix_to(x=x, y=y, z=z)
+        return self.rotated(r)
 
-        #  Rotating atom1 to be in the xz plane
-        x, y, z = atom1.coords
-        theta = -np.arctan(y / x)
-        Rz = np.asarray(
-            [[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(theta), 0], [0, 0, 1]]
-        )
-        for a in self.atoms:
-            a.rotate(Rz)
+    def rotated(self, r: np.array) -> "Molecule":
+        if not r.shape == (3, 3):
+            raise ValueError(f"Rotation matrix has invalid shape: {r.shape}")
+        rotate = partial(Atom.rotated, r=r)
+        return self.map(rotate)
 
-        # Rotate to put atom1 in on the +x axis from within xz plane
-        x, y, z = atom1.coords
-        theta = -np.arctan(z / x)
-        Ry = np.asarray(
-            [[np.cos(theta), 0, -np.sin(theta)], [0, 1, 0], [np.sin(theta), 0, np.cos(theta)]]
-        )
-        for a in self.atoms:
-            a.rotate(Ry)
+    def map(self, f: Callable) -> "Molecule":
+        return attr.evolve(self, atoms=[f(a) for a in self.atoms])
 
-        # Rotate to put xy anchor on the xy plane
-        if xy_anchor is not None:
-            x, y, z = xy_anchor.coords
-            theta = -np.arctan(z / y)
-            Rx = np.asarray(
-                [[1, 0, 0], [0, np.cos(theta), -np.sin(theta)], [0, np.sin(theta), np.cos(theta)]]
-            )
-            for a in self.atoms:
-                a.rotate(Rx)
+    def scaled(self, factor: float) -> "Molecule":
+        return self.map(partial(Atom.scaled, factor=factor))
 
-    def scale(self, factor):
-        for a in self.atoms:
-            a.scale(factor)
+    def flipped_x(self):
+        return self.map(Atom.flipped_x)
 
-    def flip_x(self):
-        for a in self.atoms:
-            a.flip_x()
+    def sorted(self, atomic_key: Callable) -> "Molecule":
+        return attr.evolve(self, atoms=sorted(self.atoms, key=atomic_key))
 
-    def sort(self, atomic_key):
-        self.atoms = sorted(self.atoms, key=atomic_key)
+    def rotated_about_x(self, angle: float) -> "Molecule":
+        f = partial(Atom.rotated_about_x, angle=angle)
+        return self.map(f)
 
-    def __str__(self):
-        my_list = self.comment + [str(atom) for atom in self.atoms]
-        s = "\n".join(my_list)
-        return s
+    def rotated_about_y(self, angle: float) -> "Molecule":
+        f = partial(Atom.rotated_about_y, angle=angle)
+        return self.map(f)
 
+    def rotated_about_z(self, angle: float) -> "Molecule":
+        f = partial(Atom.rotated_about_z, angle=angle)
+        return self.map(f)
 
-def main(argv):
-    for f in glob.glob("../analysis/xyz_files/*.xyz"):
-        M = Molecule(f)
-        M.trim_hydrogens()
-        nitrogens = [atom for atom in M.atoms if atom.Z == 7]
-        if nitrogens:
-            M.align_to_x(*nitrogens)
+    def __iter__(self):
+        return iter(self.atoms)
 
-        #  Align the nitro (acceptor) group to be +x
-        oxygens = [atom for atom in M.atoms if atom.Z == 8]
-        if oxygens:
-            if all(oxygen.coords[0] < 0 for oxygen in oxygens):
-                M.flip_x()
-        M.sort(atomic_key=lambda atom: atom.coords[0])
-        print(M)
-        print(M.coords)
-
-
-if __name__ == "__main__":
-    main(sys.argv)
+    def __eq__(self, other):
+        return all(a1 == a2 for a1, a2 in zip(self, other))

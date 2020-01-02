@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from itertools import combinations_with_replacement, product
-from math import isclose
-from typing import Callable, Dict, Sequence, Tuple, TypeVar
+from math import isclose, acos, sqrt
+from typing import Callable, Dict, Sequence, Tuple, TypeVar, Iterable
 
 import attr
 import numpy as np
@@ -162,3 +162,15 @@ class Parabola:
         coeffs = np.linalg.solve(A, b)
 
         return Parabola(a=coeffs[0], b=coeffs[1], c=coeffs[2])
+
+
+def dot(v1: Iterable[float], v2: Iterable[float]) -> float:
+    return sum((a * b) for a, b in zip(v1, v2))
+
+
+def length(v: Iterable[float]) -> float:
+    return sqrt(dot(v, v))
+
+
+def angle(v1: Iterable[float], v2: Iterable[float]) -> float:
+    return acos(dot(v1, v2) / (length(v1) * length(v2)))
