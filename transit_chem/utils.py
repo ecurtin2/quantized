@@ -2,30 +2,30 @@ from __future__ import annotations
 
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
 from itertools import combinations_with_replacement, product
-from math import isclose, acos, sqrt
-from typing import Callable, Dict, Sequence, Tuple, TypeVar, Iterable
+from math import acos
+from math import isclose as math_isclose
+from math import sqrt
+from typing import Callable, Dict, Iterable, Sequence, Tuple, TypeVar
 
 import attr
 import numpy as np
 from joblib import Memory
 from tqdm import tqdm
 
-from transit_chem.config import (
-    ENABLE_PROGRESSBAR,
-    JOBLIB_CACHE_DIR,
-    JOBLIB_VERBOSITY,
-    LARGE_NUMBER,
-    SMALL_NUMBER,
-)
+from transit_chem.config import conf
 from transit_chem.validation import Range, not_inf, not_nan
 
 __all__ = ["pairwise_array_from_func", "Parabola", "LinearComb", "cache"]
 
 
-memory = Memory(JOBLIB_CACHE_DIR, verbose=JOBLIB_VERBOSITY)
+memory = Memory(conf.cache_dir, verbose=conf.joblib_verbosity)
 cache = memory.cache
 
 T = TypeVar("T")
+
+
+def isclose(x: float, y: float) -> bool:
+    return math_isclose(x, y, abs_tol=conf.small_number)
 
 
 class LinearComb:
@@ -68,7 +68,7 @@ def pairwise_array_from_func(
     Examples
     ---------
 
-    >>> from transit_chem import pairwise_array_from_func
+    >>> from transit_chem.utils import pairwise_array_from_func
     >>> def distance(i, j):
     ...     return abs(i - j)
     ...
@@ -97,7 +97,7 @@ def pairwise_array_from_func(
         for i, j in combs:
             fut_res[exc.submit(func, items[i], items[j])] = (i, j)
 
-        with tqdm(total=len(combs), disable=not ENABLE_PROGRESSBAR, ncols=100) as pbar:
+        with tqdm(total=len(combs), disable=not conf.enable_progressbar, ncols=100) as pbar:
             for future in as_completed(fut_res.keys()):
                 res = future.result()
                 i, j = fut_res[future]
@@ -112,16 +112,16 @@ def pairwise_array_from_func(
 
 @attr.s(frozen=True)
 class Parabola:
-    a: float = attr.ib(validator=[not_nan, not_inf, Range(-LARGE_NUMBER, LARGE_NUMBER)])
-    b: float = attr.ib(validator=[not_nan, not_inf, Range(-LARGE_NUMBER, LARGE_NUMBER)])
-    c: float = attr.ib(validator=[not_nan, not_inf, Range(-LARGE_NUMBER, LARGE_NUMBER)])
+    a: float = attr.ib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
+    b: float = attr.ib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
+    c: float = attr.ib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
 
     def __call__(self, x):
         return self.a * x ** 2 + self.b * x + self.c
 
     @property
     def has_vertex(self) -> bool:
-        return not isclose(self.a, 0.0, abs_tol=SMALL_NUMBER)
+        return not isclose(self.a, 0.0)
 
     @property
     def vertex(self) -> float:

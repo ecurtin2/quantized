@@ -5,153 +5,140 @@ from itertools import count, takewhile
 from typing import Callable, List, Tuple
 
 import attr
-import numba
+
+# import numba
 import numpy as np
 from numpy.linalg import inv
 from scipy import special
 from scipy.linalg import eigh
 
-from transit_chem import config
+from transit_chem.config import conf
 from transit_chem.operators import Overlap
 from transit_chem.potentials import Harmonic
-from transit_chem.utils import LinearComb, Parabola, cache
+from transit_chem.utils import LinearComb, Parabola, cache, isclose
 from transit_chem.validation import Range
 
 ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
 
 
-class Basis:
-    def __init__(self, factory, x0, y0, z0, alpha):
-        """Create a basis object from some parameters and a function-factory function.
-
-        params
-        ======
-            factory: function g(x0, y0, z0, alpha) that returns a function f(x, y, z)
-            x0, y0, z0: centers of basis function
-            alpha: parameter for basis (decay coefficient or some other such nonsense).
-        """
-        self.f = factory(x0, y0, z0, alpha)
-        self.x0 = x0
-        self.y0 = y0
-        self.z0 = z0
-        self.alpha = alpha
-
-    def __call__(self, x, y, z):
-        return self.f(x, y, z)
-
-    # def overlap(
-    #     self,
-    #     other,
-    #     distance_cutoff=5.0,
-    #     interval=5.0,
-    #     xmin=None,
-    #     xmax=None,
-    #     ymin=None,
-    #     ymax=None,
-    #     zmin=None,
-    #     zmax=None,
-    # ):
-    #     """Return the overlap of this with another
-
-    #     This is to reduce the calculations performed by naively integrating over
-    #     all space for all combinations of basis functions.
-    #     Return 0.0 if the basis functions are separated by more than distance_cutoff.
-    #     Integrate from interval away from the centers. If bounds are not given.
-
-    #     If the midpoint of the centers of the functions is more than distance_cutoff from the boundaries,
-    #     0.0 is returned.
-
-    #     """
-    #     assert isinstance(other, Basis)
-    #     r = np.sqrt(
-    #         (self.x0 - other.x0) ** 2
-    #         + (self.y0 - other.y0) ** 2
-    #         + (self.z0 - other.z0) ** 2
-    #     )
-    #     if r > distance_cutoff:
-    #         return 0.0
-    #     else:
-    #         if xmin is None:
-    #             xmin = min(self.x0, other.x0) - interval
-    #         if ymin is None:
-    #             ymin = min(self.y0, other.y0) - interval
-    #         if zmin is None:
-    #             zmin = min(self.z0, other.z0) - interval
-    #         if xmax is None:
-    #             xmax = max(self.x0, other.x0) + interval
-    #         if ymax is None:
-    #             ymax = max(self.y0, other.y0) + interval
-    #         if zmax is None:
-    #             zmax = max(self.z0, other.z0) + interval
-
-    #         #  Check to see if the midpoint of the overlapped functions
-    #         # falls outside integration range.
-    #         #  The maximum value between the centers,
-    #         # and if it's sufficiently far from the region of integration
-    #         #  we can return 0.0 and not lose anything.
-
-    #         midpoint = (
-    #             0.5 * (self.x0 + other.x0),
-    #             0.5 * (self.y0 + other.y0),
-    #             0.5 * (self.z0 + other.z0),
-    #         )
-    #         if midpoint[0] > (xmax + interval) or midpoint[0] < (xmin - interval):
-    #             return 0.0
-    #         if midpoint[1] > (ymax + interval) or midpoint[1] < (ymin - interval):
-    #             return 0.0
-    #         if midpoint[2] > (zmax + interval) or midpoint[2] < (zmin - interval):
-    #             return 0.0
-
-    #         # Finally actually do the overlap if none of the zero-conditions apply
-    #         ovlp = overlap_factory(self.f, other.f)
-    #         integrator = integrate_region_gen_3D(
-    #             [[xmin, xmax], [ymin, ymax], [zmin, zmax]]
-    #         )
-    #         return integrator(ovlp)
-
-
-def overlap_factory(f1, f2):
-    """Generate a jitted function of f1(x, y, z) * f2(x, y, z). Only works on f1, f2 that are numba jitted."""
-
-    @numba.jit("float64(float64, float64, float64)", nopython=True)
-    def overlap_function(x, y, z):
-        return f1(x, y, z) * f2(x, y, z)
-
-    return overlap_function
-
-
-def pz_gaussian_orbital_factory(x0, y0, z0, alpha):
-    """Return a function for a gaussian pz orbital function centered at (x0, y0, z0) and decay coeff alpha.
-
-    f = N (z - z0) * exp(-(ar)^2)
-
-    The pz orbital is compiled at runtime using numba's jit LLVM compiler. As such, it is fast!"""
-
-    # TODO: FIX NORMALIZATION CONSTANT.
-    N = alpha ** 2.5
-
-    @numba.jit("float64(float64, float64, float64)", nopython=True)
-    def gaussian_orbital(x, y, z):
-
-        # TODO: MAKE THIS FUNCTION WHATEVER IS DESIRED.
-        r = math.sqrt((x - x0) ** 2 + (y - y0) ** 2 + (z - z0) ** 2)
-        return N * (z - z0) * math.exp(-((alpha * r) ** 2))
-
-    return gaussian_orbital
-
-
-def pz_orbital_factory(x0, y0, z0, alpha):
-    """Return a function for pz orbital function centered at (x0, y0, z0) and decay coeff alpha.
-
-    The pz orbital is compiled at runtime using numba's jit LLVM compiler. As such, it is fast!"""
-    N = alpha ** 2.5 / math.sqrt(math.pi)
-
-    @numba.jit("float64(float64, float64, float64)", nopython=True)
-    def pz_orbital(x, y, z):
-        r = math.sqrt((x - x0) ** 2 + (y - y0) ** 2 + (z - z0) ** 2)
-        return N * (z - z0) * math.exp(-alpha * r)
-
-    return pz_orbital
+# class ThreeDBasis:
+#     def __init__(self, factory, x0, y0, z0, alpha):
+#         """Create a basis object from some parameters and a function-factory function.
+#
+#         params
+#         ======
+#             factory: function g(x0, y0, z0, alpha) that returns a function f(x, y, z)
+#             x0, y0, z0: centers of basis function
+#             alpha: parameter for basis (decay coefficient or some other such nonsense).
+#         """
+#         self.f = factory(x0, y0, z0, alpha)
+#         self.x0 = x0
+#         self.y0 = y0
+#         self.z0 = z0
+#         self.alpha = alpha
+#
+#     def __call__(self, x, y, z):
+#         return self.f(x, y, z)
+#
+#     def overlap(
+#         self,
+#         other,
+#         distance_cutoff=5.0,
+#         interval=5.0,
+#         xmin=None,
+#         xmax=None,
+#         ymin=None,
+#         ymax=None,
+#         zmin=None,
+#         zmax=None,
+#     ):
+#         """Return the overlap of this with another
+#
+#         This is to reduce the calculations performed by naively integrating over
+#         all space for all combinations of basis functions.
+#         Return 0.0 if the basis functions are separated by more than distance_cutoff.
+#         Integrate from interval away from the centers. If bounds are not given.
+#
+#         If the midpoint of the centers of the functions is more than distance_cutoff from the boundaries,
+#         0.0 is returned.
+#
+#         """
+#         if not isinstance(other, ThreeDBasis):
+#             raise TypeError(f"ThreeDBasis can't be overlapped with {type(other)}")
+#         r = np.sqrt(
+#             (self.x0 - other.x0) ** 2 + (self.y0 - other.y0) ** 2 + (self.z0 - other.z0) ** 2
+#         )
+#         if r > distance_cutoff:
+#             return 0.0
+#         else:
+#             if xmin is None:
+#                 xmin = min(self.x0, other.x0) - interval
+#             if ymin is None:
+#                 ymin = min(self.y0, other.y0) - interval
+#             if zmin is None:
+#                 zmin = min(self.z0, other.z0) - interval
+#             if xmax is None:
+#                 xmax = max(self.x0, other.x0) + interval
+#             if ymax is None:
+#                 ymax = max(self.y0, other.y0) + interval
+#             if zmax is None:
+#                 zmax = max(self.z0, other.z0) + interval
+#
+#             #  Check to see if the midpoint of the overlapped functions
+#             # falls outside integration range.
+#             #  The maximum value between the centers,
+#             # and if it's sufficiently far from the region of integration
+#             #  we can return 0.0 and not lose anything.
+#
+#             midpoint = (
+#                 0.5 * (self.x0 + other.x0),
+#                 0.5 * (self.y0 + other.y0),
+#                 0.5 * (self.z0 + other.z0),
+#             )
+#             if midpoint[0] > (xmax + interval) or midpoint[0] < (xmin - interval):
+#                 return 0.0
+#             if midpoint[1] > (ymax + interval) or midpoint[1] < (ymin - interval):
+#                 return 0.0
+#             if midpoint[2] > (zmax + interval) or midpoint[2] < (zmin - interval):
+#                 return 0.0
+#
+#             # Finally actually do the overlap if none of the zero-conditions apply
+#             ovlp = overlap_factory(self.f, other.f)
+#             integrator = integrate_region_gen_3D([[xmin, xmax], [ymin, ymax], [zmin, zmax]])
+#             return integrator(ovlp)
+#
+#
+# def overlap_factory(f1, f2):
+#     """Generate a jitted function of f1(x, y, z) * f2(x, y, z). Only works on f1, f2 that are numba jitted."""
+#
+#     @numba.jit("float64(float64, float64, float64)", nopython=True)
+#     def overlap_function(x, y, z):
+#         return f1(x, y, z) * f2(x, y, z)
+#
+#     return overlap_function
+#
+#
+# @attr.s()
+# class PzOrbital:
+#     x: float = attr.ib()
+#     y: float = attr.ib()
+#     z: float = attr.ib()
+#     alpha: float = attr.ib()
+#
+#     @property
+#     def function(self) -> Callable[[float, float, float], float]:
+#         """Return a function for pz orbital function centered at (x0, y0, z0) and decay coeff alpha.
+#
+#         The pz orbital is compiled at runtime using numba's jit LLVM compiler. As such, it is fast!
+#         """
+#         N = self.alpha ** 2.5 / math.sqrt(math.pi)
+#
+#         @numba.jit("float64(float64, float64, float64)", nopython=True)
+#         def pz_orbital(x, y, z):
+#             r = math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2 + (z - self.z) ** 2)
+#             return N * (z - self.z) * math.exp(-self.alpha * r)
+#
+#         return pz_orbital
 
 
 @attr.s(frozen=True)
@@ -184,10 +171,10 @@ class HarmonicOscillator:
 
     """
 
-    n: int = attr.ib(validator=[Range(0, config.HARMONIC_OSCILLATOR_MAX_N)])
-    center: float = attr.ib(validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)])
-    mass: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
-    omega: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
+    n: int = attr.ib(validator=[Range(0, conf.harmonic_oscillator_max_n)])
+    center: float = attr.ib(validator=[Range(-conf.large_number, conf.large_number)])
+    mass: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
+    omega: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
 
     @staticmethod
     def from_parabola(p: Parabola, n: int, mass: float = 1.0) -> HarmonicOscillator:
@@ -287,6 +274,20 @@ class HarmonicOscillator:
 
         return k
 
+    def __overlap__(self, other, lower_limit: float, upper_limit: float) -> float:
+        if lower_limit != -np.inf or upper_limit != np.inf:
+            raise NotImplementedError
+        if not isinstance(other, HarmonicOscillator):
+            raise NotImplementedError
+
+        if (
+            isclose(self.center, other.center)
+            and isclose(self.mass, other.mass)
+            and isclose(self.omega, other.omega)
+        ):
+            return 1.0 if self.n == other.n else 0.0
+        raise NotImplementedError
+
     @property
     def energy(self):
         return (self.n + 0.5) * self.omega
@@ -320,8 +321,8 @@ def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[Harm
 @attr.s(frozen=True)
 class EigenBasis:
     # TODO: validate shapes, properties
-    states: List[Callable] = attr.ib()
-    energies: List[float] = attr.ib()
+    states: Tuple[Callable, ...] = attr.ib(converter=tuple)
+    energies: Tuple[float, ...] = attr.ib(converter=tuple)
     ao_S: np.array = attr.ib()
     eigvecs: np.array = attr.ib()
     ao_basis: List[Callable] = attr.ib()
@@ -339,7 +340,7 @@ class EigenBasis:
 
         states = [LinearComb(c, basis) for c in eigvecs.T]
         return EigenBasis(
-            states=states, energies=list(eigvals), eigvecs=eigvecs, ao_S=S, ao_basis=basis
+            states=tuple(states), energies=tuple(eigvals), eigvecs=eigvecs, ao_S=S, ao_basis=basis
         )
 
     def transformed(self, matrix: np.array) -> np.array:

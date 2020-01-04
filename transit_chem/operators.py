@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 from typing import Callable
 
 import attr
 import numpy as np
 from scipy import integrate
+
 from transit_chem.molecule import Molecule
 from transit_chem.utils import pairwise_array_from_func
 
 
 # TODO: get the type hints to work for Operator throughout codebase
 class Operator(ABC):
-    @abstractmethod
     def __call__(self, first: Callable[[float], float], second: Callable[[float], float]) -> float:
         pass
 
@@ -68,46 +68,69 @@ class Overlap(Operator):
     """
 
     def __call__(self, first: Callable, second: Callable) -> float:
+
+        try:
+            val = first.__overlap__(second, self.lower_limit, self.upper_limit)
+            return val
+        except (AttributeError, NotImplementedError):
+            pass
+
         def integrand(x):
             return first(x) * second(x)
 
         return integrate.quad(integrand, a=self.lower_limit, b=self.upper_limit)[0]
 
 
-def kinetic(first, second) -> float:
-    return Overlap()(first, second.__kinetic__())
+@attr.s()
+class Kinetic(Operator):
+    overlap: Overlap = attr.ib(default=Overlap())
+    hermitian = True
+
+    def __call__(self, first, second) -> float:
+        return Overlap()(first, second.__kinetic__())
 
 
 @attr.s()
 class Hamiltonian(Operator):
     potential: Callable[[float], float] = attr.ib()
+    kinetic: Kinetic = attr.ib(default=Kinetic())
     hermitian = True
 
     def __attrs_post_init__(self):
         self.Potential = Potential(self.potential)
 
     def __call__(self, first, second) -> float:
-        return self.Potential(first, second) + kinetic(first, second)
+        return self.Potential(first, second) + self.kinetic(first, second)
 
 
 @attr.s(frozen=True)
 class Potential(Operator):
     potential: Callable[[float], float] = attr.ib()
+    overlap: Overlap = attr.ib(default=Overlap())
     hermitian = True
 
     def __call__(self, first, second) -> float:
         def v(x):
             return self.potential(x) * second(x)
 
-        return Overlap()(first, v)
+        return self.overlap(first, v)
 
 
-@attr.s()
-class ExtendedHuckelHamiltonian:
+@attr.s(frozen=True)
+class ExtendedHuckelHamiltonian(Operator):
     S: np.array = attr.ib()
     molecule: Molecule = attr.ib()
+    hermitian = True
 
-    def matrix(self) -> np.array:
+    def __attrs_post_init__(self):
+        invalid = [a.element for a in self.molecule if a.element.voie is None]
+        if invalid:
+            raise ValueError(
+                f"Could not make EHT Hamiltonian from elements {invalid}"
+                f". They are not configured with VOIE."
+            )
+
+    def matrix(self, basis=None) -> np.array:
         """Create the Hamiltonian under the Extended Hueckel Approximation."""
 
         h = np.zeros(self.S.shape)

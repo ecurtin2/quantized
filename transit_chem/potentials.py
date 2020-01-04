@@ -3,7 +3,7 @@ from typing import Tuple, Union
 import attr
 import numpy as np
 
-from transit_chem import config
+from transit_chem.config import conf
 from transit_chem.utils import Parabola
 from transit_chem.validation import Range
 
@@ -116,9 +116,9 @@ class TripleWell:
 
 @attr.s(frozen=True)
 class Harmonic:
-    center: float = attr.ib(validator=[Range(-config.LARGE_NUMBER, config.LARGE_NUMBER)])
-    mass: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
-    omega: float = attr.ib(default=1.0, validator=Range(config.SMALL_NUMBER, config.LARGE_NUMBER))
+    center: float = attr.ib(validator=[Range(-conf.large_number, conf.large_number)])
+    mass: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
+    omega: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
 
     def __call__(self, x: float) -> float:
         return 0.5 * self.mass * (self.omega ** 2) * ((x - self.center) ** 2)

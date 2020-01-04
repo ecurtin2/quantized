@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+from math import cos, isclose, sin, sqrt
+
 import attr
 import numpy as np
-from math import sqrt, sin, cos, isclose
 
-
+from transit_chem.config import conf
 from transit_chem.elements import Element, element_from_string
 from transit_chem.utils import angle
-from transit_chem.config import SMALL_NUMBER
 
 
 @attr.s(frozen=True, cmp=False)
@@ -15,9 +15,9 @@ class Atom:
     """Atom class containing coordinates, basis and mass."""
 
     element: Element = attr.ib(converter=element_from_string)
-    x: float = attr.ib()
-    y: float = attr.ib()
-    z: float = attr.ib()
+    x: float = attr.ib(converter=float)
+    y: float = attr.ib(converter=float)
+    z: float = attr.ib(converter=float)
 
     @property
     def mass(self):
@@ -60,7 +60,7 @@ class Atom:
         v = np.cross(a, b)
         s = np.linalg.norm(v)
         c = np.dot(a, b)
-        I = np.eye(*a.shape)
+        I = np.eye(*a.shape)  # noqa: E741
 
         v_x = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
         return I + v_x + v_x @ v_x * (1 - c) / s ** 2
@@ -75,21 +75,21 @@ class Atom:
         return angle(self.coords, [0, self.y, self.z])
 
     def rotated_about_x(self, angle: float) -> "Atom":
-        r = np.array([[0, 0, 0], [0, cos(angle), -sin(angle)], [0, sin(angle), cos(angle)]])
+        r = np.array([[1, 0, 0], [0, cos(angle), -sin(angle)], [0, sin(angle), cos(angle)]])
         return self.with_coords(*r @ self.coords)
 
     def rotated_about_z(self, angle: float) -> "Atom":
-        r = np.array([[cos(angle), -sin(angle), 0], [sin(angle), cos(angle), 0], [0, 0, 0]])
+        r = np.array([[cos(angle), -sin(angle), 0], [sin(angle), cos(angle), 0], [0, 0, 1]])
         return self.with_coords(*r @ self.coords)
 
     def rotated_about_y(self, angle: float) -> "Atom":
-        r = np.array([[cos(angle), 0, -sin(angle)], [0, 0, 0], [sin(angle), 0, cos(angle)]])
+        r = np.array([[cos(angle), 0, -sin(angle)], [0, 1, 0], [sin(angle), 0, cos(angle)]])
         return self.with_coords(*r @ self.coords)
 
     def __eq__(self, other: "Atom") -> bool:
         return (
             self.element is other.element
-            and isclose(self.x, other.x, abs_tol=SMALL_NUMBER)
-            and isclose(self.y, other.y, abs_tol=SMALL_NUMBER)
-            and isclose(self.z, other.z, abs_tol=SMALL_NUMBER)
+            and isclose(self.x, other.x, abs_tol=conf.small_number)
+            and isclose(self.y, other.y, abs_tol=conf.small_number)
+            and isclose(self.z, other.z, abs_tol=conf.small_number)
         )

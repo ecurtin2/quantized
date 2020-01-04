@@ -5,10 +5,10 @@ import attr
 
 @attr.s(frozen=True)
 class Element:
-    z: int = attr.ib()
+    z: int = attr.ib(repr=False)
     name: str = attr.ib()
-    voie: Optional[float] = attr.ib(default=None)
-    alpha: Optional[float] = attr.ib(default=None)
+    voie: Optional[float] = attr.ib(default=None, repr=False)
+    alpha: Optional[float] = attr.ib(default=None, repr=False)
 
 
 H = Element(z=1, name="H")

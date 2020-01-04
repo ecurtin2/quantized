@@ -1,15 +1,22 @@
 import numpy as np
 from hypothesis.strategies import floats
 
-from transit_chem.config import LARGE_NUMBER, SMALL_NUMBER
+from typing import Iterable
+
+from transit_chem.config import conf
+from transit_chem.utils import isclose
 
 reasonable_floats = floats(
-    allow_infinity=False, allow_nan=False, min_value=-LARGE_NUMBER, max_value=LARGE_NUMBER
+    allow_infinity=False, allow_nan=False, min_value=-conf.large_number, max_value=conf.large_number
 )
 
 reasonable_pos_floats = floats(
-    allow_infinity=False, allow_nan=False, min_value=SMALL_NUMBER, max_value=LARGE_NUMBER
+    allow_infinity=False, allow_nan=False, min_value=conf.small_number, max_value=conf.large_number
 )
+
+
+def allclose(x: Iterable[float], y: Iterable[float]) -> bool:
+    return all(isclose(a, b) for a, b in zip(x, y))
 
 
 def is_diagonal(x: np.ndarray) -> bool:

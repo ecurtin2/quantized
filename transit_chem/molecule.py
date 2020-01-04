@@ -1,12 +1,11 @@
-import numpy as np
-
-from typing import List, Callable, Optional
-from transit_chem.atom import Atom
-from transit_chem.utils import pairwise_array_from_func
 from functools import partial
-
+from typing import Callable, List
 
 import attr
+import numpy as np
+
+from transit_chem.atom import Atom
+from transit_chem.utils import pairwise_array_from_func
 
 
 @attr.s(frozen=True, cmp=False)
@@ -37,7 +36,7 @@ class Molecule:
         mz = sum(a.z * a.mass for a in self.atoms)
         return mx / self.mass, my / self.mass, mz / self.mass
 
-    def translated(self, x: float, y: float, z: float) -> "Molecule":
+    def translated(self, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> "Molecule":
         f = partial(Atom.translated, x=x, y=y, z=z)
         return self.map(f)
 
@@ -51,7 +50,7 @@ class Molecule:
         only one type across all atom types.
         :type basis_type: str
         """
-        text = (line.split() for line in xyz.splitlines()[2:])
+        text = (line.split() for line in xyz.splitlines()[2:] if line.strip())
 
         atoms = [Atom(element=e, x=x, y=y, z=z) for e, x, y, z in text]
         return Molecule(atoms)

@@ -1,4 +1,3 @@
-from scipy.spatial.transform import Rotation
 import numpy as np
 
 from transit_chem.elements import H
@@ -29,5 +28,5 @@ def test_atom_scaled():
 
 def test_atom_rotated():
     a = Atom(H, 0.0, 2.0, 0.0)
-    rotation, _ = Rotation.match_vectors([a.coords], np.array([[1, 0, 0]]))
-    assert a.applied_rotation(rotation) == Atom(H, 2.0, 0.0, 0.0)
+    r = a.rotation_matrix_to(1, 0, 0)
+    assert a.rotated(r) == Atom(H, 2.0, 0.0, 0.0)

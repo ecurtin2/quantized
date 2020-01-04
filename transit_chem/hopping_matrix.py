@@ -1,15 +1,16 @@
-import attr
-from itertools import count, tee, takewhile
+from functools import lru_cache
+from itertools import chain, count, islice, takewhile, tee
 from math import isclose
-from typing import Iterable, Union, Generator, Tuple, Callable, List, Any
+from typing import Callable, Generator, Iterable, Iterator, List, Tuple, Union
 
+import attr
 import numpy as np
-
-from transit_chem.time_evolution import TimeEvolvingState
-from transit_chem.operators import Overlap
-
-
 from loguru import logger
+from scipy.interpolate import interp1d
+from scipy.optimize import root_scalar
+
+from transit_chem.operators import Overlap
+from transit_chem.time_evolution import TimeEvolvingObservable, TimeEvolvingState
 
 
 def pairwise(iterable):
@@ -21,7 +22,7 @@ def pairwise(iterable):
 
 @attr.s(frozen=True)
 class OccupancyProbabilites:
-    s: Tuple = attr.ib(converter=tuple)
+    s: Tuple[TimeEvolvingObservable] = attr.ib(converter=tuple)
 
     @property
     def initial(self) -> np.array:
@@ -131,8 +132,11 @@ def accumulate(iterable, func, *, initial=None):
 @attr.s(frozen=True)
 class Pnot:
     acceptor: int = attr.ib()
-    hopping_matrix: HoppingMatrix = attr.ib()
+    hopping_matrix: HoppingMatrix = attr.ib(hash=False)
+    times: List[float] = attr.ib()
+    values: List[float] = attr.ib()
     delta_t: float = attr.ib()
+
     """Determine P_not, the probability than acceptor state has never been occupied.
 
     Parameters
@@ -146,32 +150,91 @@ class Pnot:
 
     """
 
-    def __iter__(self):
-        times = (self.delta_t * i for i in count())
-        matrices = (self.hopping_matrix(t, self.delta_t) for t in times)
-        A_tilde = (
-            np.delete(np.delete(a, self.acceptor, axis=0), self.acceptor, axis=1) for a in matrices
-        )
-        p0_tilde = np.delete(self.hopping_matrix.occ_probs.initial, self.acceptor)
-        #  Taking [a, nb, c, d, ...] -> [(b @ a), (c @ b @ a), (d @ c @ b @ a), ...]
-        a_prod = accumulate(A_tilde, lambda a, b: b @ a, initial=p0_tilde)
-        pnot = map(np.sum, a_prod)
-        return ((self.delta_t * i, p) for i, p in enumerate(pnot))
+    @property
+    def min_time(self) -> float:
+        return self.times[0]
+
+    @property
+    def max_time(self) -> float:
+        return self.times[-1]
+
+    @property
+    def tau90(self) -> float:
+        return self.time_when_equal_to(0.1)
+
+    @property
+    def initial_value(self) -> float:
+        return self(self.min_time)
+
+    @property
+    def final_value(self) -> float:
+        return self(self.max_time)
+
+    @lru_cache()
+    def time_when_equal_to(self, x: float) -> float:
+        def f(t):
+            return self(t) - x
+
+        if not self.final_value < x < self.initial_value:
+            raise ValueError(
+                f"Can't solve for Pnot = {x}. It is out the calculated range: {self.initial_value}, {self.final_value}"
+            )
+
+        result = root_scalar(f, bracket=[self.min_time, self.max_time])
+        return result.root
+
+    @lru_cache()
+    def _interpolate(self):
+        return interp1d(self.times, self.values, bounds_error=False)
+
+    def __call__(self, t: float) -> float:
+        return self._interpolate()(t)
 
     @property
     def acceptor_occ_prob(self) -> Callable:
         return self.hopping_matrix.occ_probs[self.acceptor]
 
-    def until_time(self, t: float):
-        return takewhile(lambda x: x[0] < t, self)
+    @staticmethod
+    def gen(
+        delta_t: float, hopping_matrix: HoppingMatrix, acceptor: int
+    ) -> Generator[Tuple, None, None]:
+        times = (delta_t * i for i in count())
+        matrices = (hopping_matrix(t, delta_t) for t in times)
+        A_tilde = (np.delete(np.delete(a, acceptor, axis=0), acceptor, axis=1) for a in matrices)
+        p0_tilde = np.delete(hopping_matrix.occ_probs.initial, acceptor)
+        #  Taking [a, nb, c, d, ...] -> [(b @ a), (c @ b @ a), (d @ c @ b @ a), ...]
+        a_prod = accumulate(A_tilde, lambda a, b: b @ a, initial=p0_tilde)
+        pnot = map(np.sum, a_prod)
+        return ((delta_t * i, p) for i, p in enumerate(pnot))
 
-    def until_prob(self, p: float):
-        return takewhile(lambda x: x[1] > p, self)
+    @staticmethod
+    def gen_until_time(
+        t: float, delta_t: float, hopping_matrix: HoppingMatrix, acceptor: int
+    ) -> Iterator[Tuple[float, float]]:
+
+        gen = Pnot.gen(delta_t=delta_t, hopping_matrix=hopping_matrix, acceptor=acceptor)
+        while_lt = takewhile(lambda x: x[0] < t, gen)
+        extra_terms = islice(gen, 100)
+        return chain(while_lt, extra_terms)
+
+    @staticmethod
+    def gen_until_prob(
+        p: float, delta_t: float, hopping_matrix: HoppingMatrix, acceptor: int
+    ) -> Iterator[Tuple[float, float]]:
+        gen = Pnot.gen(delta_t=delta_t, hopping_matrix=hopping_matrix, acceptor=acceptor)
+        while_gt = takewhile(lambda x: x[1] > p, gen)
+        extra_terms = islice(gen, 100)
+        return chain(while_gt, extra_terms)
 
     @staticmethod
     def converged_with_timestep(
-        a: HoppingMatrix, tau: float, tolerance: float, max_dt: float = 1.0, min_dt: float = 1e-4
-    ) -> Tuple[List[float], List[float], "Pnot"]:
+        a: HoppingMatrix,
+        acceptor: int,
+        until_equals: float,
+        tolerance: float,
+        max_dt: float = 1.0,
+        min_dt: float = 1e-4,
+    ) -> "Pnot":
         if not max_dt > min_dt:
             raise ValueError(f"Min dt must be below max dt min_dt={min_dt}, max_dt={max_dt}")
 
@@ -181,23 +244,30 @@ class Pnot:
             dts.append(last_dt / 1.61)
             last_dt = dts[-1]
 
-        logger.info(f"Delta_t set = {dts}")
-
         last_t = -(10.0 ** 6)
 
         for dt in dts:
-            logger.info(f"Getting tau for delta_t={dt}")
-            p_not = Pnot(acceptor=2, hopping_matrix=a, delta_t=dt)
-            times, p_not_list = zip(*p_not.until_prob(tau))
-            t = times[-1]
-            logger.info(f"Tau = {t}")
-            if isclose(times[-1], last_t, abs_tol=tolerance):
+
+            times, p_not_list = zip(
+                *Pnot.gen_until_prob(until_equals, acceptor=acceptor, delta_t=dt, hopping_matrix=a)
+            )
+
+            p_not = Pnot(
+                acceptor=acceptor, times=times, values=p_not_list, delta_t=dt, hopping_matrix=a
+            )
+
+            t = p_not.time_when_equal_to(until_equals)
+            logger.info(f"For delta_t = {dt:.5f}, Tau = {t:.5f}")
+            if isclose(t, last_t, abs_tol=tolerance):
                 break
             last_t = t
         else:
-            raise ValueError(f"Tau={tau} did not converge with timestep to tolerance={tolerance}")
+            raise ValueError(
+                f"Time for Pnot to reach {until_equals} did not converge with timestep to tolerance={tolerance}"
+            )
         logger.info(
-            f"Yes!! tau ({tau}) successfully converged to {t} with difference of {t-last_t}"
+            f"Yes!! Time for pnot to reach ({until_equals:6f}) successfully converged to {t:6f}"
+            f" with difference of {t - last_t:3f}"
             f", which is within the given tolerance, {tolerance}"
         )
-        return times, p_not_list, p_not
+        return p_not

@@ -25,7 +25,7 @@ class TimeEvolvingState:
             ]
         )
 
-    def observable(self, operator: Callable, hermitian: bool):
+    def observable(self, operator: Callable, hermitian: bool) -> "TimeEvolvingObservable":
         return TimeEvolvingObservable(self, operator, hermitian=hermitian)
 
 
