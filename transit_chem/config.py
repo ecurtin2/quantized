@@ -40,7 +40,10 @@ def load(p: Path = default_conf_path) -> Config:
     return attr.evolve(default_conf, **conf_file_d)
 
 
-conf: Config = load()
+try:
+    conf: Config = load()
+except FileNotFoundError:
+    conf: Config = Config()
 
 
 def set_items(path: Path = default_conf_path, **kwargs):
