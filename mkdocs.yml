@@ -7,13 +7,12 @@ nav:
     - "Generate a matrix": tutorials/get_matrices.ipynb
     - operators: tutorials/operators.ipynb
     - triple_well: tutorials/triple_well.ipynb
+  - 'API Documentation': apidoc.md
 
 
 theme:
   name: 'material'
   language: 'en'
-  feature:
-    tabs: true
 
 repo_name: 'ecurtin2/transit-chem'
 repo_url: 'https://github.com/ecurtin2/transit-chem'
