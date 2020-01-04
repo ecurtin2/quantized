@@ -1,13 +1,5 @@
 [[package]]
 category = "dev"
-description = "A configurable sidebar-enabled Sphinx theme"
-name = "alabaster"
-optional = false
-python-versions = "*"
-version = "0.7.12"
-
-[[package]]
-category = "dev"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 name = "appdirs"
 optional = false
@@ -38,17 +30,6 @@ name = "attrs"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "19.3.0"
-
-[[package]]
-category = "dev"
-description = "Internationalization utilities"
-name = "babel"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "2.7.0"
-
-[package.dependencies]
-pytz = ">=2015.7"
 
 [[package]]
 category = "dev"
@@ -97,22 +78,6 @@ version = "1.0.0"
 
 [package.dependencies]
 attrs = ">=17.3"
-
-[[package]]
-category = "dev"
-description = "Python package for providing Mozilla's CA Bundle."
-name = "certifi"
-optional = false
-python-versions = "*"
-version = "2019.9.11"
-
-[[package]]
-category = "dev"
-description = "Universal encoding detector for Python 2 and 3"
-name = "chardet"
-optional = false
-python-versions = "*"
-version = "3.0.4"
 
 [[package]]
 category = "main"
@@ -168,14 +133,6 @@ version = "0.6.0"
 
 [[package]]
 category = "dev"
-description = "Docutils -- Python Documentation Utilities"
-name = "docutils"
-optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-version = "0.15.2"
-
-[[package]]
-category = "dev"
 description = "Discover and load entry points from installed packages."
 name = "entrypoints"
 optional = false
@@ -214,6 +171,14 @@ version = "1.0.2"
 
 [[package]]
 category = "dev"
+description = "An HTML Minifier"
+name = "htmlmin"
+optional = false
+python-versions = "*"
+version = "0.1.12"
+
+[[package]]
+category = "dev"
 description = "A library for property based testing"
 name = "hypothesis"
 optional = false
@@ -222,22 +187,6 @@ version = "4.42.7"
 
 [package.dependencies]
 attrs = ">=19.2.0"
-
-[[package]]
-category = "dev"
-description = "Internationalized Domain Names in Applications (IDNA)"
-name = "idna"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "2.8"
-
-[[package]]
-category = "dev"
-description = "Getting image size from png/jpeg/jpeg2000/gif file"
-name = "imagesize"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "1.1.0"
 
 [[package]]
 category = "dev"
@@ -349,6 +298,14 @@ name = "joblib"
 optional = false
 python-versions = "*"
 version = "0.14.1"
+
+[[package]]
+category = "dev"
+description = "JavaScript minifier."
+name = "jsmin"
+optional = false
+python-versions = "*"
+version = "2.2.2"
 
 [[package]]
 category = "dev"
@@ -472,6 +429,18 @@ version = "1.1.0"
 setuptools = "*"
 
 [[package]]
+category = "dev"
+description = "Python LiveReload is an awesome tool for web developers"
+name = "livereload"
+optional = false
+python-versions = "*"
+version = "2.6.1"
+
+[package.dependencies]
+six = "*"
+tornado = "*"
+
+[[package]]
 category = "main"
 description = "lightweight wrapper around basic LLVM functionality"
 name = "llvmlite"
@@ -490,6 +459,17 @@ version = "0.4.0"
 [package.dependencies]
 colorama = ">=0.3.4"
 win32-setctime = ">=1.0.0"
+
+[[package]]
+category = "dev"
+description = "Python implementation of Markdown."
+name = "markdown"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
+version = "3.1.1"
+
+[package.dependencies]
+setuptools = ">=36"
 
 [[package]]
 category = "dev"
@@ -529,6 +509,62 @@ name = "mistune"
 optional = false
 python-versions = "*"
 version = "0.8.4"
+
+[[package]]
+category = "dev"
+description = "Project documentation with Markdown."
+name = "mkdocs"
+optional = false
+python-versions = ">=2.7.9,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+version = "1.0.4"
+
+[package.dependencies]
+Jinja2 = ">=2.7.1"
+Markdown = ">=2.3.1"
+PyYAML = ">=3.10"
+click = ">=3.3"
+livereload = ">=2.5.1"
+tornado = ">=5.0"
+
+[[package]]
+category = "dev"
+description = "MkDocs Jupyter"
+name = "mkdocs-jupyter"
+optional = false
+python-versions = ">=3.0,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+version = "0.10.2"
+
+[package.dependencies]
+mkdocs = "*"
+nbconvert = "*"
+
+[[package]]
+category = "dev"
+description = "A Material Design theme for MkDocs"
+name = "mkdocs-material"
+optional = false
+python-versions = "*"
+version = "4.6.0"
+
+[package.dependencies]
+Pygments = ">=2.2"
+markdown = "<3.2"
+mkdocs = ">=1"
+mkdocs-minify-plugin = ">=0.2"
+pymdown-extensions = ">=6.2,<6.3"
+
+[[package]]
+category = "dev"
+description = "An MkDocs plugin to minify HTML and/or JS files prior to being written to disk"
+name = "mkdocs-minify-plugin"
+optional = false
+python-versions = ">=2.7"
+version = "0.2.1"
+
+[package.dependencies]
+htmlmin = ">=0.1.4"
+jsmin = ">=2.2.2"
+mkdocs = ">=1.0.4"
 
 [[package]]
 category = "dev"
@@ -596,22 +632,6 @@ traitlets = ">=4.1"
 
 [[package]]
 category = "dev"
-description = "Jupyter Notebook Tools for Sphinx"
-name = "nbsphinx"
-optional = false
-python-versions = "*"
-version = "0.4.3"
-
-[package.dependencies]
-docutils = "*"
-jinja2 = "*"
-nbconvert = "!=5.4"
-nbformat = "*"
-sphinx = ">=1.6.3"
-traitlets = "*"
-
-[[package]]
-category = "dev"
 description = "A web-based notebook environment for interactive computing"
 name = "notebook"
 optional = false
@@ -658,18 +678,6 @@ version = "1.17.3"
 
 [[package]]
 category = "dev"
-description = "Core utilities for Python packages"
-name = "packaging"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "19.2"
-
-[package.dependencies]
-pyparsing = ">=2.0.2"
-six = "*"
-
-[[package]]
-category = "dev"
 description = "Utilities for writing pandoc filters in python"
 name = "pandocfilters"
 optional = false
@@ -691,6 +699,14 @@ name = "pathspec"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "0.6.0"
+
+[[package]]
+category = "dev"
+description = "Backport of PEP 562."
+name = "pep562"
+optional = false
+python-versions = "*"
+version = "1.0"
 
 [[package]]
 category = "dev"
@@ -795,6 +811,18 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "2.4.2"
 
 [[package]]
+category = "dev"
+description = "Extension pack for Python Markdown."
+name = "pymdown-extensions"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
+version = "6.2.1"
+
+[package.dependencies]
+Markdown = ">=3.0.1"
+pep562 = "*"
+
+[[package]]
 category = "main"
 description = "Python parsing module"
 name = "pyparsing"
@@ -856,14 +884,6 @@ six = ">=1.5"
 
 [[package]]
 category = "dev"
-description = "World timezone definitions, modern and historical"
-name = "pytz"
-optional = false
-python-versions = "*"
-version = "2019.3"
-
-[[package]]
-category = "dev"
 description = "Python for Window Extensions"
 marker = "sys_platform == \"win32\""
 name = "pywin32"
@@ -879,6 +899,14 @@ name = "pywinpty"
 optional = false
 python-versions = "*"
 version = "0.5.5"
+
+[[package]]
+category = "dev"
+description = "YAML parser and emitter for Python"
+name = "pyyaml"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "5.2"
 
 [[package]]
 category = "dev"
@@ -911,20 +939,6 @@ name = "regex"
 optional = false
 python-versions = "*"
 version = "2019.11.1"
-
-[[package]]
-category = "dev"
-description = "Python HTTP for Humans."
-name = "requests"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "2.22.0"
-
-[package.dependencies]
-certifi = ">=2017.4.17"
-chardet = ">=3.0.2,<3.1.0"
-idna = ">=2.5,<2.9"
-urllib3 = ">=1.21.1,<1.25.0 || >1.25.0,<1.25.1 || >1.25.1,<1.26"
 
 [[package]]
 category = "main"
@@ -963,111 +977,6 @@ name = "six"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*"
 version = "1.12.0"
-
-[[package]]
-category = "dev"
-description = "This package provides 26 stemmers for 25 languages generated from Snowball algorithms."
-name = "snowballstemmer"
-optional = false
-python-versions = "*"
-version = "2.0.0"
-
-[[package]]
-category = "dev"
-description = "Python documentation generator"
-name = "sphinx"
-optional = false
-python-versions = ">=3.5"
-version = "2.2.1"
-
-[package.dependencies]
-Jinja2 = ">=2.3"
-Pygments = ">=2.0"
-alabaster = ">=0.7,<0.8"
-babel = ">=1.3,<2.0 || >2.0"
-colorama = ">=0.3.5"
-docutils = ">=0.12"
-imagesize = "*"
-packaging = "*"
-requests = ">=2.5.0"
-setuptools = "*"
-snowballstemmer = ">=1.1"
-sphinxcontrib-applehelp = "*"
-sphinxcontrib-devhelp = "*"
-sphinxcontrib-htmlhelp = "*"
-sphinxcontrib-jsmath = "*"
-sphinxcontrib-qthelp = "*"
-sphinxcontrib-serializinghtml = "*"
-
-[[package]]
-category = "dev"
-description = "Type hints (PEP 484) support for the Sphinx autodoc extension"
-name = "sphinx-autodoc-typehints"
-optional = false
-python-versions = ">=3.5.2"
-version = "1.9.0"
-
-[package.dependencies]
-Sphinx = ">=2.1"
-
-[[package]]
-category = "dev"
-description = "Sphinx Bootstrap Theme."
-name = "sphinx-bootstrap-theme"
-optional = false
-python-versions = "*"
-version = "0.7.1"
-
-[package.dependencies]
-setuptools = "*"
-
-[[package]]
-category = "dev"
-description = ""
-name = "sphinxcontrib-applehelp"
-optional = false
-python-versions = "*"
-version = "1.0.1"
-
-[[package]]
-category = "dev"
-description = ""
-name = "sphinxcontrib-devhelp"
-optional = false
-python-versions = "*"
-version = "1.0.1"
-
-[[package]]
-category = "dev"
-description = ""
-name = "sphinxcontrib-htmlhelp"
-optional = false
-python-versions = "*"
-version = "1.0.2"
-
-[[package]]
-category = "dev"
-description = "A sphinx extension which renders display math in HTML via JavaScript"
-name = "sphinxcontrib-jsmath"
-optional = false
-python-versions = ">=3.5"
-version = "1.0.1"
-
-[[package]]
-category = "dev"
-description = ""
-name = "sphinxcontrib-qthelp"
-optional = false
-python-versions = "*"
-version = "1.0.2"
-
-[[package]]
-category = "dev"
-description = ""
-name = "sphinxcontrib-serializinghtml"
-optional = false
-python-versions = "*"
-version = "1.1.3"
 
 [[package]]
 category = "dev"
@@ -1145,14 +1054,6 @@ version = "3.7.4.1"
 
 [[package]]
 category = "dev"
-description = "HTTP library with thread-safe connection pooling, file post, and more."
-name = "urllib3"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4"
-version = "1.25.6"
-
-[[package]]
-category = "dev"
 description = "Measures number of Terminal column cells of wide-character codes"
 name = "wcwidth"
 optional = false
@@ -1199,36 +1100,30 @@ version = "0.6.0"
 more-itertools = "*"
 
 [metadata]
-content-hash = "1dbef3bc70e984ac866bf239ca75c050820df2277b5326228d2c2f77639fc895"
+content-hash = "f4c8c91bf3d75affa0ba68e27be7a261ce7a1b14c5653ce62db4077e3fd7f9e1"
 python-versions = "^3.7.0"
 
 [metadata.hashes]
-alabaster = ["446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359", "a661d72d58e6ea8a57f7a86e37d86716863ee5e92788398526d58b26a4e4dc02"]
 appdirs = ["9e5896d1372858f8dd3344faf4e5014d21849c756c8d5701f78f8a103b372d92", "d8b24664561d0d34ddfaec54636d502d7cea6e29c3eaf68f3df6180863e2166e"]
 appnope = ["5b26757dc6f79a3b7dc9fab95359328d5747fcb2409d331ea66d0272b90ab2a0", "8b995ffe925347a2138d7ac0fe77155e4311a0ea6d6da4f5128fe4b3cbe5ed71"]
 atomicwrites = ["03472c30eb2c5d1ba9227e4c2ca66ab8287fbfbbda3888aa93dc2e28fc6811b4", "75a9445bac02d8d058d5e1fe689654ba5a6556a1dfd8ce6ec55a0ed79866cfa6"]
 attrs = ["08a96c641c3a74e44eb59afb61a24f2cb9f4d7188748e76ba4bb5edfa3cb7d1c", "f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"]
-babel = ["af92e6106cb7c55286b25b38ad7695f8b4efb36a90ba483d7f7a6628c46158ab", "e86135ae101e31e2c8ec20a4e0c5220f4eed12487d5cf3f78be7e98d3a57fc28"]
 backcall = ["38ecd85be2c1e78f77fd91700c76e14667dc21e2713b63876c0eb901196e01e4", "bbbf4b1e5cd2bdb08f915895b51081c041bac22394fdfcfdfbe9f14b77c08bf2"]
 black = ["1b30e59be925fafc1ee4565e5e08abef6b03fe455102883820fe5ee2e4734e0b", "c2edb73a08e9e0e6f65a0e6af18b059b8b1cdd5bef997d7a0b181df93dc81539"]
 bleach = ["213336e49e102af26d9cde77dd2d0397afabc5a6bf2fed985dc35b5d1e285a16", "3fdf7f77adcf649c9911387df51254b813185e32b2c6619f690b593a617e19fa"]
 cattrs = ["616972ae3dfa6e623a40ad3cb845420e64942989152774ab055e5c2b2f89f997", "b7ab5cf8ad127c42eefd01410c1c6e28569a45a255ea80ed968511873c433c7a"]
-certifi = ["e4f3620cfea4f83eedc95b24abd9cd56f3c4b146dd0177e83a21b4eb49e21e50", "fd7c7c74727ddcf00e9acd26bba8da604ffec95bf1c2144e67aff7a8b50e6cef"]
-chardet = ["84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae", "fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"]
 click = ["2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13", "5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"]
 colorama = ["05eed71e2e327246ad6b38c540c4a3117230b19679b875190486ddd2d721422d", "f8ac84de7840f5b9c4e3347b3c1eaa50f7e49c2b07596221daec5edaabbd7c48"]
 coverage = ["08907593569fe59baca0bf152c43f3863201efb6113ecb38ce7e97ce339805a6", "0be0f1ed45fc0c185cfd4ecc19a1d6532d72f86a2bac9de7e24541febad72650", "141f08ed3c4b1847015e2cd62ec06d35e67a3ac185c26f7635f4406b90afa9c5", "19e4df788a0581238e9390c85a7a09af39c7b539b29f25c89209e6c3e371270d", "23cc09ed395b03424d1ae30dcc292615c1372bfba7141eb85e11e50efaa6b351", "245388cda02af78276b479f299bbf3783ef0a6a6273037d7c60dc73b8d8d7755", "331cb5115673a20fb131dadd22f5bcaf7677ef758741312bee4937d71a14b2ef", "386e2e4090f0bc5df274e720105c342263423e77ee8826002dcffe0c9533dbca", "3a794ce50daee01c74a494919d5ebdc23d58873747fa0e288318728533a3e1ca", "60851187677b24c6085248f0a0b9b98d49cba7ecc7ec60ba6b9d2e5574ac1ee9", "63a9a5fc43b58735f65ed63d2cf43508f462dc49857da70b8980ad78d41d52fc", "6b62544bb68106e3f00b21c8930e83e584fdca005d4fffd29bb39fb3ffa03cb5", "6ba744056423ef8d450cf627289166da65903885272055fb4b5e113137cfa14f", "7494b0b0274c5072bddbfd5b4a6c6f18fbbe1ab1d22a41e99cd2d00c8f96ecfe", "826f32b9547c8091679ff292a82aca9c7b9650f9fda3e2ca6bf2ac905b7ce888", "93715dffbcd0678057f947f496484e906bf9509f5c1c38fc9ba3922893cda5f5", "9a334d6c83dfeadae576b4d633a71620d40d1c379129d587faa42ee3e2a85cce", "af7ed8a8aa6957aac47b4268631fa1df984643f07ef00acd374e456364b373f5", "bf0a7aed7f5521c7ca67febd57db473af4762b9622254291fbcbb8cd0ba5e33e", "bf1ef9eb901113a9805287e090452c05547578eaab1b62e4ad456fcc049a9b7e", "c0afd27bc0e307a1ffc04ca5ec010a290e49e3afbe841c5cafc5c5a80ecd81c9", "dd579709a87092c6dbee09d1b7cfa81831040705ffa12a1b248935274aee0437", "df6712284b2e44a065097846488f66840445eb987eb81b3cc6e4149e7b6982e1", "e07d9f1a23e9e93ab5c62902833bf3e4b1f65502927379148b6622686223125c", "e2ede7c1d45e65e209d6093b762e98e8318ddeff95317d07a27a2140b80cfd24", "e4ef9c164eb55123c62411f5936b5c2e521b12356037b6e1c2617cef45523d47", "eca2b7343524e7ba246cab8ff00cab47a2d6d54ada3b02772e908a45675722e2", "eee64c616adeff7db37cc37da4180a3a5b6177f5c46b187894e633f088fb5b28", "ef824cad1f980d27f26166f86856efe11eff9912c4fed97d3804820d43fa550c", "efc89291bd5a08855829a3c522df16d856455297cf35ae827a37edac45f466a7", "fa964bae817babece5aa2e8c1af841bebb6d0b9add8e637548809d040443fee0", "ff37757e068ae606659c28c3bd0d923f9d29a85de79bf25b2b34b148473b5025"]
 cycler = ["1d8a5ae1ff6c5cf9b93e8811e581232ad8920aeec647c37316ceac982b08cb2d", "cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8"]
 decorator = ["54c38050039232e1db4ad7375cfce6748d7b41c29e95a081c8a6d2c30364a2ce", "5d19b92a3c8f7f101c8dd86afd86b0f061a8ce4540ab8cd401fa2542756bce6d"]
 defusedxml = ["6687150770438374ab581bb7a1b327a847dd9c5749e396102de3fad4e8a3ef93", "f684034d135af4c6cbb949b8a4d2ed61634515257a67299e5f940fbaa34377f5"]
-docutils = ["6c4f696463b79f1fb8ba0c594b63840ebd41f059e92b31957c46b74a4599b6d0", "9e4d7ecfc600058e07ba661411a2b7de2fd0fafa17d1a7f7361cd47b1175c827", "a2aeea129088da402665e92e0b25b04b073c04b2dce4ab65caaa38b7ce2e1a99"]
 entrypoints = ["589f874b313739ad35be6e0cd7efde2a4e9b6fea91edcc34e58ecbb8dbe56d19", "c70dd71abe5a8c85e55e12c19bd91ccfeec11a6e99044204511f9ed547d48451"]
 enum34 = ["2d81cbbe0e73112bdfe6ef8576f2238f2ba27dd0d55752a776c41d38b7da2850", "644837f692e5f550741432dd3f223bbb9852018674981b1664e5dc339387588a", "6bd0f6ad48ec2aa117d3d141940d484deccda84d4fcd884f5c3d93c23ecd8c79", "8ad8c4783bf61ded74527bffb48ed9b54166685e4230386a9ed9b1279e2df5b1"]
 flake8 = ["45681a117ecc81e870cbf1262835ae4af5e7a8b08e40b944a8a6e6b895914cfb", "49356e766643ad15072a789a20915d3c91dc89fd313ccd71802303fd67e4deca"]
 funcsigs = ["330cc27ccbf7f1e992e69fef78261dc7c6569012cf397db8d3de0234e6c937ca", "a7bb0f2cf3a3fd1ab2732cb49eba4252c2af4240442415b4abce3b87022a8f50"]
+htmlmin = ["50c1ef4630374a5d723900096a961cff426dff46b48f34d194a81bbe14eca178"]
 hypothesis = ["1ccaf1c273fcd9bdb6f09c8b2c629ada9911efb3c6279cdfadb32d65a0052e3d", "9c2ef45929e0546dd94e4c3994be8839b8f51bdee51303108d5f7051cbb81315"]
-idna = ["c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407", "ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"]
-imagesize = ["3f349de3eb99145973fefb7dbe38554414e5c30abd0c8e4b970a7c9d09f3a1d8", "f3832918bc3c66617f92e35f5d70729187676313caa60c187eb0f28b8fe5e3b5"]
 importlib-metadata = ["aa18d7378b00b40847790e7c27e11673d7fed219354109d0e7b9e5b25dc3ad26", "d5f18a79777f3aa179c145737780282e27b508fc8fd688cb17c7a813e8bd39af"]
 ipykernel = ["1a7def9c986f1ee018c1138d16951932d4c9d4da01dad45f9d34e9899565a22f", "b368ad13edb71fa2db367a01e755a925d7f75ed5e09fbd3f06c85e7a8ef108a8"]
 ipython = ["dfd303b270b7b5232b3d08bd30ec6fd685d8a58cabd54055e3d69d8f029f7280", "ed7ebe1cba899c1c3ccad6f7f1c2d2369464cc77dba8eebc65e2043e19cda995"]
@@ -1238,6 +1133,7 @@ isort = ["54da7e92468955c4fceacd0c86bd0ec997b0e1ee80d97f67c35a78b719dccab1", "6e
 jedi = ["786b6c3d80e2f06fd77162a07fed81b8baa22dde5d62896a790a331d6ac21a27", "ba859c74fa3c966a22f2aeebe1b74ee27e2a462f56d3f5f7ca4a59af61bfe42e"]
 jinja2 = ["74320bb91f31270f9551d46522e33af46a80c3d619f4a4bf42b3164d30b5911f", "9fe95f19286cfefaa917656583d020be14e7859c6b0252588391e47db34527de"]
 joblib = ["0630eea4f5664c463f23fbf5dcfc54a2bc6168902719fa8e19daf033022786c8", "bdb4fd9b72915ffb49fde2229ce482dd7ae79d842ed8c2b4c932441495af1403"]
+jsmin = ["b6df99b2cd1c75d9d342e4335b535789b8da9107ec748212706ef7bbe5c2553b"]
 json5 = ["124b0f0da1ed2ff3bfe3a3e9b8630abd3c650852465cb52c15ef60b8e82a73b0", "32bd17e0553bf53927f6c29b6089f3a320c12897120a4bcfea76ea81c10b2d9c"]
 jsonschema = ["2fa0684276b6333ff3c0b1b27081f4b2305f0a36cf702a23db50edb141893c3f", "94c0a13b4a0616458b42529091624e66700a17f847453e52279e35509a5b7631"]
 jupyter = ["3e1f86076bbb7c8c207829390305a2b1fe836d471ed54be66a3b8c41e7f46cc7", "5b290f93b98ffbc21c0c7e749f054b3267782166d72fa5e3ed1ed4eaf34a2b78", "d9dc4b3318f310e34c82951ea5d6683f67bed7def4b259fafbfe4f1beb1d8e5f"]
@@ -1247,25 +1143,30 @@ jupyter-core = ["464769f7387d7a62a2403d067f1ddc616655b7f77f5d810c0dd62cb54bfd0fb
 jupyterlab = ["2188a9bcaaf0b6a68ff9098a481f37ece8231634b862fd3c9adedc466aac79f2", "e458312c9afe0386399be1cc808178ef7014ef88c562084856b6830e9602afa1"]
 jupyterlab-server = ["d0977527bfce6f47c782cb6bf79d2c949ebe3f22ac695fa000b730c671445dad", "d9c3bcf097f7ad8d8fd2f8d0c1e8a1b833671c02808e5f807088975495364447"]
 kiwisolver = ["05b5b061e09f60f56244adc885c4a7867da25ca387376b02c1efc29cc16bcd0f", "210d8c39d01758d76c2b9a693567e1657ec661229bc32eac30761fa79b2474b0", "26f4fbd6f5e1dabff70a9ba0d2c4bd30761086454aa30dddc5b52764ee4852b7", "3b15d56a9cd40c52d7ab763ff0bc700edbb4e1a298dc43715ecccd605002cf11", "3b2378ad387f49cbb328205bda569b9f87288d6bc1bf4cd683c34523a2341efe", "400599c0fe58d21522cae0e8b22318e09d9729451b17ee61ba8e1e7c0346565c", "47b8cb81a7d18dbaf4fed6a61c3cecdb5adec7b4ac292bddb0d016d57e8507d5", "53eaed412477c836e1b9522c19858a8557d6e595077830146182225613b11a75", "58e626e1f7dfbb620d08d457325a4cdac65d1809680009f46bf41eaf74ad0187", "5a52e1b006bfa5be04fe4debbcdd2688432a9af4b207a3f429c74ad625022641", "5c7ca4e449ac9f99b3b9d4693debb1d6d237d1542dd6a56b3305fe8a9620f883", "682e54f0ce8f45981878756d7203fd01e188cc6c8b2c5e2cf03675390b4534d5", "76275ee077772c8dde04fb6c5bc24b91af1bb3e7f4816fd1852f1495a64dad93", "79bfb2f0bd7cbf9ea256612c9523367e5ec51d7cd616ae20ca2c90f575d839a2", "7f4dd50874177d2bb060d74769210f3bce1af87a8c7cf5b37d032ebf94f0aca3", "8944a16020c07b682df861207b7e0efcd2f46c7488619cb55f65882279119389", "8aa7009437640beb2768bfd06da049bad0df85f47ff18426261acecd1cf00897", "9105ce82dcc32c73eb53a04c869b6a4bc756b43e4385f76ea7943e827f529e4d", "933df612c453928f1c6faa9236161a1d999a26cd40abf1dc5d7ebbc6dbfb8fca", "939f36f21a8c571686eb491acfffa9c7f1ac345087281b412d63ea39ca14ec4a", "9491578147849b93e70d7c1d23cb1229458f71fc79c51d52dce0809b2ca44eea", "9733b7f64bd9f807832d673355f79703f81f0b3e52bfce420fc00d8cb28c6a6c", "a02f6c3e229d0b7220bd74600e9351e18bc0c361b05f29adae0d10599ae0e326", "a0c0a9f06872330d0dd31b45607197caab3c22777600e88031bfe66799e70bb0", "aa716b9122307c50686356cfb47bfbc66541868078d0c801341df31dca1232a9", "acc4df99308111585121db217681f1ce0eecb48d3a828a2f9bbf9773f4937e9e", "b64916959e4ae0ac78af7c3e8cef4becee0c0e9694ad477b4c6b3a536de6a544", "d22702cadb86b6fcba0e6b907d9f84a312db9cd6934ee728144ce3018e715ee1", "d3fcf0819dc3fea58be1fd1ca390851bdb719a549850e708ed858503ff25d995", "d52e3b1868a4e8fd18b5cb15055c76820df514e26aa84cc02f593d99fef6707f", "db1a5d3cc4ae943d674718d6c47d2d82488ddd94b93b9e12d24aabdbfe48caee", "e3a21a720791712ed721c7b95d433e036134de6f18c77dbe96119eaf7aa08004", "e8bf074363ce2babeb4764d94f8e65efd22e6a7c74860a4f05a6947afc020ff2", "f16814a4a96dc04bf1da7d53ee8d5b1d6decfc1a92a63349bb15d37b6a263dd9", "f2b22153870ca5cf2ab9c940d7bc38e8e9089fa0f7e5856ea195e1cf4ff43d5a", "f790f8b3dff3d53453de6a7b7ddd173d2e020fb160baff578d578065b108a05f", "fe51b79da0062f8e9d49ed0182a626a7dc7a0cbca0328f612c6ee5e4711c81e4"]
+livereload = ["78d55f2c268a8823ba499305dcac64e28ddeb9a92571e12d543cd304faf5817b", "89254f78d7529d7ea0a3417d224c34287ebfe266b05e67e51facaf82c27f0f66"]
 llvmlite = ["06eb546c9d8f138dd91484e0e898cf0f10100e82f0112bb39f9fdcff18aca631", "1ad4f3462169884b087a9c300db26841b20d996e9f07652ca7178f9a0296ffc4", "327161412337f9e14e3a5babcfcfa4e7e6aa89cf1400fdbe162a4e19e6418013", "327558ee71574ecd813b3feb3ffd1f5c32a20595f2c7d02b503aafa55d79285a", "3f71e9a03da5b666ddbadf645182921fb399c7d4cf5c6660ebc456c3a491b041", "4386c310138aa381bace2a88ddf743ec944d11687e9a98777266abc66c8e53ee", "4eaa398d4cafb76e2d8f30ca6ab875039a1023c91e7a690c6ddec20e58bb9a07", "4f0bfd1cb98d4d240275ec83876e10f9b9d31e758e8464135c46a257b9837649", "6667551d737e31d7134c731bddf2c9177cc9bcac72da7b16999098218272fc0b", "692ad0a0012f2cefe17b7bd0a0fddc903f9c6b2047a8e8fdb7a8f4e4b1f6cf95", "81db97d407012f474097c644cb689e4c4649ebf66a018cfa2b7580b1e5417677", "8523c21b2ace8bf5ee2dfeb86c9703714be43ce93fa99e29143d25f1ef01b51e", "960ac92388a23ea8036f7c321facd2d721952db3ee62d6aa763dc219e53aebf1", "965fc64a2f5ca38326d7755e6b1447c3d85bb8bd043907d4dc3eff337d1f3a5d", "983b5bfdce72f4008016a5d9e3bcca072ef08d13d782e45d94ef6ea32768814e", "a63fa4a09a2292d9b5a166e45c9feb65299a0520ba46f42af0b0a467329883e5", "c3f3c64be18b754175b78ab76e0f11d9d9ec11832fbc4ed15329dd52b2d6d40f", "c6daff653c0b516add52639c7b05b4176670e79cd308d53d801606b1b64bcd22", "d2596ea5346f7327d2fca01e047ea9e2b0a5e60df0a112f4d88d8cd4b98bc2b5", "d5a8b571f333c5bd6ca26092faec6b728e40c1a7d7c24ff4d9b8cf2a9799852c", "dab58e45c0ef5bd47f657fa5ff2e7341846798632517aa319368c998fe994c4e"]
 loguru = ["6e3e8d865201f5a301a4eb7563f4c9e979d80fbe6f6fa919b3e3a7e095106c7b", "d5ddf363b7e0e562652f283f74a89bf35601baf16b70f2cd2736a2f8c6638748"]
+markdown = ["2e50876bcdd74517e7b71f3e7a76102050edec255b3983403f1a63e7c8a41e7a", "56a46ac655704b91e5b7e6326ce43d5ef72411376588afa1dd90e881b83c7e8c"]
 markupsafe = ["00bc623926325b26bb9605ae9eae8a215691f33cae5df11ca5424f06f2d1f473", "09027a7803a62ca78792ad89403b1b7a73a01c8cb65909cd876f7fcebd79b161", "09c4b7f37d6c648cb13f9230d847adf22f8171b1ccc4d5682398e77f40309235", "1027c282dad077d0bae18be6794e6b6b8c91d58ed8a8d89a89d59693b9131db5", "24982cc2533820871eba85ba648cd53d8623687ff11cbb805be4ff7b4c971aff", "29872e92839765e546828bb7754a68c418d927cd064fd4708fab9fe9c8bb116b", "43a55c2930bbc139570ac2452adf3d70cdbb3cfe5912c71cdce1c2c6bbd9c5d1", "46c99d2de99945ec5cb54f23c8cd5689f6d7177305ebff350a58ce5f8de1669e", "500d4957e52ddc3351cabf489e79c91c17f6e0899158447047588650b5e69183", "535f6fc4d397c1563d08b88e485c3496cf5784e927af890fb3c3aac7f933ec66", "62fe6c95e3ec8a7fad637b7f3d372c15ec1caa01ab47926cfdf7a75b40e0eac1", "6dd73240d2af64df90aa7c4e7481e23825ea70af4b4922f8ede5b9e35f78a3b1", "717ba8fe3ae9cc0006d7c451f0bb265ee07739daf76355d06366154ee68d221e", "79855e1c5b8da654cf486b830bd42c06e8780cea587384cf6545b7d9ac013a0b", "7c1699dfe0cf8ff607dbdcc1e9b9af1755371f92a68f706051cc8c37d447c905", "88e5fcfb52ee7b911e8bb6d6aa2fd21fbecc674eadd44118a9cc3863f938e735", "8defac2f2ccd6805ebf65f5eeb132adcf2ab57aa11fdf4c0dd5169a004710e7d", "98c7086708b163d425c67c7a91bad6e466bb99d797aa64f965e9d25c12111a5e", "9add70b36c5666a2ed02b43b335fe19002ee5235efd4b8a89bfcf9005bebac0d", "9bf40443012702a1d2070043cb6291650a0841ece432556f784f004937f0f32c", "ade5e387d2ad0d7ebf59146cc00c8044acbd863725f887353a10df825fc8ae21", "b00c1de48212e4cc9603895652c5c410df699856a2853135b3967591e4beebc2", "b1282f8c00509d99fef04d8ba936b156d419be841854fe901d8ae224c59f0be5", "b2051432115498d3562c084a49bba65d97cf251f5a331c64a12ee7e04dacc51b", "ba59edeaa2fc6114428f1637ffff42da1e311e29382d81b339c1817d37ec93c6", "c8716a48d94b06bb3b2524c2b77e055fb313aeb4ea620c8dd03a105574ba704f", "cd5df75523866410809ca100dc9681e301e3c27567cf498077e8551b6d20e42f", "e249096428b3ae81b08327a63a485ad0878de3fb939049038579ac0ef61e17e7"]
 matplotlib = ["08ccc8922eb4792b91c652d3e6d46b1c99073f1284d1b6705155643e8046463a", "161dcd807c0c3232f4dcd4a12a382d52004a498174cbfafd40646106c5bcdcc8", "1f9e885bfa1b148d16f82a6672d043ecf11197f6c71ae222d0546db706e52eb2", "2d6ab54015a7c0d727c33e36f85f5c5e4172059efdd067f7527f6e5d16ad01aa", "5d2e408a2813abf664bd79431107543ecb449136912eb55bb312317edecf597e", "61c8b740a008218eb604de518eb411c4953db0cb725dd0b32adf8a81771cab9e", "80f10af8378fccc136da40ea6aa4a920767476cdfb3241acb93ef4f0465dbf57", "819d4860315468b482f38f1afe45a5437f60f03eaede495d5ff89f2eeac89500", "8cc0e44905c2c8fda5637cad6f311eb9517017515a034247ab93d0cf99f8bb7a", "8e8e2c2fe3d873108735c6ee9884e6f36f467df4a143136209cff303b183bada", "98c2ffeab8b79a4e3a0af5dd9939f92980eb6e3fec10f7f313df5f35a84dacab", "d59bb0e82002ac49f4152963f8a1079e66794a4f454457fd2f0dcc7bf0797d30", "ee59b7bb9eb75932fe3787e54e61c99b628155b0cedc907864f24723ba55b309"]
 mccabe = ["ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42", "dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"]
 mistune = ["59a3429db53c50b5c6bcc8a07f8848cb00d7dc8bdb431a4ab41920d201d4756e", "88a1051873018da288eee8538d476dffe1262495144b33ecb586c4ab266bb8d4"]
+mkdocs = ["17d34329aad75d5de604b9ed4e31df3a4d235afefdc46ce7b1964fddb2e1e939", "8cc8b38325456b9e942c981a209eaeb1e9f3f77b493ad755bfef889b9c8d356a"]
+mkdocs-jupyter = ["42ff7b0c64018a39822588ecedcb715a4bdbeda3700ef39d158a0ebe042879ac"]
+mkdocs-material = ["89a8e2527ca8426c40f2213ce53513f73f54d0a32b36aef33fde6849d294e9ec", "b21aa2645ccb11442ea381c92d187bbc94127f50702c0d28c3fc0152fa7b29da"]
+mkdocs-minify-plugin = ["3000a5069dd0f42f56a8aaf7fd5ea1222c67487949617e39585d6b6434b074b6", "d54fdd5be6843dd29fd7af2f7fdd20a9eb4db46f1f6bed914e03b2f58d2d488e"]
 more-itertools = ["409cd48d4db7052af495b09dec721011634af3753ae1ef92d2b32f73a745f832", "92b8c4b06dac4f0611c0729b2f2ede52b2e1bac1ab48f089c7ddc12e26bb60c4"]
 mypy = ["1521c186a3d200c399bd5573c828ea2db1362af7209b2adb1bb8532cea2fb36f", "31a046ab040a84a0fc38bc93694876398e62bc9f35eca8ccbf6418b7297f4c00", "3b1a411909c84b2ae9b8283b58b48541654b918e8513c20a400bb946aa9111ae", "48c8bc99380575deb39f5d3400ebb6a8a1cb5cc669bbba4d3bb30f904e0a0e7d", "540c9caa57a22d0d5d3c69047cc9dd0094d49782603eb03069821b41f9e970e9", "672e418425d957e276c291930a3921b4a6413204f53fe7c37cad7bc57b9a3391", "6ed3b9b3fdc7193ea7aca6f3c20549b377a56f28769783a8f27191903a54170f", "9371290aa2cad5ad133e4cdc43892778efd13293406f7340b9ffe99d5ec7c1d9", "ace6ac1d0f87d4072f05b5468a084a45b4eda970e4d26704f201e06d47ab2990", "b428f883d2b3fe1d052c630642cc6afddd07d5cd7873da948644508be3b9d4a7", "d5bf0e6ec8ba346a2cf35cb55bf4adfddbc6b6576fcc9e10863daa523e418dbb", "d7574e283f83c08501607586b3167728c58e8442947e027d2d4c7dcd6d82f453", "dc889c84241a857c263a2b1cd1121507db7d5b5f5e87e77147097230f374d10b", "f4748697b349f373002656bf32fede706a0e713d67bfdcf04edf39b1f61d46eb"]
 mypy-extensions = ["090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d", "2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"]
 nbconvert = ["21fb48e700b43e82ba0e3142421a659d7739b65568cc832a13976a77be16b523", "f0d6ec03875f96df45aa13e21fd9b8450c42d7e1830418cccc008c0df725fcee"]
 nbformat = ["b9a0dbdbd45bb034f4f8893cafd6f652ea08c8c1674ba83f2dc55d3955743b0b", "f7494ef0df60766b7cabe0a3651556345a963b74dbc16bc7c18479041170d402"]
-nbsphinx = ["577a9f26c39fbe0d8eda18940b13661a9b7b4b12c7127bbecdc7edf72b3c4426", "c39b8b4d7f3c7b02ba608be3508414c033906d40caa8b6fcfef81c9c8527c47a"]
 notebook = ["399a4411e171170173344761e7fd4491a3625659881f76ce47c50231ed714d9b", "f67d76a68b1074a91693e95dea903ea01fd02be7c9fac5a4b870b8475caed805"]
 numba = ["26ae60dc9b725ff32ea755e99014c6aecd86d28378fa0200bb295e5c3c9c42a5", "34e47e1d9fc2212a60cd09d55cf68e55ea66d23cb97d670ddee0e0c762f8813e", "39459756aa18f7bceb7d9218e43158208840735e3c144b7d3f98ffaeec45e813", "3bc984fc48e4e968000633bfc9ce1678f5225835ef26edb72acecc808762054d", "4ea075d5085e1de558084019b9dc8edddd5af25c5c94dccf6d726e13a3e74065", "56d17b41219f8225013adfdb849fbfcc9f5ce2eae2d0b4aff7657c1c06be2c54", "581b0dd765a1760035fec0ea7b46a8197b0c83aef861f39ced80fdc448f95eca", "5ee873d08fbd8b300a6adcf533cbae5a4331214fffe13c2cd2f9b4f4f7d894f3", "8474ca7cdb688bc57d11641ecd03e752c8bd093a079c9b409ea94c311bdbb4e1", "870610f310a5338b3ca3d391a6abdf4fe3f4e5130d836fae991a95c233ab7b4e", "878dc5da34a9a2390e213290bf15b490fffdab5405afaeb138cf836515fad026", "8c62cd40cd3b080862af68c3e233dafc6aac2e9263d0b328dcc8d82a31f5ac56", "9708df9f05fa0478ab09ce08ab6fef673bd8e15de6d638ca2174202ac7d5a579", "9f63e93377fa40bada25ae02d4e79a206c223c02a794ff9c780ed3a4a403d197", "a7b42d9055da747c1b4cab9747fe5c98dcdbff30884dd003449adfa30d23ba64", "ae3e1c42feda71add88ceee4461ed6804ddb90c352ca09c3958db90689be457b", "c026991084928aebffb0590ccce611a71d08cd8ba8fea690c6ec6b3552b7d9d9", "c5773cae81259b5b834ced7537ee2d625fac29795de5d24e9b751418f53abc91", "c9b5069a9e4e5daf297803697a5819c193e42afa3cfd66bded6f28134adf7330", "ce7669937744a55300336a665e9a3b758601c810a2e9ed0c5d1b619072bff1ea", "d2c48b0f10b09f84f0b1494f408b46d8be45db9b868d9bf312f1c0251de92c45", "d2c8c0327ef365540bf36f1c860af1c7b2f86866738f36264be152b3a54ef888", "e3f19b3cb9fa6a0479a56e0da13e59c8e06fe8392cce5eaa85c7f159ae4570c0", "e7789d473f332a17e40166d2960826d821edd75d148b4ed340a893a334b46fae", "f5f908bf358e2f6d4015a04998da86136f6933f3c0a35eb35c59641475c6cdba"]
 numpy = ["0b0dd8f47fb177d00fa6ef2d58783c4f41ad3126b139c91dd2f7c4b3fdf5e9a5", "25ffe71f96878e1da7e014467e19e7db90ae7d4e12affbc73101bcf61785214e", "26efd7f7d755e6ca966a5c0ac5a930a87dbbaab1c51716ac26a38f42ecc9bc4b", "28b1180c758abf34a5c3fea76fcee66a87def1656724c42bb14a6f9717a5bdf7", "2e418f0a59473dac424f888dd57e85f77502a593b207809211c76e5396ae4f5c", "30c84e3a62cfcb9e3066f25226e131451312a044f1fe2040e69ce792cb7de418", "4650d94bb9c947151737ee022b934b7d9a845a7c76e476f3e460f09a0c8c6f39", "4dd830a11e8724c9c9379feed1d1be43113f8bcce55f47ea7186d3946769ce26", "4f2a2b279efde194877aff1f76cf61c68e840db242a5c7169f1ff0fd59a2b1e2", "62d22566b3e3428dfc9ec972014c38ed9a4db4f8969c78f5414012ccd80a149e", "669795516d62f38845c7033679c648903200980d68935baaa17ac5c7ae03ae0c", "75fcd60d682db3e1f8fbe2b8b0c6761937ad56d01c1dc73edf4ef2748d5b6bc4", "9395b0a41e8b7e9a284e3be7060db9d14ad80273841c952c83a5afc241d2bd98", "9e37c35fc4e9410093b04a77d11a34c64bf658565e30df7cbe882056088a91c1", "a0678793096205a4d784bd99f32803ba8100f639cf3b932dc63b21621390ea7e", "b46554ad4dafb2927f88de5a1d207398c5385edbb5c84d30b3ef187c4a3894d8", "c867eeccd934920a800f65c6068acdd6b87e80d45cd8c8beefff783b23cdc462", "dd0667f5be56fb1b570154c2c0516a528e02d50da121bbbb2cbb0b6f87f59bc2", "de2b1c20494bdf47f0160bd88ed05f5e48ae5dc336b8de7cfade71abcc95c0b9", "f1df7b2b7740dd777571c732f98adb5aad5450aee32772f1b39249c8a50386f6", "ffca69e29079f7880c5392bf675eb8b4146479d976ae1924d01cd92b04cccbcc"]
-packaging = ["28b924174df7a2fa32c1953825ff29c61e2f5e082343165438812f00d3a7fc47", "d9551545c6d761f3def1677baf08ab2a3ca17c56879e70fecba2fc4dde4ed108"]
 pandocfilters = ["b3dd70e169bb5449e6bc6ff96aea89c5eea8c5f6ab5e207fc2f521a2cf4a0da9"]
 parso = ["63854233e1fadb5da97f2744b6b24346d2750b85965e7e399bec1620232797dc", "666b0ee4a7a1220f65d367617f2cd3ffddff3e205f3f16a0284df30e774c2a9c"]
 pathspec = ["e285ccc8b0785beadd4c18e5708b12bb8fcf529a1e61215b3feff1d1e559ea5c"]
+pep562 = ["58cb1cc9ee63d93e62b4905a50357618d526d289919814bea1f0da8f53b79395", "d2a48b178ebf5f8dd31709cc26a19808ef794561fa2fe50ea01ea2bad4d667ef"]
 pexpect = ["2094eefdfcf37a1fdbfb9aa090862c1a4878e5c7e0e7e7088bdb511c558e5cd1", "9e2c1fd0e6ee3a49b28f95d4b33bc389c89b20af6a1255906e90ff1262ce62eb"]
 pickleshare = ["87683d47965c1da65cdacaf31c8441d12b8044cdec9aca500cd78fc2c683afca", "9649af414d74d4df115d5d718f82acb59c9d418196b7b4290ed47a12ce62df56"]
 pluggy = ["0db4b7601aae1d35b4a033282da476845aa19185c1e6964b25cf324b5e4ec3e6", "fa5fa1622fa6dd5c030e9cad086fa19ef6a0cf6d7a2d12318e10cb49d6d68f34"]
@@ -1277,32 +1178,22 @@ py-spy = ["b0f3fba3cb8ac82691d1f21cf82899a2198061486f2c3be18db5ee1973a73490", "c
 pycodestyle = ["95a2219d12372f05704562a14ec30bc76b05a5b297b21a5dfe3f6fac3491ae56", "e40a936c9a450ad81df37f549d676d127b1b66000a6c500caa2b085bc0ca976c"]
 pyflakes = ["17dbeb2e3f4d772725c777fabc446d5634d1038f234e77343108ce445ea69ce0", "d976835886f8c5b31d47970ed689944a0262b5f3afa00a5a7b4dc81e5449f8a2"]
 pygments = ["71e430bc85c88a430f000ac1d9b331d2407f681d6f6aec95e8bcfbc3df5b0127", "881c4c157e45f30af185c1ffe8d549d48ac9127433f2c380c24b84572ad66297"]
+pymdown-extensions = ["3bbe6048275f8a0d13a0fe44e0ea201e67268aa7bb40c2544eef16abbf168f7b", "dce5e17b93be0572322b7d06c9a13c13a9d98694d6468277911d50ca87d26f29"]
 pyparsing = ["6f98a7b9397e206d78cc01df10131398f1c8b8510a2f4d97d9abd82e1aacdd80", "d9338df12903bbf5d65a0e4e87c2161968b10d2e489652bb47001d82a9b028b4"]
 pyrsistent = ["eb6545dbeb1aa69ab1fb4809bfbf5a8705e44d92ef8fc7c2361682a47c46c778"]
 pytest = ["3f193df1cfe1d1609d4c583838bea3d532b18d6160fd3f55c9447fdca30848ec", "e246cf173c01169b9617fc07264b7b1316e78d7a650055235d6d897bc80d9660"]
 pytest-cov = ["cc6742d8bac45070217169f5f72ceee1e0e55b0221f54bcf24845972d3a47f2b", "cdbdef4f870408ebdbfeb44e63e07eb18bb4619fae852f6e760645fa36172626"]
 python-dateutil = ["73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c", "75bb3f31ea686f1197762692a9ee6a7550b59fc6ca3a1f4b5d7e32fb98e2da2a"]
-pytz = ["1c557d7d0e871de1f5ccd5833f60fb2550652da6be2693c1e02300743d21500d", "b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be"]
 pywin32 = ["0443e9bb196e72480f50cbddc2cf98fbb858a77d02e281ba79489ea3287b36e9", "09bbe7cdb29eb40ab2e83f7a232eeeedde864be7a0622b70a90f456aad07a234", "0d8e0f47808798d320c983574c36c49db642678902933a210edd40157d206fd0", "0db7c9f4b93528afd080d35912a60be2f86a1d6c49c0a9cf9cedd106eed81ea3", "749e590875051661ecefbd9dfa957a485016de0f25e43f5e70f888ef1e29587b", "779d3e9d4b934f2445d2920c3941416d99af72eb7f7fd57a63576cc8aa540ad6", "7c89d2c11a31c7aaa16dc4d25054d7e0e99d6f6b24193cf62c83850484658c87", "81f7732b662c46274d7d8c411c905d53e71999cba95457a0686467c3ebc745ca", "9db1fb8830bfa99c5bfd335d4482c14db5c6f5028db3b006787ef4200206242b", "bd8d04835db28646d9e07fd0ab7c7b18bd90e89dfdc559e60389179495ef30da", "fc6822a68afd79e97b015985dd455767c72009b81bcd18957068626c43f11e75", "fe6cfc2045931866417740b575231c7e12d69d481643be1493487ad53b089959"]
 pywinpty = ["0e01321e53a230233358a6d608a1a8bc86c3882cf82769ba3c62ca387dc9cc51", "333e0bc5fca8ad9e9a1516ebedb2a65da38dc1f399f8b2ea57d6cccec1ff2cc8", "3ca3123aa6340ab31bbf9bd012b92e72f9ec905e4c9ee152cc997403e1778cd3", "44a6dddcf2abf402e22f87e2c9a341f7d0b296afbec3d28184c8de4d7f514ee4", "53d94d574c3d4da2df5b1c3ae728b8d90e4d33502b0388576bbd4ddeb4de0f77", "c3955f162c53dde968f3fc11361658f1d83b683bfe601d4b6f94bb01ea4300bc", "cec9894ecb34de3d7b1ca121dd98433035b9f8949b5095e84b103b349231509c", "dcd45912e2fe2e6f72cee997a4da6ed1ad2056165a277ce5ec7f7ac98dcdf667", "f2bcdd9a2ffd8b223752a971b3d377fb7bfed85f140ec9710f1218d760f2ccb7"]
+pyyaml = ["0e7f69397d53155e55d10ff68fdfb2cf630a35e6daf65cf0bdeaf04f127c09dc", "2e9f0b7c5914367b0916c3c104a024bb68f269a486b9d04a2e8ac6f6597b7803", "35ace9b4147848cafac3db142795ee42deebe9d0dad885ce643928e88daebdcc", "38a4f0d114101c58c0f3a88aeaa44d63efd588845c5a2df5290b73db8f246d15", "483eb6a33b671408c8529106df3707270bfacb2447bf8ad856a4b4f57f6e3075", "4b6be5edb9f6bb73680f5bf4ee08ff25416d1400fbd4535fe0069b2994da07cd", "7f38e35c00e160db592091751d385cd7b3046d6d51f578b29943225178257b31", "8100c896ecb361794d8bfdb9c11fce618c7cf83d624d73d5ab38aef3bc82d43f", "c0ee8eca2c582d29c3c2ec6e2c4f703d1b7f1fb10bc72317355a746057e7346c", "e4c015484ff0ff197564917b4b4246ca03f411b9bd7f16e02a2f586eb48b6d04", "ebc4ed52dcc93eeebeae5cf5deb2ae4347b3a81c3fa12b0b8c976544829396a4"]
 pyzmq = ["01b588911714a6696283de3904f564c550c9e12e8b4995e173f1011755e01086", "0573b9790aa26faff33fba40f25763657271d26f64bffb55a957a3d4165d6098", "0fa82b9fc3334478be95a5566f35f23109f763d1669bb762e3871a8fa2a4a037", "1e59b7b19396f26e360f41411a5d4603356d18871049cd7790f1a7d18f65fb2c", "2a294b4f44201bb21acc2c1a17ff87fbe57b82060b10ddb00ac03e57f3d7fcfa", "355b38d7dd6f884b8ee9771f59036bcd178d98539680c4f87e7ceb2c6fd057b6", "4b73d20aec63933bbda7957e30add233289d86d92a0bb9feb3f4746376f33527", "4ec47f2b50bdb97df58f1697470e5c58c3c5109289a623e30baf293481ff0166", "5541dc8cad3a8486d58bbed076cb113b65b5dd6b91eb94fb3e38a3d1d3022f20", "6fca7d11310430e751f9832257866a122edf9d7b635305c5d8c51f74a5174d3d", "7369656f89878455a5bcd5d56ca961884f5d096268f71c0750fc33d6732a25e5", "75d73ee7ca4b289a2a2dfe0e6bd8f854979fc13b3fe4ebc19381be3b04e37a4a", "80c928d5adcfa12346b08d31360988d843b54b94154575cccd628f1fe91446bc", "83ce18b133dc7e6789f64cb994e7376c5aa6b4aeced993048bf1d7f9a0fe6d3a", "8b8498ceee33a7023deb2f3db907ca41d6940321e282297327a9be41e3983792", "8c69a6cbfa94da29a34f6b16193e7c15f5d3220cb772d6d17425ff3faa063a6d", "8ff946b20d13a99dc5c21cb76f4b8b253eeddf3eceab4218df8825b0c65ab23d", "972d723a36ab6a60b7806faa5c18aa3c080b7d046c407e816a1d8673989e2485", "a6c9c42bbdba3f9c73aedbb7671815af1943ae8073e532c2b66efb72f39f4165", "aa3872f2ebfc5f9692ef8957fe69abe92d905a029c0608e45ebfcd451ad30ab5", "cf08435b14684f7f2ca2df32c9df38a79cdc17c20dc461927789216cb43d8363", "d30db4566177a6205ed1badb8dbbac3c043e91b12a2db5ef9171b318c5641b75", "d5ac84f38575a601ab20c1878818ffe0d09eb51d6cb8511b636da46d0fd8949a", "e37f22eb4bfbf69cd462c7000616e03b0cdc1b65f2d99334acad36ea0e4ddf6b", "e6549dd80de7b23b637f586217a4280facd14ac01e9410a037a13854a6977299", "ed6205ca0de035f252baa0fd26fdd2bc8a8f633f92f89ca866fd423ff26c6f25", "efdde21febb9b5d7a8e0b87ea2549d7e00fda1936459cfb27fb6fca0c36af6c1", "f4e72646bfe79ff3adbf1314906bbd2d67ef9ccc71a3a98b8b2ccbcca0ab7bec"]
 qtconsole = ["4de25b8895957d23ceacf2526b6f0a76da4e60e60115611930d387c853f3cb08", "654f423662e7dfe6a9b26fac8ec76aedcf742c339909ac49f1f0c1a1b744bcd1"]
 regex = ["15454b37c5a278f46f7aa2d9339bda450c300617ca2fca6558d05d870245edc7", "1ad40708c255943a227e778b022c6497c129ad614bb7a2a2f916e12e8a359ee7", "5e00f65cc507d13ab4dfa92c1232d004fa202c1d43a32a13940ab8a5afe2fb96", "604dc563a02a74d70ae1f55208ddc9bfb6d9f470f6d1a5054c4bd5ae58744ab1", "720e34a539a76a1fedcebe4397290604cc2bdf6f81eca44adb9fb2ea071c0c69", "7caf47e4a9ac6ef08cabd3442cc4ca3386db141fb3c8b2a7e202d0470028e910", "7faf534c1841c09d8fefa60ccde7b9903c9b528853ecf41628689793290ca143", "b4e0406d822aa4993ac45072a584d57aa4931cf8288b5455bbf30c1d59dbad59", "c31eaf28c6fe75ea329add0022efeed249e37861c19681960f99bbc7db981fb2", "c7393597191fc2043c744db021643549061e12abe0b3ff5c429d806de7b93b66", "d2b302f8cdd82c8f48e9de749d1d17f85ce9a0f082880b9a4859f66b07037dc6", "e3d8dd0ec0ea280cf89026b0898971f5750a7bd92cb62c51af5a52abd020054a", "ec032cbfed59bd5a4b8eab943c310acfaaa81394e14f44454ad5c9eba4f24a74"]
-requests = ["11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4", "9cf5292fcd0f598c671cfc1e0d7d1a7f13bb8085e9a590f48c010551dc6c4b31"]
 scipy = ["0baa64bf42592032f6f6445a07144e355ca876b177f47ad8d0612901c9375bef", "243b04730d7223d2b844bda9500310eecc9eda0cba9ceaf0cde1839f8287dfa8", "2643cfb46d97b7797d1dbdb6f3c23fe3402904e3c90e6facfe6a9b98d808c1b5", "396eb4cdad421f846a1498299474f0a3752921229388f91f60dc3eda55a00488", "3ae3692616975d3c10aca6d574d6b4ff95568768d4525f76222fb60f142075b9", "435d19f80b4dcf67dc090cc04fde2c5c8a70b3372e64f6a9c58c5b806abfa5a8", "46a5e55850cfe02332998b3aef481d33f1efee1960fe6cfee0202c7dd6fc21ab", "75b513c462e58eeca82b22fc00f0d1875a37b12913eee9d979233349fce5c8b2", "7ccfa44a08226825126c4ef0027aa46a38c928a10f0a8a8483c80dd9f9a0ad44", "89dd6a6d329e3f693d1204d5562dd63af0fd7a17854ced17f9cbc37d5b853c8d", "a81da2fe32f4eab8b60d56ad43e44d93d392da228a77e229e59b51508a00299c", "a9d606d11eb2eec7ef893eb825017fbb6eef1e1d0b98a5b7fc11446ebeb2b9b1", "ac37eb652248e2d7cbbfd89619dce5ecfd27d657e714ed049d82f19b162e8d45", "cbc0611699e420774e945f6a4e2830f7ca2b3ee3483fca1aa659100049487dd5", "d02d813ec9958ed63b390ded463163685af6025cb2e9a226ec2c477df90c6957", "dd3b52e00f93fd1c86f2d78243dfb0d02743c94dd1d34ffea10055438e63b99d"]
 send2trash = ["60001cc07d707fe247c94f74ca6ac0d3255aabcb930529690897ca2a39db28b2", "f1691922577b6fa12821234aeb57599d887c4900b9ca537948d2dac34aea888b"]
 singledispatch = ["5b06af87df13818d14f08a028e42f566640aef80805c3b50c5056b086e3c2b9c", "833b46966687b3de7f438c761ac475213e53b306740f1abfaa86e1d1aae56aa8"]
 six = ["3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c", "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"]
-snowballstemmer = ["209f257d7533fdb3cb73bdbd24f436239ca3b2fa67d56f6ff88e86be08cc5ef0", "df3bac3df4c2c01363f3dd2cfa78cce2840a79b9f1c2d2de9ce8d31683992f52"]
-sphinx = ["31088dfb95359384b1005619827eaee3056243798c62724fd3fa4b84ee4d71bd", "52286a0b9d7caa31efee301ec4300dbdab23c3b05da1c9024b4e84896fb73d79"]
-sphinx-autodoc-typehints = ["0dfd26be5b81049ce81b644913a06a12795ded2791adc0a4e13420eb9a832852", "81bfdf4fbb9e248f10a6bc3f931bf80e85e95a185530e1a862db9269efd72cf9"]
-sphinx-bootstrap-theme = ["571e43ccb76d4c6c06576aa24a826b6ebc7adac45a5b54985200128806279d08"]
-sphinxcontrib-applehelp = ["edaa0ab2b2bc74403149cb0209d6775c96de797dfd5b5e2a71981309efab3897", "fb8dee85af95e5c30c91f10e7eb3c8967308518e0f7488a2828ef7bc191d0d5d"]
-sphinxcontrib-devhelp = ["6c64b077937330a9128a4da74586e8c2130262f014689b4b89e2d08ee7294a34", "9512ecb00a2b0821a146736b39f7aeb90759834b07e81e8cc23a9c70bacb9981"]
-sphinxcontrib-htmlhelp = ["4670f99f8951bd78cd4ad2ab962f798f5618b17675c35c5ac3b2132a14ea8422", "d4fd39a65a625c9df86d7fa8a2d9f3cd8299a3a4b15db63b50aac9e161d8eff7"]
-sphinxcontrib-jsmath = ["2ec2eaebfb78f3f2078e73666b1415417a116cc848b72e5172e596c871103178", "a9925e4a4587247ed2191a22df5f6970656cb8ca2bd6284309578f2153e0c4b8"]
-sphinxcontrib-qthelp = ["513049b93031beb1f57d4daea74068a4feb77aa5630f856fcff2e50de14e9a20", "79465ce11ae5694ff165becda529a600c754f4bc459778778c7017374d4d406f"]
-sphinxcontrib-serializinghtml = ["c0efb33f8052c04fd7a26c0a07f1678e8512e0faec19f4aa8f2473a8b81d5227", "db6615af393650bf1151a6cd39120c29abaf93cc60db8c48eb2dddbfdc3a9768"]
 terminado = ["4804a774f802306a7d9af7322193c5390f1da0abb429e082a10ef1d46e6fb2c2", "a43dcb3e353bc680dd0783b1d9c3fc28d529f190bc54ba9a229f72fe6e7a54d7"]
 testpath = ["46c89ebb683f473ffe2aab0ed9f12581d4d078308a3cb3765d79c6b2317b0109", "b694b3d9288dbd81685c5d2e7140b81365d46c29f5db4bc659de5aa6b98780f8"]
 toml = ["229f81c57791a41d65e399fc06bf0848bab550a9dfd5ed66df18ce5f05e73d5c", "235682dd292d5899d361a811df37e04a8828a5b1da3115886b73cf81ebc9100e", "f1db651f9657708513243e61e6cc67d101a39bad662eaa9b5546f789338e07a3"]
@@ -1311,7 +1202,6 @@ tqdm = ["5a1f3d58f3eb53264387394387fe23df469d2a3fab98c9e7f99d5c146c119873", "f1a
 traitlets = ["70b4c6a1d9019d7b4f6846832288f86998aa3b9207c6821f3578a6a6a467fe44", "d023ee369ddd2763310e4c3eae1ff649689440d4ae59d7485eb4cfbbe3e359f7"]
 typed-ast = ["1170afa46a3799e18b4c977777ce137bb53c7485379d9706af8a59f2ea1aa161", "18511a0b3e7922276346bcb47e2ef9f38fb90fd31cb9223eed42c85d1312344e", "262c247a82d005e43b5b7f69aff746370538e176131c32dda9cb0f324d27141e", "2b907eb046d049bcd9892e3076c7a6456c93a25bebfe554e931620c90e6a25b0", "354c16e5babd09f5cb0ee000d54cfa38401d8b8891eefa878ac772f827181a3c", "48e5b1e71f25cfdef98b013263a88d7145879fbb2d5185f2a0c79fa7ebbeae47", "4e0b70c6fc4d010f8107726af5fd37921b666f5b31d9331f0bd24ad9a088e631", "630968c5cdee51a11c05a30453f8cd65e0cc1d2ad0d9192819df9978984529f4", "66480f95b8167c9c5c5c87f32cf437d585937970f3fc24386f313a4c97b44e34", "71211d26ffd12d63a83e079ff258ac9d56a1376a25bc80b1cdcdf601b855b90b", "7954560051331d003b4e2b3eb822d9dd2e376fa4f6d98fee32f452f52dd6ebb2", "838997f4310012cf2e1ad3803bce2f3402e9ffb71ded61b5ee22617b3a7f6b6e", "95bd11af7eafc16e829af2d3df510cecfd4387f6453355188342c3e79a2ec87a", "bc6c7d3fa1325a0c6613512a093bc2a2a15aeec350451cbdf9e1d4bffe3e3233", "cc34a6f5b426748a507dd5d1de4c1978f2eb5626d51326e43280941206c209e1", "d755f03c1e4a51e9b24d899561fec4ccaf51f210d52abdf8c07ee2849b212a36", "d7c45933b1bdfaf9f36c579671fec15d25b06c8398f113dab64c18ed1adda01d", "d896919306dd0aa22d0132f62a1b78d11aaf4c9fc5b3410d3c666b818191630a", "fdc1c9bbf79510b76408840e009ed65958feba92a88833cdceecff93ae8fff66", "ffde2fbfad571af120fcbfbbc61c72469e72f550d676c3342492a9dfdefb8f12"]
 typing-extensions = ["091ecc894d5e908ac75209f10d5b4f118fbdb2eb1ede6a63544054bb1edb41f2", "910f4656f54de5993ad9304959ce9bb903f90aadc7c67a0bef07e678014e892d", "cf8b63fedea4d89bab840ecbb93e75578af28f76f66c35889bd7065f5af88575"]
-urllib3 = ["3de946ffbed6e6746608990594d08faac602528ac7015ac28d33cee6a45b7398", "9a107b99a5393caf59c7aa3c1249c16e6879447533d0887f4336dde834c7be86"]
 wcwidth = ["3df37372226d6e63e1b1e1eda15c594bca98a22d33a23832a90998faa96bc65e", "f4ebe71925af7b40a864553f761ed559b43544f8f71746c2d756c7fe788ade7c"]
 webencodings = ["a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78", "b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923"]
 widgetsnbextension = ["079f87d87270bce047512400efd70238820751a11d2d8cb137a5a5bdbaf255c7", "bd314f8ceb488571a5ffea6cc5b9fc6cba0adaf88a9d2386b93a489751938bcd"]

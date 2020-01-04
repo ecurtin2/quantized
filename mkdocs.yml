@@ -1,0 +1,33 @@
+site_name: Transit-Chem
+nav:
+  - Home: index.md
+  - About: about.md
+  - Tutorials:
+    - "Creating a basis": tutorials/oned_basis.ipynb
+    - "Generate a matrix": tutorials/get_matrices.ipynb
+    - operators: tutorials/operators.ipynb
+    - triple_well: tutorials/triple_well.ipynb
+
+
+theme:
+  name: 'material'
+  language: 'en'
+  feature:
+    tabs: true
+
+repo_name: 'ecurtin2/transit-chem'
+repo_url: 'https://github.com/ecurtin2/transit-chem'
+
+extra:
+  social:
+    - type: 'github'
+      link: 'https://github.com/ecurtin2'
+    - type: 'linkedin'
+      link: 'https://www.linkedin.com/in/evanmcurtin'
+
+  search:
+    languge: 'en'
+
+
+plugins:
+  - mkdocs-jupyter

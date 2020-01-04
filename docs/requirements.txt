@@ -1,5 +1,4 @@
 IPython==7.9
-nbsphinx==0.4.3
-sphinx==2.2
-sphinx-autodoc-typehints==1.9
-sphinx_bootstrap_theme==0.7.1
+mkdocs==1.0
+mkdocs-jupyter==0.10.2
+mkdocs-material==4.6
