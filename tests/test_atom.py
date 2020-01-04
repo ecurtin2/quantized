@@ -1,5 +1,3 @@
-import numpy as np
-
 from transit_chem.elements import H
 from transit_chem.atom import Atom
 
