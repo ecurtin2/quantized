@@ -3,7 +3,7 @@ name = "transit-chem"
 version = "0.6.2"
 description = "Quantifying Probabilistic Electron Transit times."
 authors = ["Evan Curtin <fakeemail@gmail.com>"]
-readme = "README.rst"
+readme = "docs/README.md"
 license = "MIT"
 
 [tool.poetry.scripts]
