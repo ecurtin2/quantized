@@ -21,6 +21,8 @@ theme:
     primary: 'teal'
     accent: 'amber'
 
+extra_css: [extra.css]
+
 repo_name: 'ecurtin2/transit-chem'
 repo_url: 'https://github.com/ecurtin2/transit-chem'
 
