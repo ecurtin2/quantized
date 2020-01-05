@@ -6,7 +6,7 @@ nav:
     - "The Triple Well Potential": tutorials/triple_well.ipynb
     - "Harmonic Oscillator Basis Functions": tutorials/oned_basis.ipynb
     - "Operators": tutorials/operators.ipynb
-    - "Time Dependent Shroedinger Equation": tutorials/get_matrices.ipynba
+    - "Time Dependent Shroedinger Equation": tutorials/get_matrices.ipynb
     - "Time dependent observables": tutorials/observables.ipynb
     - "Transition Matrix": tutorials/transition_matrix.ipynb
     - "Probability of Non-Sampling (Pnot)": tutorials/pnot.ipynb
