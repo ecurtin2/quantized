@@ -2,6 +2,7 @@ site_name: Transit-Chem
 nav:
   - Home: index.md
   - About: about.md
+  - "Getting Started": getting-started.md
   - Tutorials:
     - "The Triple Well Potential": tutorials/triple_well.ipynb
     - "Harmonic Oscillator Basis Functions": tutorials/oned_basis.ipynb
@@ -12,6 +13,9 @@ nav:
     - "Probability of Non-Sampling (Pnot)": tutorials/pnot.ipynb
     - "Putting it all together": tutorials/all.ipynb
   - 'API Documentation': apidoc.md
+  - License: LICENSE.md
+  - Citing: citing.md
+  - Contribute: contribute.md
 
 
 theme:
