@@ -3,16 +3,23 @@ nav:
   - Home: index.md
   - About: about.md
   - Tutorials:
-    - "Creating a basis": tutorials/oned_basis.ipynb
-    - "Generate a matrix": tutorials/get_matrices.ipynb
-    - operators: tutorials/operators.ipynb
-    - triple_well: tutorials/triple_well.ipynb
+    - "The Triple Well Potential": tutorials/triple_well.ipynb
+    - "Harmonic Oscillator Basis Functions": tutorials/oned_basis.ipynb
+    - "Operators": tutorials/operators.ipynb
+    - "Time Dependent Shroedinger Equation": tutorials/get_matrices.ipynba
+    - "Time dependent observables": tutorials/observables.ipynb
+    - "Transition Matrix": tutorials/transition_matrix.ipynb
+    - "Probability of Non-Sampling (Pnot)": tutorials/pnot.ipynb
+    - "Putting it all together": tutorials/all.ipynb
   - 'API Documentation': apidoc.md
 
 
 theme:
   name: 'material'
   language: 'en'
+  palette:
+    primary: 'teal'
+    accent: 'amber'
 
 repo_name: 'ecurtin2/transit-chem'
 repo_url: 'https://github.com/ecurtin2/transit-chem'
