@@ -37,7 +37,7 @@ class LinearComb:
         return sum(ci * fi(x) for ci, fi in zip(self.c, self.f))
 
     def __repr__(self):
-        return " + ".join(f"{c} * {f}" for c, f in zip(self.c, self.f))
+        return "" * 4 + "\n + ".join(f"{c:.4f} * {f}" for c, f in zip(self.c, self.f))
 
     def __kinetic__(self):
         return LinearComb(c=self.c, f=[f.__kinetic__() for f in self.f])

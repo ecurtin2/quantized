@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "transit-chem"
-version = "0.6.1"
+version = "0.6.2"
 description = "Quantifying Probabilistic Electron Transit times."
 authors = ["Evan Curtin <fakeemail@gmail.com>"]
 readme = "README.rst"
@@ -41,6 +41,7 @@ mkdocs = "^1.0"
 mkdocs-jupyter = "^0.10.2"
 mkdocs-material = "^4.6"
 pydoc-markdown = "^2.0"
+ipykernel = "^5.1"
 
 
 [tool.black]
