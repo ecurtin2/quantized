@@ -46,6 +46,8 @@ def plot_matrix(
     x: List[float],
     save_to: Union[str, Path, None] = None,
     axis: int = 0,
+    name: str = "M",
+    **kwargs,
 ):
     allowed = (0, 1, 2)
     if axis not in allowed:
@@ -56,18 +58,21 @@ def plot_matrix(
         raise ValueError(f"Array must be 3d")
 
     M, N = [x for i, x in enumerate(mat.shape) if i != axis]
-    fig, axes = plt.subplots(M, N)
+    fig, axes = plt.subplots(M, N, **kwargs)
 
     for i in range(M):
         for j in range(N):
+            label = f"{name}[{i},{j}]"
             if axis == 0:
-                axes[i, j].plot(x, mat[:, i, j], label=f"{i}{j}")
+                axes[i, j].plot(x, mat[:, i, j])
+                axes[i, j].set_title(label)
             elif axis == 1:
-                axes[i, j].plot(x, mat[i, :, j], label=f"{i}{j}")
+                axes[i, j].plot(x, mat[i, :, j])
+                axes[i, j].set_title(label)
             elif axis == 2:
-                axes[i, j].plot(x, mat[i, j, :], label=f"{i}{j}")
+                axes[i, j].plot(x, mat[i, j, :])
+                axes[i, j].set_title(label)
 
-    plt.legend()
     if save_to is not None:
         plt.savefig(save_to)
     return fig, axes

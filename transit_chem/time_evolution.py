@@ -1,4 +1,5 @@
 from typing import Callable, Union
+from numbers import Real
 
 import attr
 import numpy as np
@@ -65,5 +66,8 @@ class TimeEvolvingObservable:
                 self.P[i, j] = c[i] * c[j] * eigen_basis_matrix[i, j]
                 self.W[i, j] = np.exp(1j * (e[j] - e[i]))
 
-    def __call__(self, t: float) -> float:
-        return np.abs(np.sum(self.P * (self.W ** t)))
+    def __call__(self, t: Union[float, np.array]) -> Union[float, np.array]:
+        if isinstance(t, Real):
+            return np.abs(np.sum(self.P * (self.W ** t)))
+        elif isinstance(t, np.ndarray):
+            return np.array([np.abs(np.sum(self.P * (self.W ** t_))) for t_ in t])

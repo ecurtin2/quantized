@@ -26,7 +26,7 @@ class OccupancyProbabilites:
 
     @property
     def initial(self) -> np.array:
-        return self.__call__(0)
+        return self.__call__(0.0)
 
     def __call__(self, t: float) -> np.array:
         return np.array([s(t) for s in self.s])
@@ -200,6 +200,7 @@ class Pnot:
     ) -> Generator[Tuple, None, None]:
         times = (delta_t * i for i in count())
         matrices = (hopping_matrix(t, delta_t) for t in times)
+
         A_tilde = (np.delete(np.delete(a, acceptor, axis=0), acceptor, axis=1) for a in matrices)
         p0_tilde = np.delete(hopping_matrix.occ_probs.initial, acceptor)
         #  Taking [a, nb, c, d, ...] -> [(b @ a), (c @ b @ a), (d @ c @ b @ a), ...]

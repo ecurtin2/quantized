@@ -9,8 +9,7 @@ nav:
     - "Operators": tutorials/operators.ipynb
     - "Time Independent Schroedinger Equation": tutorials/time_independent.ipynb
     - "Time Dependent Schroedinger Equation": tutorials/time_dependence.ipynb
-    - "Transition Matrix": tutorials/transition_matrix.ipynb
-    - "Probability of Non-Sampling (Pnot)": tutorials/pnot.ipynb
+    - "Transition Matrix and Pnot": tutorials/transition_matrix.ipynb
     - "Putting it all together": tutorials/all.ipynb
   - 'API Documentation': apidoc.md
   - License: LICENSE.md
