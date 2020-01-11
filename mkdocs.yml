@@ -1,4 +1,4 @@
-site_name: Transit-Chem
+site_name: Quantized
 nav:
   - Home: README.md
   - About: about.md
@@ -11,7 +11,18 @@ nav:
     - "Time Dependent Schroedinger Equation": tutorials/time_dependence.ipynb
     - "Transition Matrix and Pnot": tutorials/transition_matrix.ipynb
     - "Putting it all together": tutorials/all.ipynb
-  - 'API Documentation': apidoc.md
+  - 'API Documentation':
+    - "Atom": api_docs/atom.md
+    - "Basis": api_docs/basis.md
+    - "Configuration": api_docs/config.md
+    - "Elements": api_docs/elements.md
+    - "Hopping Matrix": api_docs/hopping_matrix.md
+    - "Molecule": api_docs/molecule.md
+    - "Operators": api_docs/operators.md
+    - "Potentials": api_docs/potentials.md
+    - "Time Evolution": api_docs/time_evolution.md
+    - "Utilities": api_docs/utils.md
+    - "Validation": api_docs/validation.md
   - License: LICENSE.md
   - Citing: citing.md
   - Contribute: contribute.md
@@ -26,8 +37,8 @@ theme:
 
 extra_css: [extra.css]
 
-repo_name: 'ecurtin2/transit-chem'
-repo_url: 'https://github.com/ecurtin2/transit-chem'
+repo_name: 'ecurtin2/quantized'
+repo_url: 'https://github.com/ecurtin2/quantized'
 
 extra:
   social:

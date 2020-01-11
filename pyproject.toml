@@ -42,6 +42,7 @@ mkdocs-jupyter = "^0.10.2"
 mkdocs-material = "^4.6"
 pydoc-markdown = "^2.0"
 ipykernel = "^5.1"
+numpydoc = "^0.9.2"
 
 
 [tool.black]
