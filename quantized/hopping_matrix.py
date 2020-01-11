@@ -3,14 +3,18 @@ from itertools import chain, count, islice, takewhile, tee
 from math import isclose
 from typing import Callable, Generator, Iterable, Iterator, List, Tuple, Union
 
-import attr
+
 import numpy as np
 from loguru import logger
 from scipy.interpolate import interp1d
 from scipy.optimize import root_scalar
 
+from quantized.attr_wrapped import attrs, attrib, document_me
 from quantized.operators import Overlap
 from quantized.time_evolution import TimeEvolvingObservable, TimeEvolvingState
+
+
+__all__ = ["HoppingMatrix", "OccupancyProbabilites", "Pnot"]
 
 
 def pairwise(iterable):
@@ -20,20 +24,23 @@ def pairwise(iterable):
     return zip(a, b)
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class OccupancyProbabilites:
-    s: Tuple[TimeEvolvingObservable] = attr.ib(converter=tuple)
+    s: Tuple[TimeEvolvingObservable] = attrib(converter=tuple)
 
     @property
     def initial(self) -> np.array:
         return self.__call__(0.0)
 
+    @document_me
     def __call__(self, t: float) -> np.array:
         return np.array([s(t) for s in self.s])
 
+    @document_me
     def __getitem__(self, item) -> Callable:
         return self.s[item]
 
+    @document_me
     def __iter__(self):
         return iter(self.s)
 
@@ -49,9 +56,9 @@ class OccupancyProbabilites:
         )
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class HoppingMatrix:
-    occ_probs: OccupancyProbabilites = attr.ib()
+    occ_probs: OccupancyProbabilites = attrib()
     N: int = 3
 
     def at_time(self, t: float, delta_t: float) -> np.array:
@@ -99,6 +106,7 @@ class HoppingMatrix:
 
         return A
 
+    @document_me
     def __call__(self, t: Union[float, np.ndarray], delta_t: float):
         if isinstance(t, Iterable):
             result = [self.at_time(t_, delta_t) for t_ in t]
@@ -129,13 +137,13 @@ def accumulate(iterable, func, *, initial=None):
         yield total
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class Pnot:
-    acceptor: int = attr.ib()
-    hopping_matrix: HoppingMatrix = attr.ib(hash=False)
-    times: List[float] = attr.ib()
-    values: List[float] = attr.ib()
-    delta_t: float = attr.ib()
+    acceptor: int = attrib()
+    hopping_matrix: HoppingMatrix = attrib(hash=False)
+    times: List[float] = attrib()
+    values: List[float] = attrib()
+    delta_t: float = attrib()
 
     """Determine P_not, the probability than acceptor state has never been occupied.
 
@@ -187,6 +195,7 @@ class Pnot:
     def _interpolate(self):
         return interp1d(self.times, self.values, bounds_error=False)
 
+    @document_me
     def __call__(self, t: float) -> float:
         return self._interpolate()(t)
 

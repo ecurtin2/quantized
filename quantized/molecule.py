@@ -5,12 +5,15 @@ import attr
 import numpy as np
 
 from quantized.atom import Atom
+from quantized.attr_wrapped import attrib, attrs
 from quantized.utils import pairwise_array_from_func
 
+__all__ = ["Molecule"]
 
-@attr.s(frozen=True, cmp=False)
+
+@attrs(frozen=True, cmp=False)
 class Molecule:
-    atoms: List[Atom] = attr.ib()
+    atoms: List[Atom] = attrib()
 
     def __len__(self):
         return len(self.atoms)
@@ -42,14 +45,7 @@ class Molecule:
 
     @staticmethod
     def from_xyz(xyz: str) -> "Molecule":
-        """Convert from xyzfile and basistype into list of atoms.
-
-        :param xyz_file: Name of xyzfile containing atoms and coordinates
-        :type xyz_file: str
-        :param basis_type: Descriptor for basis function. Currently supports
-        only one type across all atom types.
-        :type basis_type: str
-        """
+        """Create a molecule from an xyz-file formatted string"""
         text = (line.split() for line in xyz.splitlines()[2:] if line.strip())
 
         atoms = [Atom(element=e, x=x, y=y, z=z) for e, x, y, z in text]
@@ -75,7 +71,7 @@ class Molecule:
     def scaled(self, factor: float) -> "Molecule":
         return self.map(partial(Atom.scaled, factor=factor))
 
-    def flipped_x(self):
+    def flipped_x(self) -> "Molecule":
         return self.map(Atom.flipped_x)
 
     def sorted(self, atomic_key: Callable) -> "Molecule":

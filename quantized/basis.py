@@ -4,9 +4,10 @@ import math
 from itertools import count, takewhile
 from typing import Callable, List, Tuple
 
-import attr
+from quantized.attr_wrapped import attrib, attrs, document_me
 
 # import numba
+import attr
 import numpy as np
 from numpy.linalg import inv
 from scipy import special
@@ -18,7 +19,12 @@ from quantized.potentials import Harmonic
 from quantized.utils import LinearComb, Parabola, cache, isclose
 from quantized.validation import Range
 
-___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
+__all__ = [
+    "HarmonicOscillator",
+    "EigenBasis",
+    "harmonic_basis_from_parabola",
+    "get_expansion_coeffs",
+]
 
 
 # class ThreeDBasis:
@@ -141,24 +147,11 @@ ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
 #         return pz_orbital
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class HarmonicOscillator:
     """A 1D quantum harmonic oscillator wave function.
 
-    Parameters
-    -----------
-    n
-        The quantum number
-    center
-        The center of the potential well
-    omega
-        The angular frequency of the oscillator
-    mass
-        The mass of the particle
-
-    Examples
-    ---------
-
+    ```
     >>> ho = HarmonicOscillator(n=2, center=0.5)
     >>> ho
     HarmonicOscillator(n=2, center=0.5, omega=1, mass=1.0)
@@ -168,13 +161,13 @@ class HarmonicOscillator:
     0.0
     >>> ho(-1000)
     0.0
-
+    ```
     """
 
-    n: int = attr.ib(validator=[Range(0, conf.harmonic_oscillator_max_n)])
-    center: float = attr.ib(validator=[Range(-conf.large_number, conf.large_number)])
-    mass: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
-    omega: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
+    n: int = attrib(validator=[Range(0, conf.harmonic_oscillator_max_n)])
+    center: float = attrib(validator=[Range(-conf.large_number, conf.large_number)])
+    mass: float = attrib(default=1.0, validator=Range(conf.small_number, conf.large_number))
+    omega: float = attrib(default=1.0, validator=Range(conf.small_number, conf.large_number))
 
     @staticmethod
     def from_parabola(p: Parabola, n: int, mass: float = 1.0) -> HarmonicOscillator:
@@ -198,42 +191,39 @@ class HarmonicOscillator:
         for the harmonic oscillator are determined, and the corresponding wave function
         generated and returned.
 
-        Parameters
-        -----------
-        point1
-            A sample point of the potential
-        point2
-            A sample point of the potential
-        point3
-            A sample point of the potential
-        n
-            The quantum number of the resulting wave function
-        mass
-            The mass of the particle
+        **point1**
+        A sample point of the potential
 
-        Returns
-        --------
-        HarmonicOscillator
-            The harmonic oscillator wave function resulting from the potential at the 3
-            points.
+        **point2**
+        A sample point of the potential
 
-        Examples
-        ---------
+        **point3**
+        A sample point of the potential
 
-        >>> ho = HarmonicOscillator.from_potential_points(
+        **n**
+        The quantum number of the resulting wave function
+
+        **mass**
+        The mass of the particle
+
+        **Examples**
+
+        ```python
+        ho = HarmonicOscillator.from_potential_points(
         ...     point1=(0.5, 1),
         ...     point2=(2.0, 0.5),
         ...     point3=(3.0, 1.5),
         ...     n=0
         ... )
-        >>> ho
+        ho
         HarmonicOscillator(n=0, center=1.5624999999999998, omega=1.0327955589886444, mass=1.0)
-
+        ```
 
         """
         p = Parabola.from_points(point1, point2, point3)
         return HarmonicOscillator.from_parabola(p, n=n, mass=mass)
 
+    @document_me
     def __kinetic__(self):
         """Return kinetic energy operator applied on this.
 
@@ -274,6 +264,7 @@ class HarmonicOscillator:
 
         return k
 
+    @document_me
     def __overlap__(self, other, lower_limit: float, upper_limit: float) -> float:
         if lower_limit != -np.inf or upper_limit != np.inf:
             raise NotImplementedError
@@ -308,25 +299,38 @@ class HarmonicOscillator:
     def _hermite(self):
         return special.hermite(self.n)
 
+    @document_me
     def __call__(self, x):
         y = (np.sqrt(self.mass * self.omega)) * (x - self.center)
         return self.N * np.exp(-(y ** 2) / 2.0) * self._hermite(y)
 
 
 def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[HarmonicOscillator]:
+    """Create a set of harmonic oscillator wave functions below some cutoff energy.
+
+    **p (Parabola)**
+    The parabola which will be used as the harmonic oscillator's potential surface.
+
+    **cutoff_energy (float)**
+    The energy at which to stop creating basis functions. That is, all basis functions created
+    will have energy less than or equal to `cutoff_energy`
+
+
+    """
     hos = (HarmonicOscillator.from_parabola(p, n=i) for i in count())
     return list(takewhile(lambda ho: ho.energy <= cutoff_energy, hos))
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class EigenBasis:
     # TODO: validate shapes, properties
-    states: Tuple[Callable, ...] = attr.ib(converter=tuple)
-    energies: Tuple[float, ...] = attr.ib(converter=tuple)
-    ao_S: np.array = attr.ib()
-    eigvecs: np.array = attr.ib()
-    ao_basis: List[Callable] = attr.ib()
+    states: Tuple[Callable, ...] = attrib(converter=tuple)
+    energies: Tuple[float, ...] = attrib(converter=tuple)
+    ao_S: np.array = attrib()
+    eigvecs: np.array = attrib()
+    ao_basis: List[Callable] = attrib()
 
+    @document_me
     def __len__(self):
         return len(self.states)
 

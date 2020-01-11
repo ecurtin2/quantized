@@ -3,16 +3,27 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Callable
 
-import attr
 import numpy as np
 from scipy import integrate
 
+
+from quantized.attr_wrapped import attrs, attrib, document_me
 from quantized.molecule import Molecule
 from quantized.utils import pairwise_array_from_func
 
 
+__all__ = [
+    "Operator",
+    "Overlap",
+    "Kinetic",
+    "Hamiltonian",
+    "Potential",
+    "ExtendedHuckelHamiltonian",
+]
+
 # TODO: get the type hints to work for Operator throughout codebase
 class Operator(ABC):
+    @document_me
     def __call__(self, first: Callable[[float], float], second: Callable[[float], float]) -> float:
         pass
 
@@ -25,10 +36,10 @@ class Operator(ABC):
         return pairwise_array_from_func(basis, self, symmetric=self.hermitian)
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class Overlap(Operator):
-    lower_limit: float = attr.ib(default=-np.inf)
-    upper_limit: float = attr.ib(default=np.inf)
+    lower_limit: float = attrib(default=-np.inf)
+    upper_limit: float = attrib(default=np.inf)
     hermitian = True
     """Compute the overlap integral in 1 dimension over the specified range
 
@@ -67,6 +78,7 @@ class Overlap(Operator):
 
     """
 
+    @document_me
     def __call__(self, first: Callable, second: Callable) -> float:
 
         try:
@@ -81,34 +93,37 @@ class Overlap(Operator):
         return integrate.quad(integrand, a=self.lower_limit, b=self.upper_limit)[0]
 
 
-@attr.s()
+@attrs()
 class Kinetic(Operator):
-    overlap: Overlap = attr.ib(default=Overlap())
+    overlap: Overlap = attrib(default=Overlap())
     hermitian = True
 
+    @document_me
     def __call__(self, first, second) -> float:
         return Overlap()(first, second.__kinetic__())
 
 
-@attr.s()
+@attrs()
 class Hamiltonian(Operator):
-    potential: Callable[[float], float] = attr.ib()
-    kinetic: Kinetic = attr.ib(default=Kinetic())
+    potential: Callable[[float], float] = attrib()
+    kinetic: Kinetic = attrib(default=Kinetic())
     hermitian = True
 
     def __attrs_post_init__(self):
         self.Potential = Potential(self.potential)
 
+    @document_me
     def __call__(self, first, second) -> float:
         return self.Potential(first, second) + self.kinetic(first, second)
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class Potential(Operator):
-    potential: Callable[[float], float] = attr.ib()
-    overlap: Overlap = attr.ib(default=Overlap())
+    potential: Callable[[float], float] = attrib()
+    overlap: Overlap = attrib(default=Overlap())
     hermitian = True
 
+    @document_me
     def __call__(self, first, second) -> float:
         def v(x):
             return self.potential(x) * second(x)
@@ -116,10 +131,10 @@ class Potential(Operator):
         return self.overlap(first, v)
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class ExtendedHuckelHamiltonian(Operator):
-    S: np.array = attr.ib()
-    molecule: Molecule = attr.ib()
+    S: np.array = attrib()
+    molecule: Molecule = attrib()
     hermitian = True
 
     def __attrs_post_init__(self):

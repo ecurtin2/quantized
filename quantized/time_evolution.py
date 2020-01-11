@@ -1,21 +1,24 @@
 from typing import Callable, Union
 from numbers import Real
 
-import attr
 import numpy as np
 
+from quantized.attr_wrapped import attrib, attrs, document_me
 from quantized.basis import EigenBasis, get_expansion_coeffs
 from quantized.operators import Operator
 
+__all__ = ["TimeEvolvingState", "TimeEvolvingObservable"]
 
-@attr.s
+
+@attrs()
 class TimeEvolvingState:
-    initial_state: Callable = attr.ib()
-    eigen_basis: EigenBasis = attr.ib(repr=False)
+    initial_state: Callable = attrib()
+    eigen_basis: EigenBasis = attrib(repr=False)
 
     def __attrs_post_init__(self):
         self.expansion_coeffs = get_expansion_coeffs(self.initial_state, self.eigen_basis.states)
 
+    @document_me
     def __call__(self, x: Union[float, np.ndarray], t: float) -> float:
         return sum(
             [
@@ -30,11 +33,11 @@ class TimeEvolvingState:
         return TimeEvolvingObservable(self, operator, hermitian=hermitian)
 
 
-@attr.s()
+@attrs()
 class TimeEvolvingObservable:
-    time_evolving_state: TimeEvolvingState = attr.ib()
-    operator: Operator = attr.ib()
-    hermitian: bool = attr.ib()
+    time_evolving_state: TimeEvolvingState = attrib()
+    operator: Operator = attrib()
+    hermitian: bool = attrib()
 
     def __attrs_post_init__(self):
         e = self.time_evolving_state.eigen_basis.energies
@@ -66,6 +69,7 @@ class TimeEvolvingObservable:
                 self.P[i, j] = c[i] * c[j] * eigen_basis_matrix[i, j]
                 self.W[i, j] = np.exp(1j * (e[j] - e[i]))
 
+    @document_me
     def __call__(self, t: Union[float, np.array]) -> Union[float, np.array]:
         if isinstance(t, Real):
             return np.abs(np.sum(self.P * (self.W ** t)))

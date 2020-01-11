@@ -1,14 +1,33 @@
+"""This is a module docstring
+
+It spans multiple lines
+"""
+
+
+from attr.validators import optional
 from typing import Optional, Union
 
-import attr
+from quantized.attr_wrapped import attrs, attrib
+from quantized.validation import Range, positive
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class Element:
-    z: int = attr.ib(repr=False)
-    name: str = attr.ib()
-    voie: Optional[float] = attr.ib(default=None, repr=False)
-    alpha: Optional[float] = attr.ib(default=None, repr=False)
+    """Class to hold element information"""
+
+    z: int = attrib(
+        repr=False, validator=[Range(1, 118)], desc="The atomic number of the element",
+    )
+    name: str = attrib(desc="The symbol of the element, e.g. H, He, O")
+    voie: Optional[float] = attrib(
+        default=None,
+        repr=False,
+        desc="The valence orbital ionization energy in eV",
+        validator=optional(positive),
+    )
+    alpha: Optional[float] = attrib(
+        default=None, repr=False, desc="The orbital decay coefficient", validator=optional(positive)
+    )
 
 
 H = Element(z=1, name="H")

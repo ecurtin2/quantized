@@ -1,25 +1,20 @@
 from typing import Tuple, Union
 
-import attr
 import numpy as np
 
+from quantized.attr_wrapped import attrs, attrib, document_me
 from quantized.config import conf
 from quantized.utils import Parabola
 from quantized.validation import Range
 
+__all__ = ["TripleWell", "Harmonic"]
 
-@attr.s(frozen=True)
+
+@attrs(frozen=True)
 class TripleWell:
-    center1: Tuple[float, float] = attr.ib()
-    barrier12: Tuple[float, float] = attr.ib()
-    center2: Tuple[float, float] = attr.ib()
-    barrier23: Tuple[float, float] = attr.ib()
-    center3: Tuple[float, float] = attr.ib()
-    well1: Parabola = attr.ib()
-    well2: Parabola = attr.ib()
-    well3: Parabola = attr.ib()
     """Construct a well potential from the points.
 
+    ```
     x                                                         x
     x                                                         x
     x                                                         x
@@ -31,7 +26,18 @@ class TripleWell:
        center1            x         x           x       x
                            x       x             center3
                             center2
+    ```
+
     """
+
+    center1: Tuple[float, float] = attrib()
+    barrier12: Tuple[float, float] = attrib()
+    center2: Tuple[float, float] = attrib()
+    barrier23: Tuple[float, float] = attrib()
+    center3: Tuple[float, float] = attrib()
+    well1: Parabola = attrib()
+    well2: Parabola = attrib()
+    well3: Parabola = attrib()
 
     def __attrs_post_init__(self):
 
@@ -78,6 +84,7 @@ class TripleWell:
                 "Probably the well/barrier parameters are invalid"
             )
 
+    @document_me
     def __call__(self, x: Union[np.ndarray, float]) -> Union[np.ndarray, float]:
         if isinstance(x, np.ndarray):
             return self._call_numpy(x)
@@ -114,11 +121,13 @@ class TripleWell:
         return TripleWell(center1, barrier1, center2, barrier2, center3, well1, well2, well3)
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class Harmonic:
-    center: float = attr.ib(validator=[Range(-conf.large_number, conf.large_number)])
-    mass: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
-    omega: float = attr.ib(default=1.0, validator=Range(conf.small_number, conf.large_number))
+    center: float = attrib(validator=[Range(-conf.large_number, conf.large_number)])
+    mass: float = attrib(default=1.0, validator=Range(conf.small_number, conf.large_number))
+    omega: float = attrib(default=1.0, validator=Range(conf.small_number, conf.large_number))
 
+    @document_me
     def __call__(self, x: float) -> float:
+        """Return the value of the harmonic potential at coordinate x"""
         return 0.5 * self.mass * (self.omega ** 2) * ((x - self.center) ** 2)

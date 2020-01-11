@@ -7,11 +7,11 @@ from math import isclose as math_isclose
 from math import sqrt
 from typing import Callable, Dict, Iterable, Sequence, Tuple, TypeVar
 
-import attr
 import numpy as np
 from joblib import Memory
 from tqdm import tqdm
 
+from quantized.attr_wrapped import attrib, attrs, document_me
 from quantized.config import conf
 from quantized.validation import Range, not_inf, not_nan
 
@@ -33,12 +33,14 @@ class LinearComb:
         self.c = c
         self.f = f
 
+    @document_me
     def __call__(self, x):
         return sum(ci * fi(x) for ci, fi in zip(self.c, self.f))
 
     def __repr__(self):
         return "" * 4 + "\n + ".join(f"{c:.4f} * {f}" for c, f in zip(self.c, self.f))
 
+    @document_me
     def __kinetic__(self):
         return LinearComb(c=self.c, f=[f.__kinetic__() for f in self.f])
 
@@ -110,12 +112,13 @@ def pairwise_array_from_func(
     return result
 
 
-@attr.s(frozen=True)
+@attrs(frozen=True)
 class Parabola:
-    a: float = attr.ib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
-    b: float = attr.ib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
-    c: float = attr.ib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
+    a: float = attrib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
+    b: float = attrib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
+    c: float = attrib(validator=[not_nan, not_inf, Range(-conf.large_number, conf.large_number)])
 
+    @document_me
     def __call__(self, x):
         return self.a * x ** 2 + self.b * x + self.c
 

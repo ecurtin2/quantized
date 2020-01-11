@@ -1,3 +1,6 @@
+"""This module contains the atom class"""
+
+
 from __future__ import annotations
 
 from math import cos, isclose, sin, sqrt
@@ -5,26 +8,31 @@ from math import cos, isclose, sin, sqrt
 import attr
 import numpy as np
 
+from quantized.attr_wrapped import attrs, attrib
 from quantized.config import conf
 from quantized.elements import Element, element_from_string
 from quantized.utils import angle
 
+__all__ = ["Atom"]
 
-@attr.s(frozen=True, cmp=False)
+
+@attrs(frozen=True, cmp=False)
 class Atom:
     """Atom class containing coordinates, basis and mass."""
 
-    element: Element = attr.ib(converter=element_from_string)
-    x: float = attr.ib(converter=float)
-    y: float = attr.ib(converter=float)
-    z: float = attr.ib(converter=float)
+    element: Element = attrib(converter=element_from_string, desc="The element")
+    x: float = attrib(converter=float, desc="The x coordinate of the atom")
+    y: float = attrib(converter=float, desc="The y coordinate of the atom")
+    z: float = attrib(converter=float, desc="The z coordinate of the atom")
 
     @property
     def mass(self):
+        """The mass of the atom"""
         return self.element.z
 
     @property
-    def coords(self):
+    def coords(self) -> np.array:
+        """Three dimensional array of coordinates, [x, y, z]"""
         return np.array([self.x, self.y, self.z])
 
     def with_coords(self, x: float, y: float, z: float) -> "Atom":

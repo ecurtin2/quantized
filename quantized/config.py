@@ -3,10 +3,15 @@ from pathlib import Path
 from shutil import rmtree
 from typing import Union
 
+from quantized.attr_wrapped import attrs, attrib
 import attr
 import cattr
 
+
 default_conf_path: Path = Path.home() / ".quantized/conf.yaml"
+
+
+__all__ = ["to_bool", "Config", "conf"]
 
 
 def to_bool(x: Union[str, bool]) -> bool:
@@ -18,15 +23,15 @@ def to_bool(x: Union[str, bool]) -> bool:
         raise TypeError(f"Variable {x} of type {type(x)} can't be converted to bool")
 
 
-@attr.s()
+@attrs(frozen=True)
 class Config:
-    harmonic_oscillator_max_n: int = attr.ib(default=50, converter=int)
-    small_number: float = attr.ib(default=1e-8, converter=float)
-    large_number: float = attr.ib(default=1000.0, converter=float)
-    float_tol: float = attr.ib(default=1e-6, converter=float)
-    enable_progressbar: bool = attr.ib(default=False, converter=to_bool)
-    cache_dir: Path = attr.ib(default=Path.home() / ".quantized/cache", converter=Path)
-    joblib_verbosity: int = attr.ib(default=0, converter=int)
+    harmonic_oscillator_max_n: int = attrib(default=50, converter=int)
+    small_number: float = attrib(default=1e-8, converter=float)
+    large_number: float = attrib(default=1000.0, converter=float)
+    float_tol: float = attrib(default=1e-6, converter=float)
+    enable_progressbar: bool = attrib(default=False, converter=to_bool)
+    cache_dir: Path = attrib(default="~/.quantized/cache", converter=Path)
+    joblib_verbosity: int = attrib(default=0, converter=int)
 
 
 cattr.register_structure_hook(Path, lambda s, t: Path(s))

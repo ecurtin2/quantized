@@ -1,7 +1,7 @@
 from math import isinf, isnan
 from typing import Any, Callable
 
-import attr
+from quantized.attr_wrapped import attrs, attrib
 from attr import Attribute
 
 Validator = Callable[[Any, Attribute], Any]
@@ -14,21 +14,14 @@ class ValidationError(ValueError):
     pass
 
 
-@attr.s
+@attrs()
 class Range:
     """Attrs Validator to ensure values between a min and a max value.
 
-    Parameters
-    -----------
-    min
-        The minimum allowed value
-    max
-        The maximum allowed value
-
     """
 
-    min = attr.ib()
-    max = attr.ib()
+    min = attrib(desc="The minimum allowed value")
+    max = attrib(desc="The maximum allowed value")
 
     @min.validator
     def check(self, attribute, value):
@@ -56,3 +49,17 @@ def not_inf(instance: Any, attribute: Attribute, value: float):
         raise ValidationError(
             f"Validation error for {instance}. {attribute.name} is Infinite but that's not allowed"
         )
+
+
+class _Positive:
+    def __call__(self, instance: Any, attribute: Attribute, value: float):
+        if not value > 0:
+            raise ValidationError(
+                f"Validation error for {instance}. {attribute.name} is not positive"
+            )
+
+    def __repr__(self):
+        return "Positive"
+
+
+positive = _Positive()
