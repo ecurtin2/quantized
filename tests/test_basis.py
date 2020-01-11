@@ -4,11 +4,11 @@ from hypothesis import given
 from hypothesis.strategies import integers
 from pytest import raises
 import math
-from transit_chem.basis import EigenBasis, Harmonic, HarmonicOscillator
-from transit_chem.time_evolution import TimeEvolvingState
-from transit_chem.config import conf
-from transit_chem.operators import Hamiltonian, Overlap
-from transit_chem.utils import pairwise_array_from_func, isclose
+from quantized.basis import EigenBasis, Harmonic, HarmonicOscillator
+from quantized.time_evolution import TimeEvolvingState
+from quantized.config import conf
+from quantized.operators import Hamiltonian, Overlap
+from quantized.utils import pairwise_array_from_func, isclose
 from utils import is_diagonal, reasonable_floats, reasonable_pos_floats
 
 

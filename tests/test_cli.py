@@ -1,6 +1,6 @@
 from click.testing import CliRunner
 
-from transit_chem.cli import cli
+from quantized.cli import cli
 
 import pytest
 

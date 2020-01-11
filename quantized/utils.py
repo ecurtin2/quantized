@@ -12,8 +12,8 @@ import numpy as np
 from joblib import Memory
 from tqdm import tqdm
 
-from transit_chem.config import conf
-from transit_chem.validation import Range, not_inf, not_nan
+from quantized.config import conf
+from quantized.validation import Range, not_inf, not_nan
 
 __all__ = ["pairwise_array_from_func", "Parabola", "LinearComb", "cache"]
 
@@ -43,7 +43,7 @@ class LinearComb:
         return LinearComb(c=self.c, f=[f.__kinetic__() for f in self.f])
 
 
-@cache
+# @cache
 def pairwise_array_from_func(
     items: Sequence[T], func: Callable[[T, T], float], symmetric=False
 ) -> np.ndarray:
@@ -68,7 +68,7 @@ def pairwise_array_from_func(
     Examples
     ---------
 
-    >>> from transit_chem.utils import pairwise_array_from_func
+    >>> from quantized.utils import pairwise_array_from_func
     >>> def distance(i, j):
     ...     return abs(i - j)
     ...

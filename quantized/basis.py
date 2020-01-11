@@ -12,11 +12,11 @@ from numpy.linalg import inv
 from scipy import special
 from scipy.linalg import eigh
 
-from transit_chem.config import conf
-from transit_chem.operators import Overlap
-from transit_chem.potentials import Harmonic
-from transit_chem.utils import LinearComb, Parabola, cache, isclose
-from transit_chem.validation import Range
+from quantized.config import conf
+from quantized.operators import Overlap
+from quantized.potentials import Harmonic
+from quantized.utils import LinearComb, Parabola, cache, isclose
+from quantized.validation import Range
 
 ___all__ = ["HarmonicOscillatorWaveFunction", "overlap1d"]
 

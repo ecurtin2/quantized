@@ -1,6 +1,6 @@
 from math import isclose
 
-from transit_chem import constants
+from quantized import constants
 
 
 def test_constants():

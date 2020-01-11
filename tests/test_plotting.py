@@ -1,6 +1,6 @@
 import numpy as np
 
-from transit_chem import plotting as p
+from quantized import plotting as p
 from pytest import raises
 
 

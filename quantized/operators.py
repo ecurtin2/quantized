@@ -7,8 +7,8 @@ import attr
 import numpy as np
 from scipy import integrate
 
-from transit_chem.molecule import Molecule
-from transit_chem.utils import pairwise_array_from_func
+from quantized.molecule import Molecule
+from quantized.utils import pairwise_array_from_func
 
 
 # TODO: get the type hints to work for Operator throughout codebase
@@ -51,7 +51,7 @@ class Overlap(Operator):
     Examples
     ---------
 
-    >>> from transit_chem import overlap
+    >>> from quantized import overlap
     >>> from numpy import sin, pi
     >>>
     >>> def f1(x):

@@ -3,8 +3,8 @@ from math import isclose
 import numpy as np
 from hypothesis import given
 
-from transit_chem.config import conf
-from transit_chem.utils import Parabola, pairwise_array_from_func
+from quantized.config import conf
+from quantized.utils import Parabola, pairwise_array_from_func
 from utils import reasonable_floats
 
 

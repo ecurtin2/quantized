@@ -4,8 +4,8 @@ from typing import Callable, List
 import attr
 import numpy as np
 
-from transit_chem.atom import Atom
-from transit_chem.utils import pairwise_array_from_func
+from quantized.atom import Atom
+from quantized.utils import pairwise_array_from_func
 
 
 @attr.s(frozen=True, cmp=False)

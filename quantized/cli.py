@@ -1,4 +1,4 @@
-"""Console script for transit_chem."""
+"""Console script for quantized."""
 import sys
 from functools import partial
 from pathlib import Path
@@ -7,13 +7,13 @@ import click
 import numpy as np
 from loguru import logger
 
-from transit_chem import config
-from transit_chem.basis import EigenBasis, HarmonicOscillator, harmonic_basis_from_parabola
-from transit_chem.hopping_matrix import HoppingMatrix, OccupancyProbabilites, Pnot
-from transit_chem.operators import Hamiltonian, Overlap
-from transit_chem.plotting import plot_matrix, plot_occupancies_over_time, plot_p_not
-from transit_chem.potentials import TripleWell
-from transit_chem.time_evolution import TimeEvolvingState
+from quantized import config
+from quantized.basis import EigenBasis, HarmonicOscillator, harmonic_basis_from_parabola
+from quantized.hopping_matrix import HoppingMatrix, OccupancyProbabilites, Pnot
+from quantized.operators import Hamiltonian, Overlap
+from quantized.plotting import plot_matrix, plot_occupancies_over_time, plot_p_not
+from quantized.potentials import TripleWell
+from quantized.time_evolution import TimeEvolvingState
 
 
 @click.group()

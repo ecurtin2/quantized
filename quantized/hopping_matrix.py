@@ -9,8 +9,8 @@ from loguru import logger
 from scipy.interpolate import interp1d
 from scipy.optimize import root_scalar
 
-from transit_chem.operators import Overlap
-from transit_chem.time_evolution import TimeEvolvingObservable, TimeEvolvingState
+from quantized.operators import Overlap
+from quantized.time_evolution import TimeEvolvingObservable, TimeEvolvingState
 
 
 def pairwise(iterable):

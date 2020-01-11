@@ -4,8 +4,8 @@ from numbers import Real
 import attr
 import numpy as np
 
-from transit_chem.basis import EigenBasis, get_expansion_coeffs
-from transit_chem.operators import Operator
+from quantized.basis import EigenBasis, get_expansion_coeffs
+from quantized.operators import Operator
 
 
 @attr.s

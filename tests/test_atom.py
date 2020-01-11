@@ -1,5 +1,5 @@
-from transit_chem.elements import H
-from transit_chem.atom import Atom
+from quantized.elements import H
+from quantized.atom import Atom
 
 
 def test_atom__init__():

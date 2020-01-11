@@ -6,7 +6,7 @@ from typing import Union
 import attr
 import cattr
 
-default_conf_path: Path = Path.home() / ".transit_chem/conf.yaml"
+default_conf_path: Path = Path.home() / ".quantized/conf.yaml"
 
 
 def to_bool(x: Union[str, bool]) -> bool:
@@ -25,7 +25,7 @@ class Config:
     large_number: float = attr.ib(default=1000.0, converter=float)
     float_tol: float = attr.ib(default=1e-6, converter=float)
     enable_progressbar: bool = attr.ib(default=False, converter=to_bool)
-    cache_dir: Path = attr.ib(default=Path.home() / ".transit_chem/cache", converter=Path)
+    cache_dir: Path = attr.ib(default=Path.home() / ".quantized/cache", converter=Path)
     joblib_verbosity: int = attr.ib(default=0, converter=int)
 
 

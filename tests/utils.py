@@ -3,8 +3,8 @@ from hypothesis.strategies import floats
 
 from typing import Iterable
 
-from transit_chem.config import conf
-from transit_chem.utils import isclose
+from quantized.config import conf
+from quantized.utils import isclose
 
 reasonable_floats = floats(
     allow_infinity=False, allow_nan=False, min_value=-conf.large_number, max_value=conf.large_number

@@ -1,7 +1,7 @@
 import attr
 from pytest import raises
 
-from transit_chem.validation import Range
+from quantized.validation import Range
 
 
 class DummyAttrib:

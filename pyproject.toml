@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "transit-chem"
-version = "0.6.3"
+name = "quantized"
+version = "0.0.1.alpha"
 description = "Quantifying Probabilistic Electron Transit times."
 authors = ["Evan Curtin <fakeemail@gmail.com>"]
 readme = "docs/README.md"
 license = "MIT"
 
 [tool.poetry.scripts]
-transit-chem = 'transit_chem.cli:cli'
+quantized = 'quantized.cli:cli'
 
 [tool.poetry.dependencies]
 python = "^3.7.0"

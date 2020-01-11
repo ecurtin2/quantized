@@ -1,5 +1,5 @@
-from transit_chem.config import to_bool, show, conf, Config
-from transit_chem import config
+from quantized.config import to_bool, show, conf, Config
+from quantized import config
 
 from pytest import raises
 

@@ -1,8 +1,8 @@
 import numpy as np
 
-from transit_chem.elements import H, Li
-from transit_chem.atom import Atom
-from transit_chem.molecule import Molecule
+from quantized.elements import H, Li
+from quantized.atom import Atom
+from quantized.molecule import Molecule
 
 from utils import allclose
 

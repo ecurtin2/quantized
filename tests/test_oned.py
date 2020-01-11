@@ -3,10 +3,10 @@ from math import isclose
 import numpy as np
 import pytest
 
-from transit_chem import operators as op
-from transit_chem.basis import HarmonicOscillator
-from transit_chem.config import conf
-from transit_chem.potentials import TripleWell
+from quantized import operators as op
+from quantized.basis import HarmonicOscillator
+from quantized.config import conf
+from quantized.potentials import TripleWell
 from utils import is_diagonal, is_hermitian, is_identity
 
 

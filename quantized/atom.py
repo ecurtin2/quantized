@@ -5,9 +5,9 @@ from math import cos, isclose, sin, sqrt
 import attr
 import numpy as np
 
-from transit_chem.config import conf
-from transit_chem.elements import Element, element_from_string
-from transit_chem.utils import angle
+from quantized.config import conf
+from quantized.elements import Element, element_from_string
+from quantized.utils import angle
 
 
 @attr.s(frozen=True, cmp=False)

@@ -41,11 +41,11 @@ generating this library I've tried to create something that would
 be intuitive for a domain expert to use. 
 
 ```python
-    from transit_chem.utils import Parabola
-    from transit_chem.basis import harmonic_basis_from_parabola, HarmonicOscillator, EigenBasis
-    from transit_chem import potentials
-    from transit_chem.time_evolution import TimeEvolvingState
-    from transit_chem.operators import Hamiltonian, Overlap, Kinetic
+    from quantized.utils import Parabola
+    from quantized.basis import harmonic_basis_from_parabola, HarmonicOscillator, EigenBasis
+    from quantized import potentials
+    from quantized.time_evolution import TimeEvolvingState
+    from quantized.operators import Hamiltonian, Overlap, Kinetic
 
 
     parabola = Parabola(a=1.0, b=1.0, c=1.0)

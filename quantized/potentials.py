@@ -3,9 +3,9 @@ from typing import Tuple, Union
 import attr
 import numpy as np
 
-from transit_chem.config import conf
-from transit_chem.utils import Parabola
-from transit_chem.validation import Range
+from quantized.config import conf
+from quantized.utils import Parabola
+from quantized.validation import Range
 
 
 @attr.s(frozen=True)

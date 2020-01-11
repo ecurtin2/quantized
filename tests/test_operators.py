@@ -1,11 +1,11 @@
 import numpy as np
 from pytest import raises
 
-from transit_chem.operators import ExtendedHuckelHamiltonian
-from transit_chem.molecule import Molecule
-from transit_chem.atom import Atom
-from transit_chem.elements import C, N, Uuo
-from transit_chem.utils import isclose
+from quantized.operators import ExtendedHuckelHamiltonian
+from quantized.molecule import Molecule
+from quantized.atom import Atom
+from quantized.elements import C, N, Uuo
+from quantized.utils import isclose
 
 from utils import is_diagonal
 
