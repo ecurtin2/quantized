@@ -1,6 +1,6 @@
 site_name: Quantized
 nav:
-  - Home: readme.md
+  - Home: README.md
   - About: about.md
   - "Getting Started": getting-started.md
   - Tutorials:
