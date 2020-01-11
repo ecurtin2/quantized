@@ -3,7 +3,7 @@
 .vscode/
 .idea/
 
-**transit_chem_cache
+**.quantized
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
