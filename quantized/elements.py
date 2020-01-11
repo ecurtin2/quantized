@@ -15,9 +15,7 @@ from quantized.validation import Range, positive
 class Element:
     """Class to hold element information"""
 
-    z: int = attrib(
-        repr=False, validator=[Range(1, 118)], desc="The atomic number of the element",
-    )
+    z: int = attrib(repr=False, validator=[Range(1, 118)], desc="The atomic number of the element")
     name: str = attrib(desc="The symbol of the element, e.g. H, He, O")
     voie: Optional[float] = attrib(
         default=None,

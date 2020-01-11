@@ -37,7 +37,7 @@ def test_restore_defaults(tmp_path):
 
     p = tmp_path / "conf.yaml"
 
-    n = 2334121123
+    n = 2_334_121_123
     config.set_items(p, harmonic_oscillator_max_n=n)
     c = config.load(p)
     assert c.harmonic_oscillator_max_n == n

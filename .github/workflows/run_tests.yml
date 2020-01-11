@@ -19,4 +19,4 @@ jobs:
     - name: Lint with flake8
       run: "poetry run flake8 ."
     - name: Test with pytest
-      run: "poetry run pytest tests\ --cov=quantized --cov-fail-under 90"
+      run: "poetry run pytest tests\ --cov=quantized --cov-fail-under 80"

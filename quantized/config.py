@@ -30,7 +30,7 @@ class Config:
     large_number: float = attrib(default=1000.0, converter=float)
     float_tol: float = attrib(default=1e-6, converter=float)
     enable_progressbar: bool = attrib(default=False, converter=to_bool)
-    cache_dir: Path = attrib(default="~/.quantized/cache", converter=Path)
+    cache_dir: Path = attrib(default=".quantized/cache", converter=Path)
     joblib_verbosity: int = attrib(default=0, converter=int)
 
 

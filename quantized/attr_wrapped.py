@@ -48,7 +48,7 @@ def parse_attr(cls):
             try:
                 v = ", ".join(
                     map(repr_validator, f.validator._validators)
-                )  ## and validator - multiple validators
+                )  # and validator - multiple validators
             except AttributeError:
                 v = repr_validator(f.validator)
             fields.append(f"> Constraints:  {v}")

@@ -45,7 +45,7 @@ class LinearComb:
         return LinearComb(c=self.c, f=[f.__kinetic__() for f in self.f])
 
 
-# @cache
+@cache
 def pairwise_array_from_func(
     items: Sequence[T], func: Callable[[T, T], float], symmetric=False
 ) -> np.ndarray:
