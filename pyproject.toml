@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "quantized"
-version = "0.0.2alpha"
+version = "0.0.2.0"
 description = "Quantifying Probabilistic Electron Transit times."
 authors = ["Evan Curtin <fakeemail@gmail.com>"]
 readme = "docs/README.md"
