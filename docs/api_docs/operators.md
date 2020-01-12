@@ -23,23 +23,21 @@ Overlap(lower_limit: 'float' = -inf, upper_limit: 'float' = inf)
 
 ####Methods
 
-#####hermitian
-
-
-bool(x) -> bool
-
-Returns True when the argument x is true, False otherwise.
-The builtins True and False are the only two instances of the class bool.
-The class bool is a subclass of the class int, and cannot be subclassed.
 #####matrix
 ```
 Overlap.matrix(self, basis) -> np.array
 ```
 
 
-None
+Return a matrix of the operator projected onto a basis.
 
 
+
+
+
+####Properties
+
+#####hermitian = True
 
 
 
@@ -72,23 +70,21 @@ Kinetic(
 
 ####Methods
 
-#####hermitian
-
-
-bool(x) -> bool
-
-Returns True when the argument x is true, False otherwise.
-The builtins True and False are the only two instances of the class bool.
-The class bool is a subclass of the class int, and cannot be subclassed.
 #####matrix
 ```
 Kinetic.matrix(self, basis) -> np.array
 ```
 
 
-None
+Return a matrix of the operator projected onto a basis.
 
 
+
+
+
+####Properties
+
+#####hermitian = True
 
 
 
@@ -124,23 +120,21 @@ Hamiltonian(
 
 ####Methods
 
-#####hermitian
-
-
-bool(x) -> bool
-
-Returns True when the argument x is true, False otherwise.
-The builtins True and False are the only two instances of the class bool.
-The class bool is a subclass of the class int, and cannot be subclassed.
 #####matrix
 ```
 Hamiltonian.matrix(self, basis) -> np.array
 ```
 
 
-None
+Return a matrix of the operator projected onto a basis.
 
 
+
+
+
+####Properties
+
+#####hermitian = True
 
 
 
@@ -176,23 +170,21 @@ Potential(
 
 ####Methods
 
-#####hermitian
-
-
-bool(x) -> bool
-
-Returns True when the argument x is true, False otherwise.
-The builtins True and False are the only two instances of the class bool.
-The class bool is a subclass of the class int, and cannot be subclassed.
 #####matrix
 ```
 Potential.matrix(self, basis) -> np.array
 ```
 
 
-None
+Return a matrix of the operator projected onto a basis.
 
 
+
+
+
+####Properties
+
+#####hermitian = True
 
 
 
@@ -223,14 +215,6 @@ ExtendedHuckelHamiltonian(S: 'np.array', molecule: 'Molecule')
 
 ####Methods
 
-#####hermitian
-
-
-bool(x) -> bool
-
-Returns True when the argument x is true, False otherwise.
-The builtins True and False are the only two instances of the class bool.
-The class bool is a subclass of the class int, and cannot be subclassed.
 #####matrix
 ```
 ExtendedHuckelHamiltonian.matrix(self, basis=None) -> np.array
@@ -240,6 +224,12 @@ ExtendedHuckelHamiltonian.matrix(self, basis=None) -> np.array
 Create the Hamiltonian under the Extended Hueckel Approximation.
 
 
+
+
+
+####Properties
+
+#####hermitian = True
 
 
 
@@ -258,10 +248,4 @@ ExtendedHuckelHamiltonian.__call__(
 
 
 Call self as a function.
-
-
-
-## Functions
-
-----
 

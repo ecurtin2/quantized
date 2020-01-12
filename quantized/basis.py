@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from itertools import count, takewhile
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Union
 
 from quantized.attr_wrapped import attrib, attrs, document_me
 
@@ -164,13 +164,24 @@ class HarmonicOscillator:
     ```
     """
 
-    n: int = attrib(validator=[Range(0, conf.harmonic_oscillator_max_n)])
-    center: float = attrib(validator=[Range(-conf.large_number, conf.large_number)])
-    mass: float = attrib(default=1.0, validator=Range(conf.small_number, conf.large_number))
-    omega: float = attrib(default=1.0, validator=Range(conf.small_number, conf.large_number))
+    n: int = attrib(validator=[Range(0, conf.harmonic_oscillator_max_n)], desc="The quantum number")
+    center: float = attrib(
+        validator=[Range(-conf.large_number, conf.large_number)], desc="The center of the function"
+    )
+    mass: float = attrib(
+        default=1.0,
+        validator=Range(conf.small_number, conf.large_number),
+        desc="Mass of the particle",
+    )
+    omega: float = attrib(
+        default=1.0,
+        validator=Range(conf.small_number, conf.large_number),
+        desc="Angular frequency of the oscillator",
+    )
 
     @staticmethod
     def from_parabola(p: Parabola, n: int, mass: float = 1.0) -> HarmonicOscillator:
+        """Create a harmonic oscillator, who's potential is defined by the given parabola"""
         # a = m/2 * w**2
         # 2a / m = w**2
         # sqrt(2a/m) = w
@@ -224,22 +235,21 @@ class HarmonicOscillator:
         return HarmonicOscillator.from_parabola(p, n=n, mass=mass)
 
     @document_me
-    def __kinetic__(self):
-        """Return kinetic energy operator applied on this.
+    def __kinetic__(self) -> Callable:
+        """Return kinetic energy operator applied on this."""
 
-        K = p^2 / 2m
-        p = i * sqrt(m w hbar/2)(a+ - a)
-
-        k = -1/2 * (m w hbar / 2)[(a+ - a)^2]
-        [] = (a+^2 + a+a + aa+  - a^2)
-
-        [] = sqrt(n+1)sqrt(n+2)| n + 2 >  always
-                sqrt(n+1)sqrt(n+1)| n >      always
-                sqrt(n)  sqrt(n)  | n >      if n == 0  0
-                sqrt(n)  sqrt(n-1)| n - 2 >  if n <= 1  0
-
-        k = - (m w hbar) / 4 * []
-        """
+        # K = \frac{p^2}{2m}
+        # p = i * \sqrt{m w hbar/2}(a+ - a)
+        #
+        # k = -1/2 * (m w hbar / 2)[(a+ - a)^2]
+        # [] = (a+^2 + a+a + aa+  - a^2)
+        #
+        # [] = sqrt(n+1)sqrt(n+2)| n + 2 >  always
+        #         sqrt(n+1)sqrt(n+1)| n >      always
+        #         sqrt(n)  sqrt(n)  | n >      if n == 0  0
+        #         sqrt(n)  sqrt(n-1)| n - 2 >  if n <= 1  0
+        #
+        # k = - (m w hbar) / 4 * []
 
         def k(x):
             first = np.sqrt(self.n + 1) * np.sqrt(self.n + 2) * attr.evolve(self, n=self.n + 2)(x)
@@ -266,6 +276,11 @@ class HarmonicOscillator:
 
     @document_me
     def __overlap__(self, other, lower_limit: float, upper_limit: float) -> float:
+        """Determine the overlap with some other function
+
+        This specializes a generic overlap integral, and short circuits integral
+        calculations if the integral is analytically known.
+        """
         if lower_limit != -np.inf or upper_limit != np.inf:
             raise NotImplementedError
         if not isinstance(other, HarmonicOscillator):
@@ -281,14 +296,17 @@ class HarmonicOscillator:
 
     @property
     def energy(self):
+        """The energy of harmonic oscillator"""
         return (self.n + 0.5) * self.omega
 
     @property
-    def potential(self):
+    def potential(self) -> Harmonic:
+        """The potential for this oscillator"""
         return Harmonic(center=self.center, mass=self.mass, omega=self.omega)
 
     @property
     def N(self):
+        """The normalization constant"""
         return (
             1.0
             / math.sqrt(2 ** self.n * math.factorial(self.n))
@@ -300,7 +318,8 @@ class HarmonicOscillator:
         return special.hermite(self.n)
 
     @document_me
-    def __call__(self, x):
+    def __call__(self, x: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        """Return"""
         y = (np.sqrt(self.mass * self.omega)) * (x - self.center)
         return self.N * np.exp(-(y ** 2) / 2.0) * self._hermite(y)
 
@@ -323,19 +342,33 @@ def harmonic_basis_from_parabola(p: Parabola, cutoff_energy: float) -> List[Harm
 
 @attrs(frozen=True)
 class EigenBasis:
+    """A class for representing an eigenbasis for a hamiltonian"""
+
     # TODO: validate shapes, properties
-    states: Tuple[Callable, ...] = attrib(converter=tuple)
-    energies: Tuple[float, ...] = attrib(converter=tuple)
-    ao_S: np.array = attrib()
-    eigvecs: np.array = attrib()
-    ao_basis: List[Callable] = attrib()
+    states: Tuple[Callable, ...] = attrib(converter=tuple, desc="A set of eigen states")
+    energies: Tuple[float, ...] = attrib(converter=tuple, desc="The energies of the eigen states")
+    ao_S: np.ndarray = attrib(desc="The overlap matrix in the original basis")
+    eigvecs: np.ndarray = attrib(
+        desc="The eigenvectors of the hamiltonian. Each column is a vector."
+    )
+    ao_basis: List[Callable] = attrib(desc="The original basis")
 
     @document_me
     def __len__(self):
+        """The size of the eigenbasis"""
         return len(self.states)
 
     @staticmethod
-    def from_basis(basis: List[Callable], H: np.array, S: np.array) -> EigenBasis:
+    def from_basis(basis: List[Callable], H: np.ndarray, S: np.ndarray) -> EigenBasis:
+        """Create an eigenbasis from another basis, given a hamiltonian and overlap matrix
+
+        **H (np.ndarray)**
+        The hamiltonian matrix in the basis
+
+        **S (np.ndarray)**
+        The overlap matrix in the basis
+
+        """
         # Sort vals/vecs
         eigvals, eigvecs = eigh(H, S)
         idx = np.argsort(eigvals)
@@ -347,10 +380,12 @@ class EigenBasis:
             states=tuple(states), energies=tuple(eigvals), eigvecs=eigvecs, ao_S=S, ao_basis=basis
         )
 
-    def transformed(self, matrix: np.array) -> np.array:
+    def transformed(self, matrix: np.ndarray) -> np.ndarray:
+        """Given a matrix in the original basis, return the matrix in the Eigen basis."""
         return inv(self.eigvecs) @ inv(self.ao_S) @ matrix @ self.eigvecs
 
 
 @cache
 def get_expansion_coeffs(state: Callable, basis: List[Callable]) -> List[float]:
+    """Given a state and a basis, return the expansion coefficents for that state"""
     return [Overlap()(state, basis_func) for basis_func in basis]

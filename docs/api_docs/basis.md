@@ -32,21 +32,21 @@ HarmonicOscillator(n=2, center=0.5, omega=1, mass=1.0)
 
 #### Fields
 
- **n (int)** 
+ **n (int)** The quantum number
 
 > Constraints:  Range(min=0, max=50)
 
- **center (float)** 
+ **center (float)** The center of the function
 
 > Constraints:  Range(min=-1000.0, max=1000.0)
 
- **mass (float)** 
+ **mass (float)** Mass of the particle
 
 > Default: 1.0
 
 > Constraints:  Range(min=1e-08, max=1000.0)
 
- **omega (float)** 
+ **omega (float)** Angular frequency of the oscillator
 
 > Default: 1.0
 
@@ -59,15 +59,17 @@ HarmonicOscillator(n=2, center=0.5, omega=1, mass=1.0)
 #####N
 
 
-None
+The normalization constant
 #####energy
 
 
-None
+The energy of harmonic oscillator
 #####potential
 
 
-None
+The potential for this oscillator
+
+
 
 
 
@@ -83,7 +85,7 @@ HarmonicOscillator.from_parabola(
 ```
 
 
-None
+Create a harmonic oscillator, who's potential is defined by the given parabola
 #####from\_potential\_points
 ```
 HarmonicOscillator.from_potential_points(
@@ -136,31 +138,21 @@ HarmonicOscillator(n=0, center=1.5624999999999998, omega=1.0327955589886444, mas
 
 #####\_\_call\_\_
 ```
-HarmonicOscillator.__call__(self, x) -> <class 'inspect._empty'>
+HarmonicOscillator.__call__(
+    self,
+    x: 'Union[float, np.ndarray]'
+) -> Union[float, np.ndarray]
 ```
 
 
-Call self as a function.
+Return
 #####\_\_kinetic\_\_
 ```
-HarmonicOscillator.__kinetic__(self) -> <class 'inspect._empty'>
+HarmonicOscillator.__kinetic__(self) -> Callable
 ```
 
 
 Return kinetic energy operator applied on this.
-
-K = p^2 / 2m
-p = i * sqrt(m w hbar/2)(a+ - a)
-
-k = -1/2 * (m w hbar / 2)[(a+ - a)^2]
-[] = (a+^2 + a+a + aa+  - a^2)
-
-[] = sqrt(n+1)sqrt(n+2)| n + 2 >  always
-        sqrt(n+1)sqrt(n+1)| n >      always
-        sqrt(n)  sqrt(n)  | n >      if n == 0  0
-        sqrt(n)  sqrt(n-1)| n - 2 >  if n <= 1  0
-
-k = - (m w hbar) / 4 * []
 #####\_\_overlap\_\_
 ```
 HarmonicOscillator.__overlap__(
@@ -172,7 +164,10 @@ HarmonicOscillator.__overlap__(
 ```
 
 
-None
+Determine the overlap with some other function
+
+This specializes a generic overlap integral, and short circuits integral
+calculations if the integral is analytically known.
 
  --- 
 
@@ -182,32 +177,36 @@ None
 EigenBasis(
     states,
     energies,
-    ao_S: 'np.array',
-    eigvecs: 'np.array',
+    ao_S: 'np.ndarray',
+    eigvecs: 'np.ndarray',
     ao_basis: 'List[Callable]'
 )
 ```
+A class for representing an eigenbasis for a hamiltonian
+
 #### Fields
 
- **states (Tuple[Callable, ...])** 
+ **states (Tuple[Callable, ...])** A set of eigen states
 
- **energies (Tuple[float, ...])** 
+ **energies (Tuple[float, ...])** The energies of the eigen states
 
- **ao_S (np.array)** 
+ **ao_S (np.ndarray)** The overlap matrix in the original basis
 
- **eigvecs (np.array)** 
+ **eigvecs (np.ndarray)** The eigenvectors of the hamiltonian. Each column is a vector.
 
- **ao_basis (List[Callable])** 
+ **ao_basis (List[Callable])** The original basis
 
 ####Methods
 
 #####transformed
 ```
-EigenBasis.transformed(self, matrix: 'np.array') -> np.array
+EigenBasis.transformed(self, matrix: 'np.ndarray') -> np.ndarray
 ```
 
 
-None
+Given a matrix in the original basis, return the matrix in the Eigen basis.
+
+
 
 
 
@@ -219,13 +218,19 @@ None
 ```
 EigenBasis.from_basis(
     basis: 'List[Callable]',
-    H: 'np.array',
-    S: 'np.array'
+    H: 'np.ndarray',
+    S: 'np.ndarray'
 ) -> EigenBasis
 ```
 
 
-None
+Create an eigenbasis from another basis, given a hamiltonian and overlap matrix
+
+**H (np.ndarray)**
+The hamiltonian matrix in the basis
+
+**S (np.ndarray)**
+The overlap matrix in the basis
 
 
 
@@ -237,7 +242,7 @@ EigenBasis.__len__(self) -> <class 'inspect._empty'>
 ```
 
 
-None
+The size of the eigenbasis
 
 
 
@@ -263,3 +268,12 @@ The parabola which will be used as the harmonic oscillator's potential surface.
 **cutoff_energy (float)**
 The energy at which to stop creating basis functions. That is, all basis functions created
 will have energy less than or equal to `cutoff_energy`
+
+###get_expansion_coeffs
+
+```
+get_expansion_coeffs(state: 'Callable', basis: 'List[Callable]') -> List[float]
+```
+
+
+Given a state and a basis, return the expansion coefficents for that state

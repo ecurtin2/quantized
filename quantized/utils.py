@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from concurrent.futures import Future, ProcessPoolExecutor, as_completed
+from functools import wraps
 from itertools import combinations_with_replacement, product
 from math import acos
 from math import isclose as math_isclose
@@ -19,7 +20,17 @@ __all__ = ["pairwise_array_from_func", "Parabola", "LinearComb", "cache"]
 
 
 memory = Memory(conf.cache_dir, verbose=conf.joblib_verbosity)
-cache = memory.cache
+
+
+def cache(f: Callable) -> Callable:
+    cached = memory.cache(f)
+
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        return cached(*args, **kwargs)
+
+    return wrapped
+
 
 T = TypeVar("T")
 

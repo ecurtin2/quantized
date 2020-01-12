@@ -23,63 +23,63 @@ Molecule.com_as_origin(self) -> Molecule
 ```
 
 
-None
+
 #####flipped\_x
 ```
 Molecule.flipped_x(self) -> Molecule
 ```
 
 
-None
+
 #####map
 ```
 Molecule.map(self, f: Callable) -> Molecule
 ```
 
 
-None
+
 #####rotated
 ```
 Molecule.rotated(self, r: <built-in function array>) -> Molecule
 ```
 
 
-None
+
 #####rotated\_about\_x
 ```
 Molecule.rotated_about_x(self, angle: float) -> Molecule
 ```
 
 
-None
+
 #####rotated\_about\_y
 ```
 Molecule.rotated_about_y(self, angle: float) -> Molecule
 ```
 
 
-None
+
 #####rotated\_about\_z
 ```
 Molecule.rotated_about_z(self, angle: float) -> Molecule
 ```
 
 
-None
+
 #####scaled
 ```
 Molecule.scaled(self, factor: float) -> Molecule
 ```
 
 
-None
+
 #####sorted
 ```
 Molecule.sorted(self, atomic_key: Callable) -> Molecule
 ```
 
 
-None
+
 #####translated
 ```
 Molecule.translated(
@@ -91,7 +91,7 @@ Molecule.translated(
 ```
 
 
-None
+
 #####with\_atom\_aligned\_to
 ```
 Molecule.with_atom_aligned_to(
@@ -104,7 +104,7 @@ Molecule.with_atom_aligned_to(
 ```
 
 
-None
+
 
 
 
@@ -121,11 +121,13 @@ Determine the center of mass of the molecule.
 #####coords
 
 
-None
+
 #####mass
 
 
-None
+
+
+
 
 
 
@@ -140,10 +142,4 @@ Molecule.from_xyz(xyz: str) -> Molecule
 Create a molecule from an xyz-file formatted string
 
 
-
-
-
-## Functions
-
-----
 

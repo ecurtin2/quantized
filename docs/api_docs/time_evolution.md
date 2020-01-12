@@ -32,7 +32,9 @@ TimeEvolvingState.observable(
 ```
 
 
-None
+
+
+
 
 
 
@@ -79,6 +81,8 @@ TimeEvolvingObservable(
 
 
 
+
+
 ####Dunder Methods
 
 #####\_\_call\_\_
@@ -91,10 +95,4 @@ TimeEvolvingObservable.__call__(
 
 
 Call self as a function.
-
-
-
-## Functions
-
-----
 

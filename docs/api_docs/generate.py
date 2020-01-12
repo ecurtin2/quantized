@@ -22,7 +22,11 @@ from quantized import (
 
 
 def markdown_table(d: Dict[str, List[Any]], width: int = 10, none: str = "-") -> str:
-    cstr = lambda x: str(x).center(width) if x is not None else none.center(width)
+    def cstr(x):
+        if x is not None:
+            return str(x).center(width)
+        else:
+            return none.center(width)
 
     header = "|" + "|".join(map(cstr, d)) + "|"
     br = "|" + "|".join("-" * width for _ in d) + "|"
@@ -79,7 +83,7 @@ def get_method_sigs(methods, cls) -> List[str]:
         except TypeError:
             sig = ""
         escaped_name = name.replace("_", "\_")
-        sigs.append(f"#####{escaped_name}\n{sig}\n\n{doc}")
+        sigs.append(f"#####{escaped_name}\n{sig}\n\n{doc or ''}")
     return sigs
 
 
@@ -90,6 +94,7 @@ def get_member_docs(cls) -> str:
     normal_methods = []
     properties = []
     dunder_methods = []
+    abstractprops = []
     for name, m in methods:
         # Skip single underscore methods
         if name.startswith("_") and not name.startswith("__"):
@@ -108,6 +113,9 @@ def get_member_docs(cls) -> str:
             properties.append((name, m))
         elif isinstance(meth, classmethod):
             classmethods.append((name, m))
+        # AbstractProperties
+        elif isinstance(meth, (bool, float, int, str)):
+            abstractprops.append((name, m))
         else:
             normal_methods.append((name, m))
 
@@ -121,6 +129,15 @@ def get_member_docs(cls) -> str:
     else:
         prop_str = ""
 
+    if abstractprops:
+        if properties:
+            prefix = "\n\n"
+        else:
+            prefix = "\n\n####Properties\n\n"
+        aprop_str = prefix + "\n".join(f"#####{n} = {v}" for n, v in abstractprops)
+    else:
+        aprop_str = ""
+
     if staticmethods:
         static_str = "\n\n####Static Methods\n\n" + "\n".join(get_method_sigs(staticmethods, cls))
     else:
@@ -131,7 +148,17 @@ def get_member_docs(cls) -> str:
     else:
         dunder_str = ""
 
-    return method_str + "\n\n" + prop_str + "\n\n" + static_str + "\n\n" + dunder_str
+    return (
+        method_str
+        + "\n\n"
+        + prop_str
+        + "\n\n"
+        + aprop_str
+        + "\n\n"
+        + static_str
+        + "\n\n"
+        + dunder_str
+    )
 
 
 def func_docs_from_module(m) -> str:
@@ -148,57 +175,35 @@ def autodoc_module(m) -> str:
     else:
         module_docstring += "\n\n"
 
-    return (
-        f"# {m.__name__} Module"
-        + "\n\n"
-        + module_docstring
-        + "\n\n"
-        + "## Classes"
-        + "\n\n---\n\n"
-        + attrs_docs_from_module(m)
-        + "\n\n"
-        + "## Functions"
-        + "\n\n----\n\n"
-        + func_docs_from_module(m)
-    )
+    components = [f"# {m.__name__} Module", module_docstring]
+
+    cdocs = attrs_docs_from_module(m)
+    if cdocs:
+        components += ["## Classes", "---", cdocs]
+
+    fdocs = func_docs_from_module(m)
+    if fdocs:
+        components += ["## Functions", "----", fdocs]
+
+    return "\n\n".join(components)
 
 
-### Elements
+# Elements
 attributes = ["name", "z", "voie", "alpha"]
 d = {a: [getattr(e, a) for e in elements.all_elements] for a in attributes}
 elements_table = "### Table of Elements\n\n" + markdown_table(d)
 
 md = "\n\n --- \n\n".join([elements.Element.__doc__, elements_table])
-Path("elements.md").write_text(md)
 
-
-### Basis
-
-Path("basis.md").write_text(autodoc_module(basis))
-
-### Config
-Path("config.md").write_text(autodoc_module(config))
-
-### Molecule
-Path("molecule.md").write_text(autodoc_module(molecule))
-
-### Hopping_matrix
-Path("hopping_matrix.md").write_text(autodoc_module(hopping_matrix))
-
-### Time evolution
-Path("time_evolution.md").write_text(autodoc_module(time_evolution))
-
-### Potentials
-Path("potentials.md").write_text(autodoc_module(potentials))
-
-### Operators
-Path("operators.md").write_text(autodoc_module(operators))
-
-### Atom
-Path("atom.md").write_text(autodoc_module(atom))
-
-###  Utils
-Path("utils.md").write_text(autodoc_module(utils))
-
-###  Validation
-Path("validation.md").write_text(autodoc_module(validation))
+here = Path(__file__).parent
+(here / "elements.md").write_text(md)
+(here / "basis.md").write_text(autodoc_module(basis))
+(here / "config.md").write_text(autodoc_module(config))
+(here / "molecule.md").write_text(autodoc_module(molecule))
+(here / "hopping_matrix.md").write_text(autodoc_module(hopping_matrix))
+(here / "time_evolution.md").write_text(autodoc_module(time_evolution))
+(here / "potentials.md").write_text(autodoc_module(potentials))
+(here / "operators.md").write_text(autodoc_module(operators))
+(here / "atom.md").write_text(autodoc_module(atom))
+(here / "utils.md").write_text(autodoc_module(utils))
+(here / "validation.md").write_text(autodoc_module(validation))

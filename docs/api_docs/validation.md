@@ -18,7 +18,7 @@ Attrs Validator to ensure values between a min and a max value.
 
  **min (None)** The minimum allowed value
 
-> Constraints:  <function Range.check at 0x7fb2288057b8>
+> Constraints:  <function Range.check at 0x0000019FF079C798>
 
  **max (None)** The maximum allowed value
 
@@ -30,7 +30,9 @@ Range.check(self, attribute, value) -> <class 'inspect._empty'>
 ```
 
 
-None
+
+
+
 
 
 

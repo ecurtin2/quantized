@@ -47,9 +47,6 @@ extra:
     - type: 'linkedin'
       link: 'https://www.linkedin.com/in/evanmcurtin'
 
-  search:
-    languge: 'en'
-
-
 plugins:
   - mkdocs-jupyter
+  - search

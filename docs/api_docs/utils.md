@@ -15,15 +15,15 @@ Parabola(a: 'float', b: 'float', c: 'float')
 
  **a (float)** 
 
-> Constraints:  <function not_nan at 0x7fb228805620>, <function not_inf at 0x7fb228805598>, Range(min=-1000.0, max=1000.0)
+> Constraints:  <function not_nan at 0x0000019FF0797F78>, <function not_inf at 0x0000019FF079C048>, Range(min=-1000.0, max=1000.0)
 
  **b (float)** 
 
-> Constraints:  <function not_nan at 0x7fb228805620>, <function not_inf at 0x7fb228805598>, Range(min=-1000.0, max=1000.0)
+> Constraints:  <function not_nan at 0x0000019FF0797F78>, <function not_inf at 0x0000019FF079C048>, Range(min=-1000.0, max=1000.0)
 
  **c (float)** 
 
-> Constraints:  <function not_nan at 0x7fb228805620>, <function not_inf at 0x7fb228805598>, Range(min=-1000.0, max=1000.0)
+> Constraints:  <function not_nan at 0x0000019FF0797F78>, <function not_inf at 0x0000019FF079C048>, Range(min=-1000.0, max=1000.0)
 
 
 
@@ -32,11 +32,13 @@ Parabola(a: 'float', b: 'float', c: 'float')
 #####has\_vertex
 
 
-None
+
 #####vertex
 
 
-None
+
+
+
 
 
 
@@ -85,6 +87,15 @@ Call self as a function.
 ## Functions
 
 ----
+
+###cache
+
+```
+cache(f: 'Callable') -> Callable
+```
+
+
+None
 
 ###pairwise_array_from_func
 

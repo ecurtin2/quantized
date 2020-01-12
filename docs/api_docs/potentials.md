@@ -59,6 +59,8 @@ x                                                        x
 
 
 
+
+
 ####Static Methods
 
 #####from\_params
@@ -74,7 +76,7 @@ TripleWell.from_params(
 ```
 
 
-None
+
 
 
 
@@ -122,6 +124,8 @@ Harmonic(center: float, mass: float = 1.0, omega: float = 1.0)
 
 
 
+
+
 ####Dunder Methods
 
 #####\_\_call\_\_
@@ -131,10 +135,4 @@ Harmonic.__call__(self, x: float) -> <class 'float'>
 
 
 Return the value of the harmonic potential at coordinate x
-
-
-
-## Functions
-
-----
 

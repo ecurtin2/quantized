@@ -100,7 +100,7 @@ def animate_state(
     ax.plot(x, potential(x), "k--")
     ax.plot(x, initial_state(x) * np.conj(initial_state(x)), color="C1", label="$\phi(0)$")
 
-    line, = ax.plot([], [], color="C0", label="$\phi(t)$")
+    (line,) = ax.plot([], [], color="C0", label="$\phi(t)$")
     ax.legend(loc="upper center")
 
     def density(x, t):
