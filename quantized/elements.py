@@ -160,3 +160,6 @@ def element_from_string(s: Union[str, int, Element]) -> Element:
         return next(e for e in all_elements if e.z == z)
     except ValueError:
         return next(e for e in all_elements if e.name.lower() == s.lower())
+
+
+elements_dict = {a: [getattr(e, a) for e in all_elements] for a in ["name", "z", "voie", "alpha"]}
