@@ -29,10 +29,11 @@ class Operator(ABC):
 
     @property
     @abstractmethod
-    def hermitian(self):
+    def hermitian(self) -> bool:
         return True
 
     def matrix(self, basis) -> np.array:
+        """Return a matrix of the operator projected onto a basis."""
         return pairwise_array_from_func(basis, self, symmetric=self.hermitian)
 
 
@@ -40,7 +41,7 @@ class Operator(ABC):
 class Overlap(Operator):
     lower_limit: float = attrib(default=-np.inf)
     upper_limit: float = attrib(default=np.inf)
-    hermitian = True
+    hermitian: bool = True
     """Compute the overlap integral in 1 dimension over the specified range
 
     Parameters

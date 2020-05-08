@@ -47,10 +47,10 @@ extra:
     - type: 'linkedin'
       link: 'https://www.linkedin.com/in/evanmcurtin'
 
-  search:
-    languge: 'en'
-
-
 plugins:
   - mkdocs-jupyter
+<<<<<<< HEAD
   - mkdocs_apidoc
+=======
+  - search
+>>>>>>> ea2af00c1bdc34fb33ee732e8d3409df7dabe68b
