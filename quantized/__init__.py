@@ -1,10 +1,16 @@
-<<<<<<< HEAD
-__version__ = "0.0.2.0"
+__version__ = "0.8.0"
 
-from quantized import basis
-from quantized import time_evolution
-from quantized import atom
-from quantized import hopping_matrix
-=======
-__version__ = "0.0.7"
->>>>>>> ea2af00c1bdc34fb33ee732e8d3409df7dabe68b
+from . import atom
+from . import basis
+from . import cli
+from . import config
+from . import constants
+from . import elements
+from . import hopping_matrix
+from . import molecule
+from . import operators
+from . import plotting
+from . import potentials
+from . import time_evolution
+from . import utils
+from . import validation
